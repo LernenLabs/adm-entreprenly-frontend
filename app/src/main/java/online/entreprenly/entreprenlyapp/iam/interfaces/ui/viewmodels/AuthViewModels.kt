@@ -21,9 +21,13 @@ import online.entreprenly.entreprenlyapp.iam.domain.model.queries.GetCurrentSess
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.AuthSession
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Email
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Password
+import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 
-/** Estado de la sesión para decidir qué grafo de navegación mostrar. */
+/** Session state used to decide which navigation graph to show. */
 sealed interface SessionState {
     data object Loading : SessionState
     data object SignedOut : SessionState
@@ -44,34 +48,32 @@ class SessionViewModel(
     }
 }
 
-/** Estado común de un formulario: en curso, error de validación/servidor y éxito. */
-data class FormState(
-    val loading: Boolean = false,
-    val error: String? = null,
-    val success: String? = null
-)
-
-private const val INVALID_EMAIL = "Ingresa un email válido"
-private const val INVALID_PASSWORD = "La contraseña debe tener entre 8 y 255 caracteres"
 
 class SignInViewModel(private val userCommandService: UserCommandService) : ViewModel() {
     private val _form = MutableStateFlow(FormState())
     val form: StateFlow<FormState> = _form.asStateFlow()
 
     fun signIn(email: String, password: String) {
-        val e = Email.of(email) ?: return fail(INVALID_EMAIL)
-        val p = Password.of(password) ?: return fail(INVALID_PASSWORD)
+        val e = Email.of(email) ?: return fail(UiText.Res(R.string.error_invalid_email))
+        val p = Password.of(password) ?: return fail(UiText.Res(R.string.error_invalid_password))
         _form.value = FormState(loading = true)
         viewModelScope.launch {
-            // En éxito la sesión se guarda y la navegación reacciona al SessionState.
+            // On success the session is stored and navigation reacts to SessionState.
             _form.value = when (val r = userCommandService.handle(SignInCommand(e, p))) {
                 is Result.Success -> FormState()
-                is Result.Failure -> FormState(error = r.error.message)
+                is Result.Failure -> when (r.error) {
+                    is ApplicationError.Network, is ApplicationError.Unexpected ->
+                        FormState(error = UiText.Raw(r.error.message))
+                    else -> FormState(
+                        errorTitle = UiText.Res(R.string.sign_in_error_title),
+                        error = UiText.Res(R.string.sign_in_error_message)
+                    )
+                }
             }
         }
     }
 
-    private fun fail(message: String) = _form.update { FormState(error = message) }
+    private fun fail(message: UiText) = _form.update { FormState(error = message) }
 }
 
 class SignUpViewModel(private val userCommandService: UserCommandService) : ViewModel() {
@@ -85,25 +87,25 @@ class SignUpViewModel(private val userCommandService: UserCommandService) : View
         lastName: String,
         phone: String
     ) {
-        val e = Email.of(email) ?: return fail(INVALID_EMAIL)
-        val p = Password.of(password) ?: return fail(INVALID_PASSWORD)
+        val e = Email.of(email) ?: return fail(UiText.Res(R.string.error_invalid_email))
+        val p = Password.of(password) ?: return fail(UiText.Res(R.string.error_invalid_password))
         _form.value = FormState(loading = true)
         viewModelScope.launch {
             val created = userCommandService.handle(
                 SignUpCommand(e, p, firstName.trim(), lastName.trim(), phone.trim())
             )
             _form.value = when (created) {
-                is Result.Failure -> FormState(error = created.error.message)
-                // Cuenta creada: inicia sesión automáticamente.
+                is Result.Failure -> FormState(error = UiText.Raw(created.error.message))
+                // Account created: sign in automatically.
                 is Result.Success -> when (val r = userCommandService.handle(SignInCommand(e, p))) {
                     is Result.Success -> FormState()
-                    is Result.Failure -> FormState(error = r.error.message)
+                    is Result.Failure -> FormState(error = UiText.Raw(r.error.message))
                 }
             }
         }
     }
 
-    private fun fail(message: String) = _form.update { FormState(error = message) }
+    private fun fail(message: UiText) = _form.update { FormState(error = message) }
 }
 
 class AccountViewModel(private val userCommandService: UserCommandService) : ViewModel() {
@@ -114,25 +116,25 @@ class AccountViewModel(private val userCommandService: UserCommandService) : Vie
     val emailForm: StateFlow<FormState> = _emailForm.asStateFlow()
 
     fun changePassword(current: String, new: String) {
-        val c = Password.of(current) ?: return _passwordForm.update { FormState(error = INVALID_PASSWORD) }
-        val n = Password.of(new) ?: return _passwordForm.update { FormState(error = INVALID_PASSWORD) }
+        val c = Password.of(current) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
+        val n = Password.of(new) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
         _passwordForm.value = FormState(loading = true)
         viewModelScope.launch {
             _passwordForm.value = when (val r = userCommandService.handle(ChangePasswordCommand(c, n))) {
-                is Result.Success -> FormState(success = "Contraseña actualizada")
-                is Result.Failure -> FormState(error = r.error.message)
+                is Result.Success -> FormState(success = UiText.Res(R.string.account_password_updated))
+                is Result.Failure -> FormState(error = UiText.Raw(r.error.message))
             }
         }
     }
 
-    /** En éxito se cierra la sesión (el JWT lleva el email anterior); la navegación vuelve al login. */
+    /** On success the session is cleared (the JWT carries the old email); navigation returns to sign-in. */
     fun changeEmail(newEmail: String) {
-        val e = Email.of(newEmail) ?: return _emailForm.update { FormState(error = INVALID_EMAIL) }
+        val e = Email.of(newEmail) ?: return _emailForm.update { FormState(error = UiText.Res(R.string.error_invalid_email)) }
         _emailForm.value = FormState(loading = true)
         viewModelScope.launch {
             _emailForm.value = when (val r = userCommandService.handle(ChangeEmailCommand(e))) {
-                is Result.Success -> FormState(success = "Email actualizado")
-                is Result.Failure -> FormState(error = r.error.message)
+                is Result.Success -> FormState(success = UiText.Res(R.string.account_email_updated))
+                is Result.Failure -> FormState(error = UiText.Raw(r.error.message))
             }
         }
     }

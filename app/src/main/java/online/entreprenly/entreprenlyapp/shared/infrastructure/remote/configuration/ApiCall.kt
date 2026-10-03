@@ -7,7 +7,7 @@ import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.rest.resources.ErrorResource
 import retrofit2.Response
 
-/** Ejecuta una llamada Retrofit y traduce HTTP/errores de red a [Result]. */
+/** Runs a Retrofit call and maps HTTP/network errors to [Result]. */
 suspend fun <D, T> safeApiCall(
     call: suspend () -> Response<D>,
     transform: (D?) -> T
@@ -19,9 +19,9 @@ suspend fun <D, T> safeApiCall(
         Result.Failure(response.toApplicationError())
     }
 } catch (e: IOException) {
-    Result.Failure(ApplicationError.Network("No se pudo conectar con el servidor"))
+    Result.Failure(ApplicationError.Network("Could not reach the server"))
 } catch (e: Exception) {
-    Result.Failure(ApplicationError.Unexpected(e.message ?: "Error inesperado"))
+    Result.Failure(ApplicationError.Unexpected(e.message ?: "Unexpected error"))
 }
 
 private fun <D> Response<D>.toApplicationError(): ApplicationError {
@@ -29,15 +29,16 @@ private fun <D> Response<D>.toApplicationError(): ApplicationError {
         Gson().fromJson(errorBody()?.string(), ErrorResource::class.java)?.message
     }.getOrNull()
     return when (code()) {
-        400 -> ApplicationError.Validation(message ?: "Datos inválidos")
-        401, 403 -> ApplicationError.Unauthorized(message ?: "No autorizado")
-        404 -> ApplicationError.NotFound(message ?: "No encontrado")
-        409 -> ApplicationError.Conflict(message ?: "Conflicto")
-        else -> ApplicationError.Unexpected(message ?: "Error del servidor (${code()})")
+        400 -> ApplicationError.Validation(message ?: "Invalid data")
+        401 -> ApplicationError.Unauthorized(message ?: "Unauthorized")
+        403 -> ApplicationError.Forbidden(message ?: "Forbidden")
+        404 -> ApplicationError.NotFound(message ?: "Not found")
+        409 -> ApplicationError.Conflict(message ?: "Conflict")
+        else -> ApplicationError.Unexpected(message ?: "Server error (${code()})")
     }
 }
 
-/** Variante para respuestas que deben traer cuerpo: un cuerpo vacío es un error inesperado. */
+/** Variant for responses that must carry a body: an empty body is an unexpected error. */
 suspend fun <D : Any, T> safeApiCallWithBody(
     call: suspend () -> Response<D>,
     transform: (D) -> T
@@ -45,5 +46,5 @@ suspend fun <D : Any, T> safeApiCallWithBody(
     is Result.Failure -> r
     is Result.Success ->
         r.value?.let { Result.Success(transform(it)) }
-            ?: Result.Failure(ApplicationError.Unexpected("Respuesta vacía del servidor"))
+            ?: Result.Failure(ApplicationError.Unexpected("Empty response from the server"))
 }

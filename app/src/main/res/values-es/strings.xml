@@ -1,0 +1,127 @@
+<resources>
+    <string name="app_name">Entreprenly App</string>
+
+    <string name="field_email">Correo electrónico</string>
+    <string name="field_password">Contraseña</string>
+
+    <string name="error_invalid_email">Ingresa un correo válido</string>
+    <string name="error_invalid_password">La contraseña debe tener entre 8 y 255 caracteres</string>
+
+    <string name="sign_in_title">Inicia sesión</string>
+    <string name="sign_in_action">Iniciar sesión</string>
+
+    <string name="sign_up_title">Crear cuenta</string>
+    <string name="sign_up_action">Crear cuenta</string>
+    <string name="sign_up_first_name">Nombre (opcional)</string>
+    <string name="sign_up_last_name">Apellido (opcional)</string>
+    <string name="sign_up_phone">Teléfono (opcional)</string>
+
+    <string name="account_title">Mi cuenta</string>
+    <string name="account_change_password_title">Cambiar contraseña</string>
+    <string name="account_current_password">Contraseña actual</string>
+    <string name="account_new_password">Nueva contraseña</string>
+    <string name="account_change_password_action">Actualizar contraseña</string>
+    <string name="account_password_updated">Contraseña actualizada</string>
+    <string name="account_change_email_title">Cambiar correo</string>
+    <string name="account_change_email_hint">Deberás iniciar sesión nuevamente después de cambiarlo.</string>
+    <string name="account_new_email">Nuevo correo</string>
+    <string name="account_change_email_action">Actualizar correo</string>
+    <string name="account_email_updated">Correo actualizado</string>
+    <string name="account_sign_out">Cerrar sesión</string>
+
+
+    <string name="chatbot_money">S/ %1$.2f</string>
+    <string name="chatbot_unknown_client">Cliente</string>
+    <string name="chatbot_refresh">Actualizar</string>
+    <string name="chatbot_retry">Reintentar</string>
+    <string name="chatbot_plan_required_title">Se requiere el Plan Control</string>
+    <string name="chatbot_plan_required_message">El chatbot de WhatsApp, sus pedidos y conversaciones están incluidos en la suscripción Plan Control. Mejora tu plan para usarlos.</string>
+    <string name="chatbot_view_plans">Ver planes</string>
+
+    <string name="chatbot_status_pending">En curso</string>
+    <string name="chatbot_status_waiting_payment">Esperando pago</string>
+    <string name="chatbot_status_to_validate">Por validar</string>
+    <string name="chatbot_status_confirmed">Pago aprobado</string>
+    <string name="chatbot_status_cancelled">Cancelado</string>
+    <string name="chatbot_status_blocked">Bloqueado</string>
+
+    <string name="chatbot_orders_title">Pedidos</string>
+    <string name="chatbot_connected">Conectado</string>
+    <string name="chatbot_disconnected">WhatsApp Business no vinculado</string>
+    <string name="chatbot_tab_orders">Pedidos</string>
+    <string name="chatbot_tab_conversations">Conversaciones</string>
+    <string name="chatbot_filter_all">Todos</string>
+    <string name="chatbot_filter_to_validate">Por validar</string>
+    <string name="chatbot_filter_confirmed">Confirmados</string>
+    <string name="chatbot_filter_cancelled">Cancelados</string>
+    <string name="chatbot_filter_with_count">%1$s · %2$d</string>
+    <string name="chatbot_order_title">%1$s — %2$s</string>
+    <string name="chatbot_empty_orders">Aún no hay pedidos. Los pedidos hechos por el chatbot de WhatsApp aparecerán aquí.</string>
+    <string name="chatbot_empty_orders_filter">Ningún pedido coincide con este filtro.</string>
+    <string name="chatbot_empty_conversations">Aún no hay conversaciones.</string>
+
+    <string name="common_back">Atrás</string>
+    <string name="chat_handled_by_bot">Atendido por el bot</string>
+    <string name="chat_message_hint">Escribe un mensaje…</string>
+    <string name="chat_send">Enviar</string>
+    <string name="chat_empty">Aún no hay mensajes en esta conversación.</string>
+    <string name="chat_image_message">Imagen</string>
+
+    <string name="common_cancel">Cancelar</string>
+    <string name="order_not_found">Este pedido ya no está disponible.</string>
+    <string name="order_item_line">%1$d × %2$s</string>
+    <string name="order_detail_delivery">Entrega: %1$s</string>
+    <string name="order_detail_total">Total</string>
+    <string name="order_detail_receipt">Comprobante de pago</string>
+    <string name="order_detail_no_receipt">Sin comprobante aún</string>
+    <string name="order_detail_timeline">Trazabilidad</string>
+    <string name="order_timeline_with_time">%1$s — %2$s</string>
+    <string name="order_timeline_registered">Pedido registrado</string>
+    <string name="order_timeline_receipt_received">Comprobante recibido vía WhatsApp</string>
+    <plurals name="order_timeline_rejections">
+        <item quantity="one">Comprobante rechazado %d vez</item>
+        <item quantity="many">Comprobante rechazado %d veces</item>
+        <item quantity="other">Comprobante rechazado %d veces</item>
+    </plurals>
+    <string name="order_timeline_pending_validation">Pendiente de validación</string>
+    <string name="order_timeline_awaiting_payment">Esperando el pago del cliente</string>
+    <string name="order_timeline_confirmed">Pago aprobado: stock descontado y venta registrada</string>
+    <string name="order_timeline_cancelled">Pedido cancelado</string>
+    <string name="order_timeline_blocked">Bloqueado por demasiados comprobantes rechazados</string>
+    <string name="order_timeline_in_progress">Pedido en curso con el bot</string>
+    <string name="order_reject">Rechazar</string>
+    <string name="order_approve">Aprobar pago</string>
+    <string name="order_reject_title">Rechazar pago</string>
+    <string name="order_reject_subtitle">Selecciona el motivo. El chatbot se lo enviará al cliente.</string>
+    <string name="order_reject_reason_amount">Monto incorrecto</string>
+    <string name="order_reject_reason_unreadable">Comprobante ilegible</string>
+    <string name="order_reject_reason_duplicate">Comprobante duplicado</string>
+    <string name="order_reject_reason_other">Otro motivo</string>
+    <string name="order_reject_detail">Detalle (opcional)</string>
+    <string name="order_reject_confirm">Confirmar rechazo</string>
+    <string name="order_reject_message">No pudimos validar tu pago del pedido %1$s. Motivo: %2$s. Por favor envía un nuevo comprobante.</string>
+    <string name="order_approve_title">¿Aprobar pago de %1$s?</string>
+    <string name="order_approve_message">Se descontará el stock y se registrará la venta del pedido de %1$s.</string>
+    <string name="order_approve_confirm">Confirmar</string>
+    <string name="order_payment_approved">Pago aprobado</string>
+    <string name="order_payment_rejected">Pago rechazado. Se envió el motivo al cliente.</string>
+
+    <!-- Chatbot: link WhatsApp -->
+    <string name="chatbot_link_title">Vincular WhatsApp Business</string>
+    <string name="chatbot_link_subtitle">Activa el chatbot para recibir pedidos automáticamente.</string>
+    <string name="chatbot_link_expires_in">El código expira en %1$02d:%2$02d</string>
+    <string name="chatbot_link_qr_description">Código QR para vincular WhatsApp</string>
+    <string name="chatbot_link_waiting_qr">Esperando el código… Si no aparece en un minuto, el servicio de WhatsApp podría estar apagado.</string>
+    <string name="chatbot_link_code_expired">El código expiró</string>
+    <string name="chatbot_link_code_renewed">Generamos uno nuevo automáticamente.</string>
+    <string name="chatbot_link_code_waiting">Esperando un nuevo código…</string>
+    <string name="chatbot_link_step_open">Abre WhatsApp en el celular del negocio</string>
+    <string name="chatbot_link_step_settings">Ve a Ajustes → Dispositivos vinculados</string>
+    <string name="chatbot_link_step_link">Toca Vincular un dispositivo</string>
+    <string name="chatbot_link_step_scan">Escanea este código</string>
+    <string name="chatbot_linked_title">Cuenta vinculada correctamente</string>
+    <string name="chatbot_linked_message">El chatbot ya puede recibir y responder mensajes de tus clientes.</string>
+    <string name="chatbot_session_expired_title">Sesión expirada</string>
+    <string name="chatbot_session_expired_message">El chatbot no puede responder mensajes.</string>
+    <string name="chatbot_relink">Volver a vincular</string>
+</resources>

@@ -1,0 +1,44 @@
+<resources>
+    <string name="splash_tagline">Smart Retail para tu negocio</string>
+
+    <string name="welcome_title">Gestiona tu negocio desde tu celular</string>
+    <string name="welcome_subtitle">Inventario, ventas y pedidos por WhatsApp en una sola app.</string>
+    <string name="welcome_create_account">Crear cuenta</string>
+
+    <string name="sign_in_welcome_back">Bienvenido de nuevo a Entreprenly.</string>
+    <string name="sign_in_error_title">Correo o contraseña incorrectos</string>
+    <string name="sign_in_error_message">Verifica tus datos e inténtalo nuevamente.</string>
+
+    <string name="sign_up_subtitle">Regístrate gratis y empieza con el Plan Free.</string>
+
+    <string name="auth_no_account">¿No tienes cuenta?</string>
+    <string name="auth_sign_up_link">Regístrate</string>
+    <string name="auth_have_account">¿Ya tienes cuenta?</string>
+    <string name="auth_sign_in_link">Inicia sesión</string>
+
+    <string name="password_rule_length">Mínimo 8 caracteres</string>
+    <string name="password_rule_uppercase">Una letra mayúscula</string>
+    <string name="password_rule_digit">Un número</string>
+
+    <string name="home_date_format">EEE, d MMM</string>
+    <string name="home_quick_new_product">Nuevo producto</string>
+    <string name="home_quick_create_lot">Crear lote</string>
+    <string name="home_sales_today">Ventas de hoy</string>
+    <string name="home_cash">Efectivo</string>
+    <string name="home_digital">Digital</string>
+    <string name="home_stat_sales">Ventas</string>
+    <string name="home_stat_lots">Lotes por vencer</string>
+    <string name="home_stat_orders">Pedidos por validar</string>
+    <string name="home_chatbot_title">Chatbot de WhatsApp</string>
+    <string name="home_chatbot_connected">Activo</string>
+    <string name="home_chatbot_disconnected">Desconectado</string>
+    <string name="home_chatbot_hint">Vincula tu WhatsApp para recibir pedidos automáticos.</string>
+    <string name="home_chatbot_connect">Conectar ahora</string>
+    <string name="home_alerts">Alertas</string>
+    <string name="home_alerts_ok_title">Inventario en buen estado</string>
+    <string name="home_alerts_ok_message">No hay alertas de stock activas.</string>
+    <string name="home_orders_title">Pedidos del chatbot</string>
+    <string name="home_orders_empty_title">Sin pedidos aún</string>
+    <string name="home_orders_empty_message">Los pedidos del chatbot aparecerán aquí.</string>
+    <string name="home_inventory_empty">Sin productos registrados</string>
+</resources>

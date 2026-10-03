@@ -18,5 +18,5 @@ data class ChangeEmailCommand(val newEmail: Email)
 
 data class ChangePasswordCommand(val currentPassword: Password, val newPassword: Password)
 
-/** Cierra la sesión local (US-61): descarta el JWT almacenado. */
+/** Local sign-out (US-61): discards the stored JWT. */
 data object SignOutCommand
