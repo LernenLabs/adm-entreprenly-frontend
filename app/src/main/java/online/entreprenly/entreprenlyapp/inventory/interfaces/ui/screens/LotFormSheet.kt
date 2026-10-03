@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -71,11 +72,17 @@ fun LotFormSheet(
     var codeQR by rememberSaveable { mutableStateOf("") }
     var quantity by rememberSaveable { mutableStateOf("") }
     var quantityTouched by rememberSaveable { mutableStateOf(false) }
-    var entryDate by rememberSaveable { mutableStateOf(today) }
-    var expiryDate by rememberSaveable { mutableStateOf<LocalDate?>(null) }
+    // Dates are kept as UTC-millis Longs: LocalDate is not Bundle-saveable.
+    var entryMillis by rememberSaveable {
+        mutableLongStateOf(InventoryRules.localDateToInstant(today).toEpochMilli())
+    }
+    var expiryMillis by rememberSaveable { mutableStateOf<Long?>(null) }
     var expiryTouched by rememberSaveable { mutableStateOf(false) }
     var submitted by rememberSaveable { mutableStateOf(false) }
     var picking by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val entryDate = Instant.ofEpochMilli(entryMillis).atZone(ZoneOffset.UTC).toLocalDate()
+    val expiryDate = expiryMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
 
     val form by viewModel.lotForm.collectAsState()
     LaunchedEffect(preselected?.key) { viewModel.clearLotForm() }
@@ -264,10 +271,8 @@ fun LotFormSheet(
     if (picking != null) {
         val forExpiry = picking == "expiry"
         val todayStart = InventoryRules.localDateToInstant(today).toEpochMilli()
-        val entryStart = InventoryRules.localDateToInstant(entryDate).toEpochMilli()
-        val initialMillis = ((if (forExpiry) expiryDate else entryDate)
-            ?: if (forExpiry) entryDate else today)
-            .let(InventoryRules::localDateToInstant).toEpochMilli()
+        val entryStart = entryMillis
+        val initialMillis = if (forExpiry) expiryMillis ?: entryStart else entryStart
         val dateState = rememberDatePickerState(
             initialSelectedDateMillis = initialMillis,
             selectableDates = object : SelectableDates {
@@ -284,9 +289,7 @@ fun LotFormSheet(
                 androidx.compose.material3.TextButton(
                     onClick = {
                         dateState.selectedDateMillis?.let { millis ->
-                            val picked = Instant.ofEpochMilli(millis)
-                                .atZone(ZoneOffset.UTC).toLocalDate()
-                            if (forExpiry) expiryDate = picked else entryDate = picked
+                            if (forExpiry) expiryMillis = millis else entryMillis = millis
                         }
                         picking = null
                     }
