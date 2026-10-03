@@ -1,6 +1,6 @@
 package online.entreprenly.entreprenlyapp.shared.application.result
 
-/** Errores de aplicación que cruzan la frontera entre capas (equivalente al backend). */
+/** Application errors that cross layer boundaries (mirrors the backend). */
 sealed class ApplicationError(open val message: String) {
     data class Validation(override val message: String) : ApplicationError(message)
     data class Unauthorized(override val message: String) : ApplicationError(message)

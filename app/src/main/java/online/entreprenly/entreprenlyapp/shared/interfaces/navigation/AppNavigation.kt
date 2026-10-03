@@ -47,7 +47,7 @@ fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
     val signedIn = sessionState as? SessionState.SignedIn
     val navController = rememberNavController()
 
-    // Al iniciar/cerrar sesión se reemplaza todo el back stack.
+    // Signing in/out replaces the whole back stack.
     LaunchedEffect(signedIn != null) {
         val target = if (signedIn != null) Routes.ACCOUNT else Routes.SIGN_IN
         if (navController.currentDestination?.route != target) {

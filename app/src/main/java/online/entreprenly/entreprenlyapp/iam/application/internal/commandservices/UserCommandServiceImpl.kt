@@ -28,7 +28,7 @@ class UserCommandServiceImpl(
     override suspend fun handle(command: ChangePasswordCommand): Result<Unit> =
         userRepository.changePassword(command)
 
-    /** El JWT usa el email como subject: tras el cambio hay que volver a iniciar sesión. */
+    /** The JWT subject is the email: after changing it the user must sign in again. */
     override suspend fun handle(command: ChangeEmailCommand): Result<Unit> =
         userRepository.changeEmail(command).also {
             if (it is Result.Success) sessionRepository.clear()

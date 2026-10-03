@@ -18,14 +18,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.components.EmailField
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.components.FormSubmit
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.components.PasswordField
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.components.TextInputField
+import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.EmailField
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.FormSubmit
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PasswordField
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.TextInputField
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignUpViewModel
 
-/** US-56: registrar cuenta con email (el backend asigna el Plan Free vía eventos). */
+/** US-56: sign up with email (the backend assigns the Free plan through events). */
 @Composable
 fun SignUpScreen(viewModel: SignUpViewModel, onGoToSignIn: () -> Unit, modifier: Modifier = Modifier) {
     val form by viewModel.form.collectAsState()
@@ -39,13 +41,13 @@ fun SignUpScreen(viewModel: SignUpViewModel, onGoToSignIn: () -> Unit, modifier:
         modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically)
     ) {
-        Text("Crea tu cuenta", style = MaterialTheme.typography.headlineMedium)
+        Text(stringResource(R.string.sign_up_title), style = MaterialTheme.typography.headlineMedium)
         EmailField(email, { email = it })
         PasswordField(password, { password = it })
-        TextInputField(firstName, { firstName = it }, "Nombre (opcional)")
-        TextInputField(lastName, { lastName = it }, "Apellido (opcional)")
-        TextInputField(phone, { phone = it }, "Teléfono (opcional)", KeyboardType.Phone)
-        FormSubmit(form, "Registrarme") { viewModel.signUp(email, password, firstName, lastName, phone) }
-        TextButton(onClick = onGoToSignIn) { Text("¿Ya tienes cuenta? Inicia sesión") }
+        TextInputField(firstName, { firstName = it }, stringResource(R.string.sign_up_first_name))
+        TextInputField(lastName, { lastName = it }, stringResource(R.string.sign_up_last_name))
+        TextInputField(phone, { phone = it }, stringResource(R.string.sign_up_phone), keyboardType = KeyboardType.Phone)
+        FormSubmit(form, stringResource(R.string.sign_up_action), { viewModel.signUp(email, password, firstName, lastName, phone) })
+        TextButton(onClick = onGoToSignIn) { Text(stringResource(R.string.sign_up_go_to_sign_in)) }
     }
 }
