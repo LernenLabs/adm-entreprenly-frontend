@@ -55,7 +55,7 @@
     <!-- Chatbot: orders -->
     <string name="chatbot_orders_title">Orders</string>
     <string name="chatbot_connected">Connected</string>
-    <string name="chatbot_disconnected">WhatsApp not connected</string>
+    <string name="chatbot_disconnected">WhatsApp Business not linked</string>
     <string name="chatbot_tab_orders">Orders</string>
     <string name="chatbot_tab_conversations">Conversations</string>
     <string name="chatbot_filter_all">All</string>
@@ -114,4 +114,23 @@
     <string name="order_approve_confirm">Confirm</string>
     <string name="order_payment_approved">Payment approved</string>
     <string name="order_payment_rejected">Payment rejected. The reason was sent to the client.</string>
+
+    <!-- Chatbot: link WhatsApp -->
+    <string name="chatbot_link_title">Link WhatsApp Business</string>
+    <string name="chatbot_link_subtitle">Turn on the chatbot to receive orders automatically.</string>
+    <string name="chatbot_link_expires_in">The code expires in %1$02d:%2$02d</string>
+    <string name="chatbot_link_qr_description">QR code to link WhatsApp</string>
+    <string name="chatbot_link_waiting_qr">Waiting for the code… If it doesn\'t show up in a minute, the WhatsApp service may be offline.</string>
+    <string name="chatbot_link_code_expired">The code expired</string>
+    <string name="chatbot_link_code_renewed">We generated a new one automatically.</string>
+    <string name="chatbot_link_code_waiting">Waiting for a new code…</string>
+    <string name="chatbot_link_step_open">Open WhatsApp on the business phone</string>
+    <string name="chatbot_link_step_settings">Go to Settings → Linked devices</string>
+    <string name="chatbot_link_step_link">Tap Link a device</string>
+    <string name="chatbot_link_step_scan">Scan this code</string>
+    <string name="chatbot_linked_title">Account linked successfully</string>
+    <string name="chatbot_linked_message">The chatbot can now receive and answer your clients\' messages.</string>
+    <string name="chatbot_session_expired_title">Session expired</string>
+    <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
+    <string name="chatbot_relink">Link again</string>
 </resources>

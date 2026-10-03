@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +37,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +49,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatOrder
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.Conversation
@@ -57,6 +58,9 @@ import online.entreprenly.entreprenlyapp.chatbot.domain.model.valueobjects.Whats
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.EmptyContent
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.ErrorContent
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.InitialsAvatar
+import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.LinkWhatsAppContent
+import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.LinkedBanner
+import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.SessionDisconnectedBanner
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.LoadingContent
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.PlanRequiredContent
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.components.StatusBadge
@@ -68,6 +72,8 @@ import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.Chatbo
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.OrdersViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusNeutral
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusSuccess
+
+private const val QR_POLL_MILLIS = 3_000L
 
 private enum class ChatbotTab(@StringRes val label: Int) {
     ORDERS(R.string.chatbot_tab_orders),
@@ -107,6 +113,34 @@ fun OrdersScreen(
             ChatbotState.PlanRequired -> PlanRequiredContent(onViewPlans = onViewPlans, onRetry = viewModel::refresh)
             is ChatbotState.Error -> ErrorContent(s.message, onRetry = viewModel::refresh)
             is ChatbotState.Ready -> {
+                // Unknown state (bridge endpoint failed) does not block the lists.
+                val linked = s.connection?.connected != false
+                var relinking by rememberSaveable { mutableStateOf(false) }
+                LaunchedEffect(linked) {
+                    if (linked) relinking = false
+                    // Poll while unlinked so the QR refreshes and the link is detected.
+                    while (!linked) {
+                        delay(QR_POLL_MILLIS)
+                        viewModel.pollConnection()
+                    }
+                }
+                val hasHistory = s.orders.isNotEmpty() || s.conversations.isNotEmpty()
+                if (!linked && (!hasHistory || relinking)) {
+                    LinkWhatsAppContent(s.connection?.qr)
+                    return@Column
+                }
+                if (!linked) {
+                    SessionDisconnectedBanner(
+                        onRelink = { relinking = true },
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                    )
+                }
+                if (s.justLinked) {
+                    LinkedBanner(
+                        onDismiss = viewModel::dismissLinked,
+                        modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                    )
+                }
                 TabSelector(tab, onSelect = { tab = it }, modifier = Modifier.padding(16.dp))
                 PullToRefreshBox(
                     isRefreshing = s.refreshing,
@@ -155,7 +189,6 @@ private fun OrdersTopBar(connection: WhatsAppConnection?, onRefresh: () -> Unit)
                 Icon(Icons.Filled.Refresh, contentDescription = stringResource(R.string.chatbot_refresh))
             }
         },
-        windowInsets = WindowInsets(0),
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary,

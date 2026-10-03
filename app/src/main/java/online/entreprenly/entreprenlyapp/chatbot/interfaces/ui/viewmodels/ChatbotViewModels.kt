@@ -44,7 +44,9 @@ sealed interface ChatbotState {
         val orders: List<ChatOrder>,
         val conversations: List<Conversation>,
         val connection: WhatsAppConnection?,
-        val refreshing: Boolean = false
+        val refreshing: Boolean = false,
+        /** WhatsApp was linked while the screen was open: show the confirmation once. */
+        val justLinked: Boolean = false
     ) : ChatbotState {
         fun order(id: Long): ChatOrder? = orders.firstOrNull { it.id == id }
         fun conversation(id: Long): Conversation? = conversations.firstOrNull { it.id == id }
@@ -113,7 +115,31 @@ class OrdersViewModel(
     fun refresh() {
         val current = _state.value
         _state.value = if (current is ChatbotState.Ready) current.copy(refreshing = true) else ChatbotState.Loading
-        viewModelScope.launch { _state.value = load() }
+        viewModelScope.launch {
+            val loaded = load()
+            val linked = (_state.value as? ChatbotState.Ready)?.justLinked == true
+            _state.value = if (loaded is ChatbotState.Ready && linked) loaded.copy(justLinked = true) else loaded
+        }
+    }
+
+    /**
+     * Re-reads the WhatsApp link state; the screen calls it every few seconds while the
+     * account is not linked, so a new QR shows up and the link is detected right away.
+     */
+    fun pollConnection() {
+        viewModelScope.launch {
+            val connection = (whatsAppConnectionQueryService.handle(GetWhatsAppConnectionQuery) as? Result.Success)
+                ?.value ?: return@launch
+            val ready = _state.value as? ChatbotState.Ready ?: return@launch
+            val linkedNow = ready.connection?.connected != true && connection.connected
+            _state.value = ready.copy(connection = connection, justLinked = ready.justLinked || linkedNow)
+            // Messages that arrived while linking show up without a manual refresh.
+            if (linkedNow) refresh()
+        }
+    }
+
+    fun dismissLinked() {
+        (_state.value as? ChatbotState.Ready)?.let { _state.value = it.copy(justLinked = false) }
     }
 
     private suspend fun load(): ChatbotState = when (val access = subscriptionAccessFacade.hasChatbotAccess()) {

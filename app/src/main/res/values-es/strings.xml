@@ -47,7 +47,7 @@
 
     <string name="chatbot_orders_title">Pedidos</string>
     <string name="chatbot_connected">Conectado</string>
-    <string name="chatbot_disconnected">WhatsApp no conectado</string>
+    <string name="chatbot_disconnected">WhatsApp Business no vinculado</string>
     <string name="chatbot_tab_orders">Pedidos</string>
     <string name="chatbot_tab_conversations">Conversaciones</string>
     <string name="chatbot_filter_all">Todos</string>
@@ -105,4 +105,23 @@
     <string name="order_approve_confirm">Confirmar</string>
     <string name="order_payment_approved">Pago aprobado</string>
     <string name="order_payment_rejected">Pago rechazado. Se envió el motivo al cliente.</string>
+
+    <!-- Chatbot: link WhatsApp -->
+    <string name="chatbot_link_title">Vincular WhatsApp Business</string>
+    <string name="chatbot_link_subtitle">Activa el chatbot para recibir pedidos automáticamente.</string>
+    <string name="chatbot_link_expires_in">El código expira en %1$02d:%2$02d</string>
+    <string name="chatbot_link_qr_description">Código QR para vincular WhatsApp</string>
+    <string name="chatbot_link_waiting_qr">Esperando el código… Si no aparece en un minuto, el servicio de WhatsApp podría estar apagado.</string>
+    <string name="chatbot_link_code_expired">El código expiró</string>
+    <string name="chatbot_link_code_renewed">Generamos uno nuevo automáticamente.</string>
+    <string name="chatbot_link_code_waiting">Esperando un nuevo código…</string>
+    <string name="chatbot_link_step_open">Abre WhatsApp en el celular del negocio</string>
+    <string name="chatbot_link_step_settings">Ve a Ajustes → Dispositivos vinculados</string>
+    <string name="chatbot_link_step_link">Toca Vincular un dispositivo</string>
+    <string name="chatbot_link_step_scan">Escanea este código</string>
+    <string name="chatbot_linked_title">Cuenta vinculada correctamente</string>
+    <string name="chatbot_linked_message">El chatbot ya puede recibir y responder mensajes de tus clientes.</string>
+    <string name="chatbot_session_expired_title">Sesión expirada</string>
+    <string name="chatbot_session_expired_message">El chatbot no puede responder mensajes.</string>
+    <string name="chatbot_relink">Volver a vincular</string>
 </resources>
