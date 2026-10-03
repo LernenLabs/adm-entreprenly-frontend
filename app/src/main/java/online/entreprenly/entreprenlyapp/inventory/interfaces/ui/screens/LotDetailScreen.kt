@@ -28,6 +28,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -129,7 +130,11 @@ private fun LotDetailContent(
                         val left = InventoryRules.daysLeft(lot.expiryDate!!, today).toInt()
                         InventoryAlertBanner(
                             title = stringResource(R.string.inventory_lot_expiring_title),
-                            message = stringResource(R.string.inventory_lot_expiring_message, left),
+                            message = pluralStringResource(
+                                R.plurals.inventory_lot_expiring_message,
+                                left,
+                                left
+                            ),
                             kind = InventoryBannerKind.WARNING
                         )
                     }
@@ -182,7 +187,11 @@ private fun LotDetailContent(
                             )
                         }
                         val amount = if (lot.type == ProductType.UNIT) {
-                            stringResource(R.string.inventory_quantity_units, lot.quantityUnits)
+                            pluralStringResource(
+                                R.plurals.inventory_quantity_units,
+                                lot.quantityUnits,
+                                lot.quantityUnits
+                            )
                         } else {
                             stringResource(
                                 R.string.inventory_quantity_kg,

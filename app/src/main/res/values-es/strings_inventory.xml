@@ -8,7 +8,6 @@
     <string name="inventory_filter_unit">Unidad</string>
     <string name="inventory_filter_weight">Peso</string>
     <string name="inventory_retry">Reintentar</string>
-    <string name="inventory_close">Cerrar</string>
     <string name="inventory_not_available">Este elemento ya no está disponible.</string>
 
     <!-- Inventario: píldoras -->
@@ -21,6 +20,7 @@
     <plurals name="inventory_pill_expires_in">
         <item quantity="one">Vence en %d día</item>
         <item quantity="other">Vence en %d días</item>
+        <item quantity="many">Vence en %d días</item>
     </plurals>
 
     <!-- Inventario: vacío / sin resultados -->
@@ -76,7 +76,11 @@
     <string name="inventory_lots_filter_expiring">Próximos a vencer</string>
     <string name="inventory_lots_filter_expired">Vencidos</string>
     <string name="inventory_lots_filter_active">Activos</string>
-    <string name="inventory_lots_banner_expiring">%d lotes próximos a vencer. Se muestran primero en la lista.</string>
+    <plurals name="inventory_lots_banner_expiring">
+        <item quantity="one">%d lote próximo a vencer. Se muestra primero en la lista.</item>
+        <item quantity="other">%d lotes próximos a vencer. Se muestran primero en la lista.</item>
+        <item quantity="many">%d lotes próximos a vencer. Se muestran primero en la lista.</item>
+    </plurals>
     <plurals name="inventory_lots_banner_expired">
         <item quantity="one">%d lote vencido. Retíralo de la venta y actualiza su stock.</item>
         <item quantity="other">%d lotes vencidos. Retíralos de la venta y actualiza su stock.</item>
@@ -110,14 +114,22 @@
     <string name="inventory_lot_expiry_label">Fecha de vencimiento</string>
     <string name="inventory_lot_quantity_label">Cantidad actual</string>
     <string name="inventory_lot_expiring_title">Próximo a vencer</string>
-    <string name="inventory_lot_expiring_message">Este lote vence en %d días. Prioriza su venta.</string>
+    <plurals name="inventory_lot_expiring_message">
+        <item quantity="one">Este lote vence en %d día. Prioriza su venta.</item>
+        <item quantity="other">Este lote vence en %d días. Prioriza su venta.</item>
+        <item quantity="many">Este lote vence en %d días. Prioriza su venta.</item>
+    </plurals>
     <string name="inventory_lot_expired_title">Lote vencido</string>
     <string name="inventory_lot_expired_message">Retíralo de la venta y actualiza su stock.</string>
 
     <!-- Inventario: formatos -->
     <string name="inventory_money">S/ %1$.2f</string>
     <string name="inventory_money_per_kg">S/ %1$.2f/kg</string>
-    <string name="inventory_quantity_units">%1$d und</string>
+    <plurals name="inventory_quantity_units">
+        <item quantity="one">%1$d und</item>
+        <item quantity="other">%1$d und</item>
+        <item quantity="many">%1$d und</item>
+    </plurals>
     <string name="inventory_quantity_kg">%1$s kg</string>
     <string name="inventory_measure_unit">Unidad</string>
     <string name="inventory_measure_weight">Peso (kg)</string>

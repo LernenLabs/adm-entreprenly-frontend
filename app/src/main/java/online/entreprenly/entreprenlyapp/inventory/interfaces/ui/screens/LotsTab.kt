@@ -103,8 +103,9 @@ fun LotsTab(
             } else if (counters.expiringSoon > 0) {
                 InventoryAlertBanner(
                     title = stringResource(R.string.inventory_lots_expiring),
-                    message = stringResource(
-                        R.string.inventory_lots_banner_expiring,
+                    message = pluralStringResource(
+                        R.plurals.inventory_lots_banner_expiring,
+                        counters.expiringSoon,
                         counters.expiringSoon
                     ),
                     kind = InventoryBannerKind.WARNING,

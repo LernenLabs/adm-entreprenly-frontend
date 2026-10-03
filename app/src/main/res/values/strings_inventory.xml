@@ -8,7 +8,6 @@
     <string name="inventory_filter_unit">Unit</string>
     <string name="inventory_filter_weight">Weight</string>
     <string name="inventory_retry">Retry</string>
-    <string name="inventory_close">Close</string>
     <string name="inventory_not_available">This item is no longer available.</string>
 
     <!-- Inventory: pills -->
@@ -75,7 +74,10 @@
     <string name="inventory_lots_filter_expiring">Expiring soon</string>
     <string name="inventory_lots_filter_expired">Expired</string>
     <string name="inventory_lots_filter_active">Active</string>
-    <string name="inventory_lots_banner_expiring">%d lots expiring soon. They are shown first in the list.</string>
+    <plurals name="inventory_lots_banner_expiring">
+        <item quantity="one">%d lot expiring soon. It is shown first in the list.</item>
+        <item quantity="other">%d lots expiring soon. They are shown first in the list.</item>
+    </plurals>
     <plurals name="inventory_lots_banner_expired">
         <item quantity="one">%d expired lot. Remove it from sale and update its stock.</item>
         <item quantity="other">%d expired lots. Remove them from sale and update their stock.</item>
@@ -108,14 +110,20 @@
     <string name="inventory_lot_expiry_label">Expiration date</string>
     <string name="inventory_lot_quantity_label">Current quantity</string>
     <string name="inventory_lot_expiring_title">Expiring soon</string>
-    <string name="inventory_lot_expiring_message">This lot expires in %d days. Prioritize selling it.</string>
+    <plurals name="inventory_lot_expiring_message">
+        <item quantity="one">This lot expires in %d day. Prioritize selling it.</item>
+        <item quantity="other">This lot expires in %d days. Prioritize selling it.</item>
+    </plurals>
     <string name="inventory_lot_expired_title">Expired lot</string>
     <string name="inventory_lot_expired_message">Remove it from sale and update its stock.</string>
 
     <!-- Inventory: formats -->
     <string name="inventory_money">S/ %1$.2f</string>
     <string name="inventory_money_per_kg">S/ %1$.2f/kg</string>
-    <string name="inventory_quantity_units">%1$d units</string>
+    <plurals name="inventory_quantity_units">
+        <item quantity="one">%1$d unit</item>
+        <item quantity="other">%1$d units</item>
+    </plurals>
     <string name="inventory_quantity_kg">%1$s kg</string>
     <string name="inventory_measure_unit">Unit</string>
     <string name="inventory_measure_weight">Weight (kg)</string>

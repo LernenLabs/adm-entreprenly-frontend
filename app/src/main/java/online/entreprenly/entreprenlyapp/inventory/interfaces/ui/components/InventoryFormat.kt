@@ -18,9 +18,13 @@ fun formatPrice(product: Product): String =
 
 /** "18 und" or "3.2 kg". */
 @Composable
-fun formatStock(product: Product, stock: Double): String =
-    if (product.type == ProductType.UNIT) stringResource(R.string.inventory_quantity_units, stock.toInt())
-    else stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(stock))
+fun formatStock(product: Product, stock: Double): String {
+    if (product.type == ProductType.UNIT) {
+        val qty = stock.toInt()
+        return pluralStringResource(R.plurals.inventory_quantity_units, qty, qty)
+    }
+    return stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(stock))
+}
 
 /** "Unidad" or "Peso (kg)". */
 @Composable
@@ -47,11 +51,8 @@ fun remainingText(product: Product, stock: Double): String =
 /** Lot row detail: "L-0245 · Vence 04/10/2026 · 12 und" (weight: "L-0230 · 40 kg"). */
 @Composable
 fun lotRowDetail(lot: Lot): String {
-    val amount = if (lot.type == ProductType.UNIT) {
-        stringResource(R.string.inventory_quantity_units, lot.quantityUnits)
-    } else {
-        stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(lot.quantityKg))
-    }
+    val amount = unitAmount(lot)
+        ?: stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(lot.quantityKg))
     val expiry = lot.expiryDate
     return if (lot.type == ProductType.UNIT && expiry != null) {
         val date = InventoryRules.formatLotDate(expiry)
@@ -64,11 +65,8 @@ fun lotRowDetail(lot: Lot): String {
 /** Lot row inside the product detail: weight lots show the entry date. */
 @Composable
 fun productLotRowDetail(lot: Lot): String {
-    val amount = if (lot.type == ProductType.UNIT) {
-        stringResource(R.string.inventory_quantity_units, lot.quantityUnits)
-    } else {
-        stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(lot.quantityKg))
-    }
+    val amount = unitAmount(lot)
+        ?: stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(lot.quantityKg))
     val expiry = lot.expiryDate
     return if (lot.type == ProductType.UNIT && expiry != null) {
         val date = InventoryRules.formatLotDate(expiry)
@@ -77,6 +75,12 @@ fun productLotRowDetail(lot: Lot): String {
         val date = InventoryRules.formatLotDate(lot.entryDate)
         "${stringResource(R.string.inventory_lot_row_entered, date)} · $amount"
     }
+}
+
+@Composable
+private fun unitAmount(lot: Lot): String? {
+    if (lot.type != ProductType.UNIT) return null
+    return pluralStringResource(R.plurals.inventory_quantity_units, lot.quantityUnits, lot.quantityUnits)
 }
 
 data class LotPillData(val text: String, val kind: LotPillKind)
