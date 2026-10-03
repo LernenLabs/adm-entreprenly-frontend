@@ -23,4 +23,22 @@
     <string name="home_date_format">EEE, d MMM</string>
     <string name="home_quick_new_product">Nuevo producto</string>
     <string name="home_quick_create_lot">Crear lote</string>
+    <string name="home_sales_today">Ventas de hoy</string>
+    <string name="home_cash">Efectivo</string>
+    <string name="home_digital">Digital</string>
+    <string name="home_stat_sales">Ventas</string>
+    <string name="home_stat_lots">Lotes por vencer</string>
+    <string name="home_stat_orders">Pedidos por validar</string>
+    <string name="home_chatbot_title">Chatbot de WhatsApp</string>
+    <string name="home_chatbot_connected">Activo</string>
+    <string name="home_chatbot_disconnected">Desconectado</string>
+    <string name="home_chatbot_hint">Vincula tu WhatsApp para recibir pedidos automáticos.</string>
+    <string name="home_chatbot_connect">Conectar ahora</string>
+    <string name="home_alerts">Alertas</string>
+    <string name="home_alerts_ok_title">Inventario en buen estado</string>
+    <string name="home_alerts_ok_message">No hay alertas de stock activas.</string>
+    <string name="home_orders_title">Pedidos del chatbot</string>
+    <string name="home_orders_empty_title">Sin pedidos aún</string>
+    <string name="home_orders_empty_message">Los pedidos del chatbot aparecerán aquí.</string>
+    <string name="home_inventory_empty">Sin productos registrados</string>
 </resources>

@@ -38,3 +38,6 @@ val DarkErrorBg = Color(0xFF3A1B1B)
 
 // Logo pill background (from the Entreprenly icon).
 val BrandInk = Color(0xFF0B0F12)
+
+// Dark brown of the sales card on the home dashboard (Figma).
+val BrandBrown = Color(0xFF5C2A00)
