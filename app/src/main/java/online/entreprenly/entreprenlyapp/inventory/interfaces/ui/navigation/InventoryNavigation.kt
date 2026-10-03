@@ -13,11 +13,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens.InventoryScreen
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens.LotDetailScreen
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens.ProductDetailScreen
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.navigation.Routes
-import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ComingSoonScreen
 
 /**
  * Inventory destinations. Screen content lands in follow-up commits, one per
@@ -58,8 +58,15 @@ fun NavGraphBuilder.inventoryGraph(navController: NavController, container: AppC
             navArgument(Routes.ARG_LOT_ID) { type = NavType.LongType }
         )
     ) { entry ->
-        inventoryViewModel(navController, entry, container)
-        ComingSoonScreen("lot")
+        val type = ProductType.fromName(entry.arguments?.getString(Routes.ARG_LOT_TYPE))
+            ?: ProductType.UNIT
+        val id = entry.arguments?.getLong(Routes.ARG_LOT_ID) ?: 0L
+        LotDetailScreen(
+            viewModel = inventoryViewModel(navController, entry, container),
+            type = type,
+            id = id,
+            onBack = { navController.popBackStack() }
+        )
     }
 }
 
