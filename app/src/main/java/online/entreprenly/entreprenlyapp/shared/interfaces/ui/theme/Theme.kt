@@ -20,7 +20,8 @@ data class ExtraColors(
     val success: Color,
     val successBackground: Color,
     val warning: Color,
-    val warningBackground: Color
+    val warningBackground: Color,
+    val errorBackground: Color
 )
 
 private val LightExtraColors = ExtraColors(
@@ -30,7 +31,8 @@ private val LightExtraColors = ExtraColors(
     success = LightSuccess,
     successBackground = LightSuccessBg,
     warning = LightWarning,
-    warningBackground = LightWarningBg
+    warningBackground = LightWarningBg,
+    errorBackground = LightErrorBg
 )
 
 private val DarkExtraColors = ExtraColors(
@@ -40,7 +42,8 @@ private val DarkExtraColors = ExtraColors(
     success = DarkSuccess,
     successBackground = DarkSuccessBg,
     warning = DarkWarning,
-    warningBackground = DarkWarningBg
+    warningBackground = DarkWarningBg,
+    errorBackground = DarkErrorBg
 )
 
 private val LocalExtraColors = staticCompositionLocalOf { LightExtraColors }

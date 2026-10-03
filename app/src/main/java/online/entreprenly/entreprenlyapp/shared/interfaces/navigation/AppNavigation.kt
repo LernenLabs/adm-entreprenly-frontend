@@ -1,13 +1,10 @@
 package online.entreprenly.entreprenlyapp.shared.interfaces.navigation
 
 import android.content.res.Configuration
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -15,8 +12,9 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -28,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import java.util.Locale
+import kotlinx.coroutines.delay
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.navigation.chatbotGraph
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.navigation.iamGraph
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SessionState
@@ -40,6 +39,7 @@ import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.Profil
 import online.entreprenly.entreprenlyapp.sales.interfaces.ui.navigation.salesGraph
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.HomeScreen
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.SplashScreen
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.EntreprenlyAppTheme
 import online.entreprenly.entreprenlyapp.subscription.interfaces.ui.navigation.subscriptionGraph
 
@@ -106,11 +106,14 @@ fun AppNavigation(
 ) {
     val sessionState by sessionViewModel.state.collectAsState()
 
-    if (sessionState is SessionState.Loading) {
-        Box(
-            modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
-            contentAlignment = Alignment.Center
-        ) { CircularProgressIndicator() }
+    // Keep the splash visible for a moment even when the saved session loads instantly.
+    var splashDone by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(1200)
+        splashDone = true
+    }
+    if (sessionState is SessionState.Loading || !splashDone) {
+        SplashScreen(modifier)
         return
     }
 
@@ -122,7 +125,7 @@ fun AppNavigation(
 
     // Signing in/out replaces the whole back stack.
     LaunchedEffect(signedIn != null) {
-        val target = if (signedIn != null) Routes.HOME else Routes.SIGN_IN
+        val target = if (signedIn != null) Routes.HOME else Routes.WELCOME
         if (navController.currentDestination?.route != target) {
             navController.navigate(target) { popUpTo(0) { inclusive = true } }
         }
@@ -149,7 +152,7 @@ fun AppNavigation(
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (signedIn != null) Routes.HOME else Routes.SIGN_IN,
+            startDestination = if (signedIn != null) Routes.HOME else Routes.WELCOME,
             modifier = Modifier.padding(innerPadding)
         ) {
             iamGraph(navController, container, signedIn?.session?.email.orEmpty())
@@ -158,9 +161,7 @@ fun AppNavigation(
                     userName = userName,
                     onSell = { navController.navigate(Routes.SELL) },
                     onInventory = { navController.navigate(Routes.INVENTORY) },
-                    onOrders = { navController.navigate(Routes.ORDERS) },
-                    onSubscription = { navController.navigate(Routes.SUBSCRIPTION) },
-                    onProfile = { navController.navigate(Routes.PROFILE) }
+                    onOrders = { navController.navigate(Routes.ORDERS) }
                 )
             }
             profileGraph(

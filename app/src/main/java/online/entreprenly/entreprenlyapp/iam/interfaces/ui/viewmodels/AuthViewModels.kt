@@ -22,6 +22,7 @@ import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.AuthSessi
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Email
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Password
 import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
@@ -60,7 +61,14 @@ class SignInViewModel(private val userCommandService: UserCommandService) : View
             // On success the session is stored and navigation reacts to SessionState.
             _form.value = when (val r = userCommandService.handle(SignInCommand(e, p))) {
                 is Result.Success -> FormState()
-                is Result.Failure -> FormState(error = UiText.Raw(r.error.message))
+                is Result.Failure -> when (r.error) {
+                    is ApplicationError.Network, is ApplicationError.Unexpected ->
+                        FormState(error = UiText.Raw(r.error.message))
+                    else -> FormState(
+                        errorTitle = UiText.Res(R.string.sign_in_error_title),
+                        error = UiText.Res(R.string.sign_in_error_message)
+                    )
+                }
             }
         }
     }
