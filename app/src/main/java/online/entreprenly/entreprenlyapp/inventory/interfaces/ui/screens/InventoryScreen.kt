@@ -134,10 +134,11 @@ fun InventoryScreen(
                 onClose = { showAddProduct = false },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            // Replaced by ProductFormSheet in the add-product commit.
-            Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.inventory_empty_message))
-            }
+            ProductFormSheet(
+                viewModel = viewModel,
+                initial = null,
+                onClose = { showAddProduct = false }
+            )
         }
     }
     if (showCreateLot) {
