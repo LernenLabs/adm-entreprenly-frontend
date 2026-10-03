@@ -11,6 +11,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens.InventoryScreen
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.navigation.Routes
@@ -22,8 +23,13 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ComingS
  */
 fun NavGraphBuilder.inventoryGraph(navController: NavController, container: AppContainer) {
     composable(Routes.INVENTORY) { entry ->
-        val viewModel = inventoryViewModel(navController, entry, container)
-        InventoryRootStub(viewModel = viewModel)
+        InventoryScreen(
+            viewModel = inventoryViewModel(navController, entry, container),
+            onProductClick = { product ->
+                navController.navigate(Routes.productDetail(product.type.value, product.id))
+            },
+            onLotClick = { type, id -> navController.navigate(Routes.lotDetail(type, id)) }
+        )
     }
     composable(
         Routes.PRODUCT_DETAIL,
@@ -70,9 +76,4 @@ fun inventoryViewModel(
             )
         }
     })
-}
-
-@Composable
-private fun InventoryRootStub(viewModel: InventoryViewModel) {
-    ComingSoonScreen("inventory")
 }

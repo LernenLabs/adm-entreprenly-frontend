@@ -98,6 +98,8 @@
     <string name="inventory_lot_date_note">Past dates cannot be selected.</string>
     <string name="inventory_lot_confirm_date">Confirm date</string>
     <string name="inventory_lot_created">Lot registered successfully</string>
+    <string name="inventory_lot_row_expires">Expires %1$s</string>
+    <string name="inventory_lot_row_entered">Entered %1$s</string>
 
     <!-- Inventory: lot detail -->
     <string name="inventory_lot_status">Status</string>

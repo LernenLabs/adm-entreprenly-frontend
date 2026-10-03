@@ -100,6 +100,8 @@
     <string name="inventory_lot_date_note">Las fechas pasadas no se pueden seleccionar.</string>
     <string name="inventory_lot_confirm_date">Confirmar fecha</string>
     <string name="inventory_lot_created">Lote registrado correctamente</string>
+    <string name="inventory_lot_row_expires">Vence %1$s</string>
+    <string name="inventory_lot_row_entered">Ingreso %1$s</string>
 
     <!-- Inventario: detalle de lote -->
     <string name="inventory_lot_status">Estado</string>
