@@ -8,7 +8,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -20,17 +19,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopBar
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.EmailField
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.FormSubmit
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PasswordField
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountViewModel
 
-/** US-66 change password, US-65 change email and US-61 sign out. */
+/** US-66 change password and US-65 change email. Sign out lives in the More tab (US-61). */
 @Composable
 fun AccountScreen(
     viewModel: AccountViewModel,
     email: String,
-    onSignOut: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val passwordForm by viewModel.passwordForm.collectAsState()
@@ -39,11 +39,12 @@ fun AccountScreen(
     var newPassword by rememberSaveable { mutableStateOf("") }
     var newEmail by rememberSaveable { mutableStateOf("") }
 
+    Column(modifier.fillMaxSize()) {
+    AppTopBar(stringResource(R.string.account_title), onBack)
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(stringResource(R.string.account_title), style = MaterialTheme.typography.headlineMedium)
         Text(email, style = MaterialTheme.typography.bodyLarge)
 
         HorizontalDivider()
@@ -62,7 +63,6 @@ fun AccountScreen(
         EmailField(newEmail, { newEmail = it }, label = stringResource(R.string.account_new_email))
         FormSubmit(emailForm, stringResource(R.string.account_change_email_action), { viewModel.changeEmail(newEmail) })
 
-        HorizontalDivider()
-        OutlinedButton(onClick = onSignOut) { Text(stringResource(R.string.account_sign_out)) }
+    }
     }
 }
