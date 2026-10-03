@@ -72,4 +72,12 @@
     <string name="chatbot_empty_orders">No orders yet. Orders placed through the WhatsApp chatbot will appear here.</string>
     <string name="chatbot_empty_orders_filter">No orders match this filter.</string>
     <string name="chatbot_empty_conversations">No conversations yet.</string>
+
+    <!-- Chatbot: chat -->
+    <string name="common_back">Back</string>
+    <string name="chat_handled_by_bot">Handled by the bot</string>
+    <string name="chat_message_hint">Write a message…</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_empty">No messages in this conversation yet.</string>
+    <string name="chat_image_message">Image</string>
 </resources>

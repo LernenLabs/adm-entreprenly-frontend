@@ -7,16 +7,22 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
+import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
+import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatMessageQueryService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatOrderQueryService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ConversationQueryService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.WhatsAppConnectionQueryService
+import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatMessage
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatOrder
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.Conversation
+import online.entreprenly.entreprenlyapp.chatbot.domain.model.commands.SendChatMessageCommand
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetAllChatOrdersQuery
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetAllConversationsQuery
+import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetChatMessagesByConversationIdQuery
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetWhatsAppConnectionQuery
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.valueobjects.WhatsAppConnection
 import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
@@ -88,6 +94,68 @@ class OrdersViewModel(
                     conversations = c.value,
                     connection = (connection.await() as? Result.Success)?.value
                 )
+            }
+        }
+    }
+}
+
+data class ChatState(
+    val messages: List<ChatMessage> = emptyList(),
+    val draft: String = "",
+    val loading: Boolean = true,
+    val sending: Boolean = false,
+    val planRequired: Boolean = false,
+    /** Load error when [messages] is empty; otherwise a failed send. */
+    val error: UiText? = null
+) {
+    val canSend: Boolean get() = draft.isNotBlank() && !sending
+}
+
+/** One conversation: the seller reads the history and replies as the bot. */
+class ChatViewModel(
+    private val conversationId: Long,
+    private val chatMessageQueryService: ChatMessageQueryService,
+    private val chatMessageCommandService: ChatMessageCommandService
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(ChatState())
+    val state: StateFlow<ChatState> = _state.asStateFlow()
+
+    init {
+        load()
+    }
+
+    fun load() {
+        _state.update { it.copy(loading = true, error = null) }
+        viewModelScope.launch {
+            val r = chatMessageQueryService.handle(GetChatMessagesByConversationIdQuery(conversationId))
+            _state.update {
+                when (r) {
+                    is Result.Success -> it.copy(messages = r.value, loading = false)
+                    is Result.Failure -> it.copy(
+                        loading = false,
+                        planRequired = r.error is ApplicationError.Forbidden,
+                        error = r.error.toUiText()
+                    )
+                }
+            }
+        }
+    }
+
+    fun onDraftChange(text: String) = _state.update { it.copy(draft = text, error = null) }
+
+    fun send() {
+        val current = _state.value
+        if (!current.canSend) return
+        _state.update { it.copy(sending = true, error = null) }
+        viewModelScope.launch {
+            val r = chatMessageCommandService.handle(SendChatMessageCommand(conversationId, current.draft))
+            _state.update {
+                when (r) {
+                    is Result.Success -> it.copy(messages = it.messages + r.value, draft = "", sending = false)
+                    // Keep the draft so the seller can retry.
+                    is Result.Failure -> it.copy(sending = false, error = r.error.toUiText())
+                }
             }
         }
     }

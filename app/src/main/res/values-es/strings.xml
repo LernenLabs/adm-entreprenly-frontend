@@ -63,4 +63,11 @@
     <string name="chatbot_empty_orders">Aún no hay pedidos. Los pedidos hechos por el chatbot de WhatsApp aparecerán aquí.</string>
     <string name="chatbot_empty_orders_filter">Ningún pedido coincide con este filtro.</string>
     <string name="chatbot_empty_conversations">Aún no hay conversaciones.</string>
+
+    <string name="common_back">Atrás</string>
+    <string name="chat_handled_by_bot">Atendido por el bot</string>
+    <string name="chat_message_hint">Escribe un mensaje…</string>
+    <string name="chat_send">Enviar</string>
+    <string name="chat_empty">Aún no hay mensajes en esta conversación.</string>
+    <string name="chat_image_message">Imagen</string>
 </resources>
