@@ -141,13 +141,7 @@ fun AppNavigation(
             if (signedIn != null && currentRoute in barRoutes) {
                 BottomNavigationBar(
                     selected = tabForRoute(currentRoute),
-                    onSelect = { tab ->
-                        navController.navigate(tab.route) {
-                            popUpTo(Routes.HOME) { saveState = true }
-                            launchSingleTop = true
-                            restoreState = true
-                        }
-                    }
+                    onSelect = navController::navigateToTab
                 )
             }
         }
@@ -162,9 +156,9 @@ fun AppNavigation(
                 HomeScreen(
                     userName = userName,
                     currencySymbol = currencySymbol,
-                    onSell = { navController.navigate(Routes.SELL) },
-                    onInventory = { navController.navigate(Routes.INVENTORY) },
-                    onOrders = { navController.navigate(Routes.ORDERS) }
+                    onSell = { navController.navigateToTab(BottomTab.SELL) },
+                    onInventory = { navController.navigateToTab(BottomTab.INVENTORY) },
+                    onOrders = { navController.navigateToTab(BottomTab.ORDERS) }
                 )
             }
             profileGraph(
