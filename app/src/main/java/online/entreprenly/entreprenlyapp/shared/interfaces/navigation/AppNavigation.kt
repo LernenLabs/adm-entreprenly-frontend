@@ -121,7 +121,9 @@ fun AppNavigation(
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
     val profileState by profileViewModel.uiState.collectAsState()
-    val userName = (profileState as? ProfileUiState.Loaded)?.profile?.firstName.orEmpty()
+    val loadedProfile = (profileState as? ProfileUiState.Loaded)?.profile
+    val userName = loadedProfile?.firstName.orEmpty()
+    val currencySymbol = loadedProfile?.preferences?.currency?.symbol ?: "S/"
 
     // Signing in/out replaces the whole back stack.
     LaunchedEffect(signedIn != null) {
@@ -159,6 +161,7 @@ fun AppNavigation(
             composable(Routes.HOME) {
                 HomeScreen(
                     userName = userName,
+                    currencySymbol = currencySymbol,
                     onSell = { navController.navigate(Routes.SELL) },
                     onInventory = { navController.navigate(Routes.INVENTORY) },
                     onOrders = { navController.navigate(Routes.ORDERS) }

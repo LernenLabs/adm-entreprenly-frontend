@@ -23,4 +23,22 @@
     <string name="home_date_format">EEE, d MMM</string>
     <string name="home_quick_new_product">New product</string>
     <string name="home_quick_create_lot">Create lot</string>
+    <string name="home_sales_today">Today\'s sales</string>
+    <string name="home_cash">Cash</string>
+    <string name="home_digital">Digital</string>
+    <string name="home_stat_sales">Sales</string>
+    <string name="home_stat_lots">Expiring lots</string>
+    <string name="home_stat_orders">Orders to validate</string>
+    <string name="home_chatbot_title">WhatsApp Chatbot</string>
+    <string name="home_chatbot_connected">Active</string>
+    <string name="home_chatbot_disconnected">Disconnected</string>
+    <string name="home_chatbot_hint">Link your WhatsApp to receive orders automatically.</string>
+    <string name="home_chatbot_connect">Connect now</string>
+    <string name="home_alerts">Alerts</string>
+    <string name="home_alerts_ok_title">Inventory in good shape</string>
+    <string name="home_alerts_ok_message">There are no active stock alerts.</string>
+    <string name="home_orders_title">Chatbot orders</string>
+    <string name="home_orders_empty_title">No orders yet</string>
+    <string name="home_orders_empty_message">Chatbot orders will appear here.</string>
+    <string name="home_inventory_empty">No products registered</string>
 </resources>
