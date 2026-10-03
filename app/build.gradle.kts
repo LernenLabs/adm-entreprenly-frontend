@@ -21,12 +21,12 @@ android {
 
     buildTypes {
         debug {
-            // 10.0.2.2 = localhost de la PC desde el emulador. Backend: puerto 8092.
-            buildConfigField("String", "API_BASE_URL", "\"http://10.0.2.2:8092/\"")
+            // Deployed backend (Render). To use a local backend from the emulator, switch to
+            // "http://10.0.2.2:8092/" (10.0.2.2 is the host machine's localhost).
+            buildConfigField("String", "API_BASE_URL", "\"https://adm-entreprenly-backend.onrender.com/\"")
         }
         release {
-            // TODO: URL del backend desplegado.
-            buildConfigField("String", "API_BASE_URL", "\"https://api.entreprenly.online/\"")
+            buildConfigField("String", "API_BASE_URL", "\"https://adm-entreprenly-backend.onrender.com/\"")
             optimization {
                 enable = false
             }
