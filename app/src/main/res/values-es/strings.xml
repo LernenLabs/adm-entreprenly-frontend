@@ -9,14 +9,12 @@
 
     <string name="sign_in_title">Inicia sesión</string>
     <string name="sign_in_action">Iniciar sesión</string>
-    <string name="sign_in_go_to_sign_up">¿No tienes cuenta? Regístrate</string>
 
-    <string name="sign_up_title">Crea tu cuenta</string>
-    <string name="sign_up_action">Registrarme</string>
+    <string name="sign_up_title">Crear cuenta</string>
+    <string name="sign_up_action">Crear cuenta</string>
     <string name="sign_up_first_name">Nombre (opcional)</string>
     <string name="sign_up_last_name">Apellido (opcional)</string>
     <string name="sign_up_phone">Teléfono (opcional)</string>
-    <string name="sign_up_go_to_sign_in">¿Ya tienes cuenta? Inicia sesión</string>
 
     <string name="account_title">Mi cuenta</string>
     <string name="account_change_password_title">Cambiar contraseña</string>
@@ -31,8 +29,6 @@
     <string name="account_email_updated">Correo actualizado</string>
     <string name="account_sign_out">Cerrar sesión</string>
 
-    <string name="nav_account">Cuenta</string>
-    <string name="nav_orders">Pedidos</string>
 
     <string name="chatbot_money">S/ %1$.2f</string>
     <string name="chatbot_unknown_client">Cliente</string>

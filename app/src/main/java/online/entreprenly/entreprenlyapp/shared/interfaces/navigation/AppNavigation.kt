@@ -1,99 +1,133 @@
 package online.entreprenly.entreprenlyapp.shared.interfaces.navigation
 
-import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Box
+import android.content.res.Configuration
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavBackStackEntry
-import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import online.entreprenly.entreprenlyapp.R
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.ChatScreen
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.OrderDetailScreen
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.OrdersScreen
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.ChatViewModel
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.ChatbotState
-import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.OrdersViewModel
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.AccountScreen
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignInScreen
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignUpScreen
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountViewModel
+import java.util.Locale
+import kotlinx.coroutines.delay
+import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.navigation.chatbotGraph
+import online.entreprenly.entreprenlyapp.iam.interfaces.ui.navigation.iamGraph
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SessionState
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SessionViewModel
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignInViewModel
-import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignUpViewModel
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.navigation.inventoryGraph
+import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.AppTheme
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.navigation.profileGraph
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileUiState
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileViewModel
+import online.entreprenly.entreprenlyapp.sales.interfaces.ui.navigation.salesGraph
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.HomeScreen
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.SplashScreen
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.EntreprenlyAppTheme
+import online.entreprenly.entreprenlyapp.subscription.interfaces.ui.navigation.subscriptionGraph
 
-object Routes {
-    const val SIGN_IN = "sign_in"
-    const val SIGN_UP = "sign_up"
-    const val ACCOUNT = "account"
-    const val ORDERS = "orders"
-    const val ARG_CONVERSATION_ID = "conversationId"
-    const val CHAT = "conversations/{$ARG_CONVERSATION_ID}"
+/** Routes where the bottom navigation bar is visible. */
+private val barRoutes = setOf(
+    Routes.HOME, Routes.INVENTORY, Routes.SELL, Routes.ORDERS, Routes.MORE,
+    Routes.PROFILE, Routes.PREFERENCES, Routes.SUBSCRIPTION, Routes.ACCOUNT
+)
 
-    const val ARG_ORDER_ID = "orderId"
-    const val ORDER_DETAIL = "orders/{$ARG_ORDER_ID}"
-
-    fun chat(conversationId: Long) = "conversations/$conversationId"
-    fun orderDetail(orderId: Long) = "orders/$orderId"
-}
-
-/** Destinations reachable from the bottom navigation bar once signed in. */
-private enum class TopLevelTab(val route: String, @StringRes val label: Int, val icon: ImageVector) {
-    ACCOUNT(Routes.ACCOUNT, R.string.nav_account, Icons.Filled.Person),
-    ORDERS(Routes.ORDERS, R.string.nav_orders, Icons.Filled.ShoppingCart)
-}
-
+/**
+ * App entry point: applies the user's saved theme and language (US-67), then shows the navigation.
+ * Preferences are cached on the device, so they apply before the network answers.
+ */
 @Composable
-fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
+fun AppRoot(container: AppContainer) {
     val sessionViewModel: SessionViewModel = viewModel(factory = viewModelFactory {
         initializer { SessionViewModel(container.sessionQueryService, container.userCommandService) }
     })
+    val profileViewModel: ProfileViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+            ProfileViewModel(
+                container.sessionQueryService,
+                container.profileQueryService,
+                container.profileCommandService
+            )
+        }
+    })
+    val preferences by profileViewModel.appPreferences.collectAsState()
+    val darkTheme = preferences?.theme?.let { it == AppTheme.DARK } ?: isSystemInDarkTheme()
+
+    WithLanguage(preferences?.language?.code) {
+        EntreprenlyAppTheme(darkTheme = darkTheme) {
+            AppNavigation(container, sessionViewModel, profileViewModel)
+        }
+    }
+}
+
+/** Overrides the resources locale for everything inside [content]; null keeps the device language. */
+@Composable
+private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit) {
+    val base = LocalContext.current
+    val localized = remember(base, languageCode) {
+        if (languageCode == null) {
+            base
+        } else {
+            val configuration = Configuration(base.resources.configuration).apply {
+                setLocale(Locale.forLanguageTag(languageCode))
+            }
+            base.createConfigurationContext(configuration)
+        }
+    }
+    CompositionLocalProvider(
+        LocalContext provides localized,
+        LocalConfiguration provides localized.resources.configuration
+    ) { content() }
+}
+
+@Composable
+fun AppNavigation(
+    container: AppContainer,
+    sessionViewModel: SessionViewModel,
+    profileViewModel: ProfileViewModel,
+    modifier: Modifier = Modifier
+) {
     val sessionState by sessionViewModel.state.collectAsState()
 
-    if (sessionState is SessionState.Loading) {
-        Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+    // Keep the splash visible for a moment even when the saved session loads instantly.
+    var splashDone by remember { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        delay(1200)
+        splashDone = true
+    }
+    if (sessionState is SessionState.Loading || !splashDone) {
+        SplashScreen(modifier)
         return
     }
 
     val signedIn = sessionState as? SessionState.SignedIn
     val navController = rememberNavController()
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-    // TODO(subscription): navigate to the plans screen once the subscription context adds it.
-    val onViewPlans: () -> Unit = { }
+    val profileState by profileViewModel.uiState.collectAsState()
+    val loadedProfile = (profileState as? ProfileUiState.Loaded)?.profile
+    val userName = loadedProfile?.firstName.orEmpty()
+    val currencySymbol = loadedProfile?.preferences?.currency?.symbol ?: "S/"
 
     // Signing in/out replaces the whole back stack.
     LaunchedEffect(signedIn != null) {
-        val target = if (signedIn != null) Routes.ACCOUNT else Routes.SIGN_IN
+        val target = if (signedIn != null) Routes.HOME else Routes.WELCOME
         if (navController.currentDestination?.route != target) {
             navController.navigate(target) { popUpTo(0) { inclusive = true } }
         }
@@ -101,129 +135,48 @@ fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
 
     Scaffold(
         modifier = modifier,
-        // The activity's Scaffold already applies the system bar insets.
-        contentWindowInsets = WindowInsets(0),
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         bottomBar = {
-            if (signedIn != null && TopLevelTab.entries.any { it.route == currentRoute }) {
-                BottomNavigationBar(currentRoute, onSelect = { navController.navigateToTab(it.route) })
+            if (signedIn != null && currentRoute in barRoutes) {
+                BottomNavigationBar(
+                    selected = tabForRoute(currentRoute),
+                    onSelect = { tab ->
+                        navController.navigate(tab.route) {
+                            popUpTo(Routes.HOME) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
             }
         }
     ) { innerPadding ->
         NavHost(
             navController = navController,
-            startDestination = if (signedIn != null) Routes.ACCOUNT else Routes.SIGN_IN,
+            startDestination = if (signedIn != null) Routes.HOME else Routes.WELCOME,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Routes.SIGN_IN) {
-                val vm: SignInViewModel = viewModel(factory = viewModelFactory {
-                    initializer { SignInViewModel(container.userCommandService) }
-                })
-                SignInScreen(vm, onGoToSignUp = { navController.navigateSingleTop(Routes.SIGN_UP) })
-            }
-            composable(Routes.SIGN_UP) {
-                val vm: SignUpViewModel = viewModel(factory = viewModelFactory {
-                    initializer { SignUpViewModel(container.userCommandService) }
-                })
-                SignUpScreen(vm, onGoToSignIn = { navController.popBackStack() })
-            }
-            composable(Routes.ACCOUNT) {
-                val vm: AccountViewModel = viewModel(factory = viewModelFactory {
-                    initializer { AccountViewModel(container.userCommandService) }
-                })
-                AccountScreen(
-                    viewModel = vm,
-                    email = signedIn?.session?.email.orEmpty(),
-                    onSignOut = sessionViewModel::signOut
+            iamGraph(navController, container, signedIn?.session?.email.orEmpty())
+            composable(Routes.HOME) {
+                HomeScreen(
+                    userName = userName,
+                    currencySymbol = currencySymbol,
+                    onSell = { navController.navigate(Routes.SELL) },
+                    onInventory = { navController.navigate(Routes.INVENTORY) },
+                    onOrders = { navController.navigate(Routes.ORDERS) }
                 )
             }
-            composable(Routes.ORDERS) { entry ->
-                val vm = ordersViewModel(navController, entry, container)
-                OrdersScreen(
-                    viewModel = vm,
-                    onOpenOrder = { navController.navigate(Routes.orderDetail(it)) },
-                    onOpenConversation = { navController.navigate(Routes.chat(it)) },
-                    onViewPlans = onViewPlans
-                )
-            }
-            composable(
-                Routes.CHAT,
-                arguments = listOf(navArgument(Routes.ARG_CONVERSATION_ID) { type = NavType.LongType })
-            ) { entry ->
-                val conversationId = entry.arguments?.getLong(Routes.ARG_CONVERSATION_ID) ?: 0L
-                val vm: ChatViewModel = viewModel(factory = viewModelFactory {
-                    initializer {
-                        ChatViewModel(conversationId, container.chatMessageQueryService, container.chatMessageCommandService)
-                    }
-                })
-                val chatbotState by ordersViewModel(navController, entry, container).state.collectAsState()
-                ChatScreen(
-                    viewModel = vm,
-                    clientName = (chatbotState as? ChatbotState.Ready)?.conversation(conversationId)?.displayName,
-                    onBack = { navController.popBackStack() },
-                    onViewPlans = onViewPlans
-                )
-            }
-            composable(
-                Routes.ORDER_DETAIL,
-                arguments = listOf(navArgument(Routes.ARG_ORDER_ID) { type = NavType.LongType })
-            ) { entry ->
-                OrderDetailScreen(
-                    viewModel = ordersViewModel(navController, entry, container),
-                    orderId = entry.arguments?.getLong(Routes.ARG_ORDER_ID) ?: 0L,
-                    onBack = { navController.popBackStack() },
-                    onViewPlans = onViewPlans
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun BottomNavigationBar(currentRoute: String?, onSelect: (TopLevelTab) -> Unit) {
-    NavigationBar(windowInsets = WindowInsets(0)) {
-        TopLevelTab.entries.forEach { tab ->
-            NavigationBarItem(
-                selected = currentRoute == tab.route,
-                onClick = { onSelect(tab) },
-                icon = { Icon(tab.icon, contentDescription = null) },
-                label = { Text(stringResource(tab.label)) }
+            profileGraph(
+                navController = navController,
+                viewModel = profileViewModel,
+                email = signedIn?.session?.email.orEmpty(),
+                onSignOut = sessionViewModel::signOut
             )
+            inventoryGraph(navController)
+            salesGraph(navController)
+            chatbotGraph(navController, container)
+            subscriptionGraph(navController)
         }
     }
 }
-
-/**
- * The orders tab's ViewModel, scoped to its back stack entry so the chat and order detail
- * screens opened from it share the same loaded orders and conversations.
- */
-@Composable
-private fun ordersViewModel(
-    navController: NavHostController,
-    entry: NavBackStackEntry,
-    container: AppContainer
-): OrdersViewModel {
-    // Resolved once per entry: during exit transitions the orders entry may already be gone.
-    val ordersEntry = remember(entry) { navController.getBackStackEntry(Routes.ORDERS) }
-    return viewModel(viewModelStoreOwner = ordersEntry, factory = viewModelFactory {
-        initializer {
-            OrdersViewModel(
-                container.subscriptionAccessFacade,
-                container.chatOrderQueryService,
-                container.conversationQueryService,
-                container.whatsAppConnectionQueryService,
-                container.chatOrderCommandService
-            )
-        }
-    })
-}
-
-/** Switches tabs keeping a single copy of each and restoring its saved state. */
-private fun NavHostController.navigateToTab(route: String) =
-    navigate(route) {
-        popUpTo(Routes.ACCOUNT) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
-
-private fun NavHostController.navigateSingleTop(route: String) =
-    navigate(route) { launchSingleTop = true }

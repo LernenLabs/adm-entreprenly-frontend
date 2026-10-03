@@ -31,7 +31,6 @@ import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatOrder
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.valueobjects.OrderStatus
-import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.BrandOrangeDark
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusDanger
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusDangerContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusNeutral
@@ -81,7 +80,7 @@ fun InitialsAvatar(name: String?, modifier: Modifier = Modifier, size: Dp = 44.d
     ) {
         Text(
             text = initialsOf(name),
-            color = BrandOrangeDark,
+            color = StatusWarning,
             style = MaterialTheme.typography.labelLarge,
             fontWeight = FontWeight.Bold
         )
@@ -116,7 +115,7 @@ fun PlanRequiredContent(onViewPlans: () -> Unit, onRetry: () -> Unit, modifier: 
             modifier = Modifier.size(72.dp).background(StatusWarningContainer, CircleShape),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Filled.Lock, contentDescription = null, tint = BrandOrangeDark, modifier = Modifier.size(36.dp))
+            Icon(Icons.Filled.Lock, contentDescription = null, tint = StatusWarning, modifier = Modifier.size(36.dp))
         }
         Text(
             stringResource(R.string.chatbot_plan_required_title),

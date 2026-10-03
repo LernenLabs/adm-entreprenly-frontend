@@ -4,7 +4,6 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
@@ -34,6 +33,13 @@ import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQu
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
+import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
+import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
+import online.entreprenly.entreprenlyapp.profile.application.queryservices.ProfileQueryService
+import online.entreprenly.entreprenlyapp.profile.infrastructure.local.LocalPreferencesRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.ProfilesApi
+import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.RetrofitFactory
 
 /** Composition root manual (sin framework de DI). Un solo contenedor por proceso. */
@@ -50,12 +56,22 @@ class AppContainer(context: Context) {
         debug = BuildConfig.DEBUG
     ).retrofit
 
+    // IAM
     private val sessionRepository = SessionRepositoryImpl(context)
     private val userRepository = UserRepositoryImpl(retrofit.create(IamApi::class.java))
 
     val userCommandService: UserCommandService =
         UserCommandServiceImpl(userRepository, sessionRepository)
     val sessionQueryService: SessionQueryService = SessionQueryServiceImpl(sessionRepository)
+
+    // Profile
+    private val localPreferences = LocalPreferencesRepositoryImpl(context)
+    private val profileRepository = ProfileRepositoryImpl(retrofit.create(ProfilesApi::class.java))
+
+    val profileCommandService: ProfileCommandService =
+        ProfileCommandServiceImpl(profileRepository, localPreferences)
+    val profileQueryService: ProfileQueryService =
+        ProfileQueryServiceImpl(profileRepository, localPreferences)
 
     // Chatbot
     private val chatbotApi = retrofit.create(ChatbotApi::class.java)

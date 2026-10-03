@@ -59,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -85,7 +86,6 @@ import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.Chatbo
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.OrdersViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.TextInputField
-import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.BrandWhite
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusDanger
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusDangerContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusInfo
@@ -419,7 +419,7 @@ private fun RejectPaymentSheet(order: ChatOrder, onDismiss: () -> Unit, onConfir
             TextInputField(detail, { detail = it }, label = stringResource(R.string.order_reject_detail))
             Button(
                 onClick = { onConfirm(message) },
-                colors = ButtonDefaults.buttonColors(containerColor = StatusDanger, contentColor = BrandWhite),
+                colors = ButtonDefaults.buttonColors(containerColor = StatusDanger, contentColor = Color.White),
                 modifier = Modifier.fillMaxWidth().height(52.dp)
             ) { Text(stringResource(R.string.order_reject_confirm), fontWeight = FontWeight.Bold) }
         }
