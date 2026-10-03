@@ -151,7 +151,7 @@ fun ProductDetailScreen(
             )
         }
     }
-    if (showCreateLot && current != null) {
+    if (showCreateLot && current != null && ready != null) {
         ModalBottomSheet(
             onDismissRequest = { showCreateLot = false },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -161,10 +161,13 @@ fun ProductDetailScreen(
                 onClose = { showCreateLot = false },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            // Replaced by LotFormSheet with a locked preselected product in the create-lot commit.
-            Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(current.name)
-            }
+            LotFormSheet(
+                viewModel = viewModel,
+                products = ready.products,
+                preselected = current,
+                locked = true,
+                onClose = { showCreateLot = false }
+            )
         }
     }
 }

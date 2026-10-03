@@ -182,10 +182,13 @@ fun InventoryScreen(
                 onClose = { showCreateLot = false },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
-            // Replaced by LotFormSheet in the create-lot commit.
-            Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
-                Text(stringResource(R.string.inventory_lots_empty_message))
-            }
+            LotFormSheet(
+                viewModel = viewModel,
+                products = (state as? InventoryState.Ready)?.products.orEmpty(),
+                preselected = null,
+                locked = false,
+                onClose = { showCreateLot = false }
+            )
         }
     }
 }
