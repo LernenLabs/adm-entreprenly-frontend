@@ -80,4 +80,43 @@
     <string name="chat_send">Send</string>
     <string name="chat_empty">No messages in this conversation yet.</string>
     <string name="chat_image_message">Image</string>
+
+    <!-- Chatbot: order detail -->
+    <string name="common_cancel">Cancel</string>
+    <string name="order_not_found">This order is no longer available.</string>
+    <string name="order_item_line">%1$d × %2$s</string>
+    <string name="order_detail_delivery">Delivery: %1$s</string>
+    <string name="order_detail_total">Total</string>
+    <string name="order_detail_receipt">Payment receipt</string>
+    <string name="order_detail_no_receipt">No receipt yet</string>
+    <string name="order_detail_timeline">Timeline</string>
+    <string name="order_timeline_with_time">%1$s — %2$s</string>
+    <string name="order_timeline_registered">Order registered</string>
+    <string name="order_timeline_receipt_received">Receipt received via WhatsApp</string>
+    <plurals name="order_timeline_rejections">
+        <item quantity="one">Receipt rejected %d time</item>
+        <item quantity="other">Receipt rejected %d times</item>
+    </plurals>
+    <string name="order_timeline_pending_validation">Pending validation</string>
+    <string name="order_timeline_awaiting_payment">Waiting for the client\'s payment</string>
+    <string name="order_timeline_confirmed">Payment approved: stock deducted and sale registered</string>
+    <string name="order_timeline_cancelled">Order cancelled</string>
+    <string name="order_timeline_blocked">Blocked after too many rejected receipts</string>
+    <string name="order_timeline_in_progress">Order in progress with the bot</string>
+    <string name="order_reject">Reject</string>
+    <string name="order_approve">Approve payment</string>
+    <string name="order_reject_title">Reject payment</string>
+    <string name="order_reject_subtitle">Choose the reason. The chatbot will send it to the client.</string>
+    <string name="order_reject_reason_amount">Incorrect amount</string>
+    <string name="order_reject_reason_unreadable">Unreadable receipt</string>
+    <string name="order_reject_reason_duplicate">Duplicate receipt</string>
+    <string name="order_reject_reason_other">Other reason</string>
+    <string name="order_reject_detail">Detail (optional)</string>
+    <string name="order_reject_confirm">Confirm rejection</string>
+    <string name="order_reject_message">We could not validate your payment for order %1$s. Reason: %2$s. Please send a new receipt.</string>
+    <string name="order_approve_title">Approve payment of %1$s?</string>
+    <string name="order_approve_message">Stock will be deducted and the sale registered for %1$s\'s order.</string>
+    <string name="order_approve_confirm">Confirm</string>
+    <string name="order_payment_approved">Payment approved</string>
+    <string name="order_payment_rejected">Payment rejected. The reason was sent to the client.</string>
 </resources>

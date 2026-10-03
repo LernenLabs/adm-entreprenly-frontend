@@ -36,6 +36,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.ChatScreen
+import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.OrderDetailScreen
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.screens.OrdersScreen
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.ChatViewModel
 import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.ChatbotState
@@ -58,7 +59,11 @@ object Routes {
     const val ARG_CONVERSATION_ID = "conversationId"
     const val CHAT = "conversations/{$ARG_CONVERSATION_ID}"
 
+    const val ARG_ORDER_ID = "orderId"
+    const val ORDER_DETAIL = "orders/{$ARG_ORDER_ID}"
+
     fun chat(conversationId: Long) = "conversations/$conversationId"
+    fun orderDetail(orderId: Long) = "orders/$orderId"
 }
 
 /** Destinations reachable from the bottom navigation bar once signed in. */
@@ -135,7 +140,7 @@ fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
                 val vm = ordersViewModel(navController, entry, container)
                 OrdersScreen(
                     viewModel = vm,
-                    onOpenOrder = { },
+                    onOpenOrder = { navController.navigate(Routes.orderDetail(it)) },
                     onOpenConversation = { navController.navigate(Routes.chat(it)) },
                     onViewPlans = onViewPlans
                 )
@@ -154,6 +159,17 @@ fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
                 ChatScreen(
                     viewModel = vm,
                     clientName = (chatbotState as? ChatbotState.Ready)?.conversation(conversationId)?.displayName,
+                    onBack = { navController.popBackStack() },
+                    onViewPlans = onViewPlans
+                )
+            }
+            composable(
+                Routes.ORDER_DETAIL,
+                arguments = listOf(navArgument(Routes.ARG_ORDER_ID) { type = NavType.LongType })
+            ) { entry ->
+                OrderDetailScreen(
+                    viewModel = ordersViewModel(navController, entry, container),
+                    orderId = entry.arguments?.getLong(Routes.ARG_ORDER_ID) ?: 0L,
                     onBack = { navController.popBackStack() },
                     onViewPlans = onViewPlans
                 )
@@ -194,7 +210,8 @@ private fun ordersViewModel(
                 container.subscriptionAccessFacade,
                 container.chatOrderQueryService,
                 container.conversationQueryService,
-                container.whatsAppConnectionQueryService
+                container.whatsAppConnectionQueryService,
+                container.chatOrderCommandService
             )
         }
     })

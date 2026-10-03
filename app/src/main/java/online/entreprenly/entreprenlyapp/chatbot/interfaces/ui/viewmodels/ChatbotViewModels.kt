@@ -1,5 +1,6 @@
 package online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
+import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatOrderCommandService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatMessageQueryService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatOrderQueryService
 import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ConversationQueryService
@@ -19,6 +21,8 @@ import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.Whats
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatMessage
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatOrder
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.Conversation
+import online.entreprenly.entreprenlyapp.chatbot.domain.model.commands.ApproveOrderPaymentCommand
+import online.entreprenly.entreprenlyapp.chatbot.domain.model.commands.RejectOrderPaymentCommand
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.commands.SendChatMessageCommand
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetAllChatOrdersQuery
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetAllConversationsQuery
@@ -27,6 +31,7 @@ import online.entreprenly.entreprenlyapp.chatbot.domain.model.queries.GetWhatsAp
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.valueobjects.WhatsAppConnection
 import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 
 /** State shared by the chatbot screens (orders, conversations and order detail). */
@@ -53,19 +58,55 @@ internal fun ApplicationError.toChatbotState(): ChatbotState =
 internal fun ApplicationError.toUiText(): UiText =
     if (this is ApplicationError.Forbidden) UiText.Res(R.string.chatbot_plan_required_message) else UiText.Raw(message)
 
-/** Orders tab: checks Plan Control access, then loads orders, conversations and WhatsApp state. */
+/**
+ * Orders tab: checks Plan Control access, then loads orders, conversations and WhatsApp state.
+ * Also approves or rejects payment receipts from the order detail.
+ */
 class OrdersViewModel(
     private val subscriptionAccessFacade: SubscriptionAccessFacade,
     private val chatOrderQueryService: ChatOrderQueryService,
     private val conversationQueryService: ConversationQueryService,
-    private val whatsAppConnectionQueryService: WhatsAppConnectionQueryService
+    private val whatsAppConnectionQueryService: WhatsAppConnectionQueryService,
+    private val chatOrderCommandService: ChatOrderCommandService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<ChatbotState>(ChatbotState.Loading)
     val state: StateFlow<ChatbotState> = _state.asStateFlow()
 
+    /** Progress and outcome of the last approve/reject action. */
+    private val _review = MutableStateFlow(FormState())
+    val review: StateFlow<FormState> = _review.asStateFlow()
+
     init {
         refresh()
+    }
+
+    fun approvePayment(order: ChatOrder) = review(R.string.order_payment_approved) {
+        chatOrderCommandService.handle(ApproveOrderPaymentCommand(order.id))
+    }
+
+    /** [message] is the reason the bot sends to the client. */
+    fun rejectPayment(order: ChatOrder, message: String) = review(R.string.order_payment_rejected) {
+        chatOrderCommandService.handle(RejectOrderPaymentCommand(order.id, order.conversationId, message))
+    }
+
+    fun clearReview() {
+        _review.value = FormState()
+    }
+
+    /** On success the list is reloaded: the backend already deducted stock / counted the rejection. */
+    private fun review(@StringRes success: Int, action: suspend () -> Result<ChatOrder>) {
+        if (_review.value.loading) return
+        _review.value = FormState(loading = true)
+        viewModelScope.launch {
+            _review.value = when (val r = action()) {
+                is Result.Success -> {
+                    refresh()
+                    FormState(success = UiText.Res(success))
+                }
+                is Result.Failure -> FormState(error = r.error.toUiText())
+            }
+        }
     }
 
     /** Keeps the current content visible while reloading. */

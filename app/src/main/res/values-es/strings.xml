@@ -70,4 +70,43 @@
     <string name="chat_send">Enviar</string>
     <string name="chat_empty">Aún no hay mensajes en esta conversación.</string>
     <string name="chat_image_message">Imagen</string>
+
+    <string name="common_cancel">Cancelar</string>
+    <string name="order_not_found">Este pedido ya no está disponible.</string>
+    <string name="order_item_line">%1$d × %2$s</string>
+    <string name="order_detail_delivery">Entrega: %1$s</string>
+    <string name="order_detail_total">Total</string>
+    <string name="order_detail_receipt">Comprobante de pago</string>
+    <string name="order_detail_no_receipt">Sin comprobante aún</string>
+    <string name="order_detail_timeline">Trazabilidad</string>
+    <string name="order_timeline_with_time">%1$s — %2$s</string>
+    <string name="order_timeline_registered">Pedido registrado</string>
+    <string name="order_timeline_receipt_received">Comprobante recibido vía WhatsApp</string>
+    <plurals name="order_timeline_rejections">
+        <item quantity="one">Comprobante rechazado %d vez</item>
+        <item quantity="many">Comprobante rechazado %d veces</item>
+        <item quantity="other">Comprobante rechazado %d veces</item>
+    </plurals>
+    <string name="order_timeline_pending_validation">Pendiente de validación</string>
+    <string name="order_timeline_awaiting_payment">Esperando el pago del cliente</string>
+    <string name="order_timeline_confirmed">Pago aprobado: stock descontado y venta registrada</string>
+    <string name="order_timeline_cancelled">Pedido cancelado</string>
+    <string name="order_timeline_blocked">Bloqueado por demasiados comprobantes rechazados</string>
+    <string name="order_timeline_in_progress">Pedido en curso con el bot</string>
+    <string name="order_reject">Rechazar</string>
+    <string name="order_approve">Aprobar pago</string>
+    <string name="order_reject_title">Rechazar pago</string>
+    <string name="order_reject_subtitle">Selecciona el motivo. El chatbot se lo enviará al cliente.</string>
+    <string name="order_reject_reason_amount">Monto incorrecto</string>
+    <string name="order_reject_reason_unreadable">Comprobante ilegible</string>
+    <string name="order_reject_reason_duplicate">Comprobante duplicado</string>
+    <string name="order_reject_reason_other">Otro motivo</string>
+    <string name="order_reject_detail">Detalle (opcional)</string>
+    <string name="order_reject_confirm">Confirmar rechazo</string>
+    <string name="order_reject_message">No pudimos validar tu pago del pedido %1$s. Motivo: %2$s. Por favor envía un nuevo comprobante.</string>
+    <string name="order_approve_title">¿Aprobar pago de %1$s?</string>
+    <string name="order_approve_message">Se descontará el stock y se registrará la venta del pedido de %1$s.</string>
+    <string name="order_approve_confirm">Confirmar</string>
+    <string name="order_payment_approved">Pago aprobado</string>
+    <string name="order_payment_rejected">Pago rechazado. Se envió el motivo al cliente.</string>
 </resources>
