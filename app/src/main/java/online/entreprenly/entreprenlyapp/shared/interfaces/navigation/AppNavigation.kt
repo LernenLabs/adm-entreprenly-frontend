@@ -169,7 +169,7 @@ fun AppNavigation(
             )
             inventoryGraph(navController)
             salesGraph(navController)
-            chatbotGraph(navController)
+            chatbotGraph(navController, container)
             subscriptionGraph(navController)
         }
     }
