@@ -46,7 +46,8 @@ import online.entreprenly.entreprenlyapp.subscription.interfaces.ui.navigation.s
 /** Routes where the bottom navigation bar is visible. */
 private val barRoutes = setOf(
     Routes.HOME, Routes.INVENTORY, Routes.SELL, Routes.ORDERS, Routes.MORE,
-    Routes.PROFILE, Routes.PREFERENCES, Routes.SUBSCRIPTION, Routes.ACCOUNT
+    Routes.PROFILE, Routes.PREFERENCES, Routes.SUBSCRIPTION, Routes.ACCOUNT,
+    Routes.PRODUCT_DETAIL, Routes.LOT_DETAIL
 )
 
 /**
@@ -167,7 +168,7 @@ fun AppNavigation(
                 email = signedIn?.session?.email.orEmpty(),
                 onSignOut = sessionViewModel::signOut
             )
-            inventoryGraph(navController)
+            inventoryGraph(navController, container)
             salesGraph(navController)
             chatbotGraph(navController, container)
             subscriptionGraph(navController)

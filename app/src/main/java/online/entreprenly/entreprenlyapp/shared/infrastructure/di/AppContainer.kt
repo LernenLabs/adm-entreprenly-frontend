@@ -33,6 +33,20 @@ import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQu
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.LotCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.ProductCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.LotQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.ProductQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.StockAlertQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.InventoryApi
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.StockAlertRepositoryImpl
 import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
 import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
@@ -91,6 +105,19 @@ class AppContainer(context: Context) {
         retrofit.create(SubscriptionAccessApi::class.java),
         sessionQueryService
     )
+
+    // Inventory
+    private val inventoryApi = retrofit.create(InventoryApi::class.java)
+    private val productRepository = ProductRepositoryImpl(inventoryApi)
+    private val lotRepository = LotRepositoryImpl(inventoryApi)
+    private val stockAlertRepository = StockAlertRepositoryImpl(inventoryApi)
+
+    val productQueryService: ProductQueryService = ProductQueryServiceImpl(productRepository)
+    val lotQueryService: LotQueryService = LotQueryServiceImpl(lotRepository)
+    val stockAlertQueryService: StockAlertQueryService = StockAlertQueryServiceImpl(stockAlertRepository)
+    val productCommandService: ProductCommandService =
+        ProductCommandServiceImpl(productRepository, lotRepository)
+    val lotCommandService: LotCommandService = LotCommandServiceImpl(lotRepository)
 
     init {
         // Mantiene el token en memoria para el interceptor HTTP.

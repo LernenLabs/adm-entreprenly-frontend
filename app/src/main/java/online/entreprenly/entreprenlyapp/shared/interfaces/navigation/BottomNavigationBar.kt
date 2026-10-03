@@ -54,6 +54,7 @@ private val moreRoutes = setOf(
 fun tabForRoute(route: String?): BottomTab? = when (route) {
     null -> null
     in moreRoutes -> BottomTab.MORE
+    Routes.PRODUCT_DETAIL, Routes.LOT_DETAIL -> BottomTab.INVENTORY
     else -> BottomTab.entries.firstOrNull { it.route == route }
 }
 
