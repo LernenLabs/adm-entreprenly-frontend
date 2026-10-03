@@ -30,7 +30,8 @@ private fun <D> Response<D>.toApplicationError(): ApplicationError {
     }.getOrNull()
     return when (code()) {
         400 -> ApplicationError.Validation(message ?: "Invalid data")
-        401, 403 -> ApplicationError.Unauthorized(message ?: "Unauthorized")
+        401 -> ApplicationError.Unauthorized(message ?: "Unauthorized")
+        403 -> ApplicationError.Forbidden(message ?: "Forbidden")
         404 -> ApplicationError.NotFound(message ?: "Not found")
         409 -> ApplicationError.Conflict(message ?: "Conflict")
         else -> ApplicationError.Unexpected(message ?: "Server error (${code()})")
