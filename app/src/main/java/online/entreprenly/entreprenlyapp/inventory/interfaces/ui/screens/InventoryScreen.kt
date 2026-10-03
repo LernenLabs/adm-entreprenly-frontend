@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -37,6 +38,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryError
@@ -60,6 +62,8 @@ fun InventoryScreen(
     var showAddProduct by rememberSaveable { mutableStateOf(false) }
     var showCreateLot by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val noProductsMessage = stringResource(R.string.inventory_lots_no_products)
 
     val notice = (state as? InventoryState.Ready)?.notice
     val noticeText = notice?.asString()
@@ -108,12 +112,39 @@ fun InventoryScreen(
                                 onAddClick = { showAddProduct = true }
                             )
                         } else {
-                            LotsTabPlaceholder()
+                            LotsTab(
+                                lots = s.lots,
+                                products = s.products,
+                                recentlyAdded = s.recentlyAddedLot,
+                                refreshing = s.refreshing,
+                                onRefresh = viewModel::refresh,
+                                onLotClick = { type, id -> onLotClick(type, id) },
+                                onAddClick = {
+                                    if (s.products.isEmpty()) {
+                                        noProductsMessage?.let { message ->
+                                            scope.launch { snackbar.showSnackbar(message) }
+                                        }
+                                    } else {
+                                        showCreateLot = true
+                                    }
+                                }
+                            )
                         }
                     }
                 }
                 FloatingActionButton(
-                    onClick = { if (tab == 0) showAddProduct = true else showCreateLot = true },
+                    onClick = {
+                        if (tab == 0) {
+                            showAddProduct = true
+                        } else {
+                            val hasProducts = (state as? InventoryState.Ready)?.products?.isNotEmpty() == true
+                            if (!hasProducts) {
+                                scope.launch { snackbar.showSnackbar(noProductsMessage) }
+                            } else {
+                                showCreateLot = true
+                            }
+                        }
+                    },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp)
@@ -174,17 +205,6 @@ private fun InventoryHeader(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.ExtraBold,
             color = MaterialTheme.colorScheme.onPrimary
-        )
-    }
-}
-
-@Composable
-private fun LotsTabPlaceholder(modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(
-            stringResource(R.string.inventory_lots),
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
