@@ -1,0 +1,98 @@
+<resources>
+    <!-- Navegación -->
+    <string name="nav_home">Inicio</string>
+    <string name="nav_inventory">Inventario</string>
+    <string name="nav_sell">Vender</string>
+    <string name="nav_orders">Pedidos</string>
+    <string name="nav_more">Más</string>
+    <string name="nav_back">Atrás</string>
+
+    <!-- Más -->
+    <string name="more_title">Más</string>
+    <string name="more_profile">Mi perfil</string>
+    <string name="more_profile_sub">Datos personales y seguridad</string>
+    <string name="more_preferences">Preferencias</string>
+    <string name="more_preferences_sub">Idioma, tema, zona horaria y moneda</string>
+    <string name="more_notifications">Notificaciones</string>
+    <string name="more_notifications_sub">Alertas de inventario</string>
+    <string name="more_subscription">Suscripción</string>
+    <string name="more_subscription_sub">Consultar mi plan y beneficios</string>
+    <string name="more_sign_out">Cerrar sesión</string>
+    <string name="more_account_security">Contraseña y seguridad</string>
+    <string name="more_account_security_sub">Cambiar contraseña o correo</string>
+
+    <!-- Perfil -->
+    <string name="profile_title">Mi perfil</string>
+    <string name="profile_role_plan">%1$s · %2$s</string>
+    <string name="profile_role_merchant">Comerciante</string>
+    <string name="profile_email_title">Correo de la cuenta</string>
+    <string name="profile_phone_title">Número de teléfono</string>
+    <string name="profile_phone_empty">Aún no agregado</string>
+    <string name="profile_edit_title">Editar información</string>
+    <string name="profile_edit_sub">Nombre y biografía</string>
+    <string name="profile_preferences_title">Preferencias</string>
+    <string name="profile_notifications_title">Notificaciones</string>
+    <string name="profile_notifications_sub">Stock bajo y próximos vencimientos</string>
+    <string name="profile_updated_title">Perfil actualizado</string>
+    <string name="profile_updated_message">Los cambios se conservaron en tu cuenta.</string>
+    <string name="profile_session_expired_title">Tu sesión expiró</string>
+    <string name="profile_session_expired_message">Vuelve a iniciar sesión para ver y actualizar tu perfil.</string>
+    <string name="profile_sign_in">Iniciar sesión</string>
+    <string name="profile_load_error">No pudimos cargar tu perfil.</string>
+    <string name="profile_retry">Reintentar</string>
+
+    <!-- Editar perfil -->
+    <string name="edit_title">Editar perfil</string>
+    <string name="edit_intro">Mantén actualizados tus datos personales.</string>
+    <string name="edit_first_name">Nombre *</string>
+    <string name="edit_last_name">Apellido</string>
+    <string name="edit_biography">Biografía</string>
+    <string name="edit_hint">Tu correo y teléfono se gestionan por separado desde Mi perfil.</string>
+    <string name="edit_first_name_required">El nombre es obligatorio.</string>
+    <string name="edit_save">Guardar cambios</string>
+    <string name="edit_cancel">Cancelar</string>
+
+    <!-- Preferencias -->
+    <string name="prefs_title">Preferencias</string>
+    <string name="prefs_intro">Personaliza tu experiencia.</string>
+    <string name="prefs_language">Idioma</string>
+    <string name="prefs_timezone">Zona horaria</string>
+    <string name="prefs_theme">Tema</string>
+    <string name="prefs_theme_light">Claro</string>
+    <string name="prefs_theme_dark">Oscuro</string>
+    <string name="prefs_currency">Moneda</string>
+    <string name="prefs_amount_format">Formato de importe</string>
+    <string name="prefs_footer">Los cambios se aplican al instante y se conservan entre sesiones.</string>
+    <string name="prefs_language_sheet">Idioma de la aplicación</string>
+    <string name="prefs_timezone_sheet">Zona horaria</string>
+    <string name="prefs_currency_sheet">Moneda</string>
+    <string name="prefs_close">Cerrar</string>
+    <string name="prefs_save_error">No pudimos guardar tus preferencias. Inténtalo de nuevo.</string>
+
+    <!-- Notificaciones -->
+    <string name="notif_title">Notificaciones</string>
+    <string name="notif_intro">Elige qué alertas quieres recibir en tu dispositivo.</string>
+    <string name="notif_permission_on_title">Permiso del dispositivo: activado</string>
+    <string name="notif_permission_on_message">Entreprenly puede enviarte notificaciones push.</string>
+    <string name="notif_permission_off_title">Permiso desactivado</string>
+    <string name="notif_permission_off_message">Activa las notificaciones desde Ajustes para recibir avisos push.</string>
+    <string name="notif_stock_title">Stock y vencimientos</string>
+    <string name="notif_stock_sub">Avisos de stock bajo y próximos vencimientos.</string>
+    <string name="notif_footer">Puedes volver a cambiar esta preferencia en cualquier momento.</string>
+    <string name="notif_save">Guardar preferencias</string>
+    <string name="notif_cancel">Cancelar</string>
+    <string name="notif_open_settings">Abrir Ajustes del dispositivo</string>
+    <string name="notif_back_to_profile">Volver a mi perfil</string>
+    <string name="notif_saved_title">Preferencias guardadas</string>
+    <string name="notif_saved_on">Las alertas de stock y vencimientos están activadas.</string>
+    <string name="notif_saved_off">Las alertas de stock y vencimientos están desactivadas.</string>
+
+    <!-- Inicio -->
+    <string name="home_title">Inicio</string>
+    <string name="home_greeting">Hola, %1$s</string>
+    <string name="home_shortcuts">Accesos directos</string>
+
+    <!-- Módulos aún no disponibles -->
+    <string name="module_coming_soon_title">%1$s estará disponible pronto</string>
+    <string name="module_coming_soon_message">Este módulo aún no está disponible en la app.</string>
+</resources>
