@@ -12,7 +12,7 @@ import online.entreprenly.entreprenlyapp.iam.domain.repositories.SessionReposito
 
 private val Context.sessionDataStore by preferencesDataStore(name = "iam_session")
 
-/** Persiste la sesión (JWT) en DataStore para sobrevivir al cierre de la app. */
+/** Persists the session (JWT) in DataStore so it survives app restarts. */
 class SessionRepositoryImpl(context: Context) : SessionRepository {
 
     private val dataStore = context.applicationContext.sessionDataStore

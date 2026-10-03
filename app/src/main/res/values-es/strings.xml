@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Entreprenly App</string>
+
+    <string name="field_email">Correo electrónico</string>
+    <string name="field_password">Contraseña</string>
+
+    <string name="error_invalid_email">Ingresa un correo válido</string>
+    <string name="error_invalid_password">La contraseña debe tener entre 8 y 255 caracteres</string>
+
+    <string name="sign_in_title">Inicia sesión</string>
+    <string name="sign_in_action">Iniciar sesión</string>
+    <string name="sign_in_go_to_sign_up">¿No tienes cuenta? Regístrate</string>
+
+    <string name="sign_up_title">Crea tu cuenta</string>
+    <string name="sign_up_action">Registrarme</string>
+    <string name="sign_up_first_name">Nombre (opcional)</string>
+    <string name="sign_up_last_name">Apellido (opcional)</string>
+    <string name="sign_up_phone">Teléfono (opcional)</string>
+    <string name="sign_up_go_to_sign_in">¿Ya tienes cuenta? Inicia sesión</string>
+
+    <string name="account_title">Mi cuenta</string>
+    <string name="account_change_password_title">Cambiar contraseña</string>
+    <string name="account_current_password">Contraseña actual</string>
+    <string name="account_new_password">Nueva contraseña</string>
+    <string name="account_change_password_action">Actualizar contraseña</string>
+    <string name="account_password_updated">Contraseña actualizada</string>
+    <string name="account_change_email_title">Cambiar correo</string>
+    <string name="account_change_email_hint">Deberás iniciar sesión nuevamente después de cambiarlo.</string>
+    <string name="account_new_email">Nuevo correo</string>
+    <string name="account_change_email_action">Actualizar correo</string>
+    <string name="account_email_updated">Correo actualizado</string>
+    <string name="account_sign_out">Cerrar sesión</string>
+</resources>
