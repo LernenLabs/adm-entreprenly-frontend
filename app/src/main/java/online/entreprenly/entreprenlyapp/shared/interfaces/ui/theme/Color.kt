@@ -18,6 +18,7 @@ val LightSuccess = Color(0xFF15803D)
 val LightSuccessBg = Color(0xFFFFF4E8)
 val LightWarning = Color(0xFF713F12)
 val LightWarningBg = Color(0xFFFEF3C7)
+val LightErrorBg = Color(0xFFFEF2F2)
 
 // Dark
 val DarkPrimary = Color(0xFFF38313)
@@ -33,3 +34,7 @@ val DarkSuccess = Color(0xFF4ADE80)
 val DarkSuccessBg = Color(0xFF1F2A1F)
 val DarkWarning = Color(0xFFFDE68A)
 val DarkWarningBg = Color(0xFF3A3012)
+val DarkErrorBg = Color(0xFF3A1B1B)
+
+// Logo pill background (from the Entreprenly icon).
+val BrandInk = Color(0xFF0B0F12)

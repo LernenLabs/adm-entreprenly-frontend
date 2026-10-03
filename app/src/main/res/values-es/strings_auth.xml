@@ -1,0 +1,26 @@
+<resources>
+    <string name="splash_tagline">Smart Retail para tu negocio</string>
+
+    <string name="welcome_title">Gestiona tu negocio desde tu celular</string>
+    <string name="welcome_subtitle">Inventario, ventas y pedidos por WhatsApp en una sola app.</string>
+    <string name="welcome_create_account">Crear cuenta</string>
+
+    <string name="sign_in_welcome_back">Bienvenido de nuevo a Entreprenly.</string>
+    <string name="sign_in_error_title">Correo o contraseña incorrectos</string>
+    <string name="sign_in_error_message">Verifica tus datos e inténtalo nuevamente.</string>
+
+    <string name="sign_up_subtitle">Regístrate gratis y empieza con el Plan Free.</string>
+
+    <string name="auth_no_account">¿No tienes cuenta?</string>
+    <string name="auth_sign_up_link">Regístrate</string>
+    <string name="auth_have_account">¿Ya tienes cuenta?</string>
+    <string name="auth_sign_in_link">Inicia sesión</string>
+
+    <string name="password_rule_length">Mínimo 8 caracteres</string>
+    <string name="password_rule_uppercase">Una letra mayúscula</string>
+    <string name="password_rule_digit">Un número</string>
+
+    <string name="home_date_format">EEE, d MMM</string>
+    <string name="home_quick_new_product">Nuevo producto</string>
+    <string name="home_quick_create_lot">Crear lote</string>
+</resources>
