@@ -30,5 +30,5 @@ shared/                        Result/ApplicationError, Retrofit config, DI cont
 ## Running
 
 1. Start the backend (port 8092) – see its README.
-2. Debug builds point to `http://10.0.2.2:8092/` (emulator → host machine). For a physical device or a deployed backend, change `API_BASE_URL` in `app/build.gradle.kts`.
+2. Both debug and release builds point to the deployed backend (`https://adm-entreprenly-backend.onrender.com/`). To use a local backend from the emulator, change `API_BASE_URL` in `app/build.gradle.kts` to `http://10.0.2.2:8092/`. The free Render instance sleeps when idle: the first request can take ~1 minute.
 3. Run the `app` configuration from Android Studio.
