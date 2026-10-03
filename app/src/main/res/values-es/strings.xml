@@ -30,4 +30,37 @@
     <string name="account_change_email_action">Actualizar correo</string>
     <string name="account_email_updated">Correo actualizado</string>
     <string name="account_sign_out">Cerrar sesión</string>
+
+    <string name="nav_account">Cuenta</string>
+    <string name="nav_orders">Pedidos</string>
+
+    <string name="chatbot_money">S/ %1$.2f</string>
+    <string name="chatbot_unknown_client">Cliente</string>
+    <string name="chatbot_refresh">Actualizar</string>
+    <string name="chatbot_retry">Reintentar</string>
+    <string name="chatbot_plan_required_title">Se requiere el Plan Control</string>
+    <string name="chatbot_plan_required_message">El chatbot de WhatsApp, sus pedidos y conversaciones están incluidos en la suscripción Plan Control. Mejora tu plan para usarlos.</string>
+    <string name="chatbot_view_plans">Ver planes</string>
+
+    <string name="chatbot_status_pending">En curso</string>
+    <string name="chatbot_status_waiting_payment">Esperando pago</string>
+    <string name="chatbot_status_to_validate">Por validar</string>
+    <string name="chatbot_status_confirmed">Pago aprobado</string>
+    <string name="chatbot_status_cancelled">Cancelado</string>
+    <string name="chatbot_status_blocked">Bloqueado</string>
+
+    <string name="chatbot_orders_title">Pedidos</string>
+    <string name="chatbot_connected">Conectado</string>
+    <string name="chatbot_disconnected">WhatsApp no conectado</string>
+    <string name="chatbot_tab_orders">Pedidos</string>
+    <string name="chatbot_tab_conversations">Conversaciones</string>
+    <string name="chatbot_filter_all">Todos</string>
+    <string name="chatbot_filter_to_validate">Por validar</string>
+    <string name="chatbot_filter_confirmed">Confirmados</string>
+    <string name="chatbot_filter_cancelled">Cancelados</string>
+    <string name="chatbot_filter_with_count">%1$s · %2$d</string>
+    <string name="chatbot_order_title">%1$s — %2$s</string>
+    <string name="chatbot_empty_orders">Aún no hay pedidos. Los pedidos hechos por el chatbot de WhatsApp aparecerán aquí.</string>
+    <string name="chatbot_empty_orders_filter">Ningún pedido coincide con este filtro.</string>
+    <string name="chatbot_empty_conversations">Aún no hay conversaciones.</string>
 </resources>

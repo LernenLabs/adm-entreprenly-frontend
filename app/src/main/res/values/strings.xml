@@ -35,4 +35,41 @@
     <string name="account_change_email_action">Update email</string>
     <string name="account_email_updated">Email updated</string>
     <string name="account_sign_out">Sign out</string>
+
+    <!-- Navigation -->
+    <string name="nav_account">Account</string>
+    <string name="nav_orders">Orders</string>
+
+    <!-- Chatbot: common -->
+    <string name="chatbot_money">S/ %1$.2f</string>
+    <string name="chatbot_unknown_client">Client</string>
+    <string name="chatbot_refresh">Refresh</string>
+    <string name="chatbot_retry">Retry</string>
+    <string name="chatbot_plan_required_title">Plan Control required</string>
+    <string name="chatbot_plan_required_message">The WhatsApp chatbot, its orders and conversations are included in the Plan Control subscription. Upgrade your plan to use them.</string>
+    <string name="chatbot_view_plans">View plans</string>
+
+    <!-- Chatbot: order status -->
+    <string name="chatbot_status_pending">In progress</string>
+    <string name="chatbot_status_waiting_payment">Awaiting payment</string>
+    <string name="chatbot_status_to_validate">To validate</string>
+    <string name="chatbot_status_confirmed">Payment approved</string>
+    <string name="chatbot_status_cancelled">Cancelled</string>
+    <string name="chatbot_status_blocked">Blocked</string>
+
+    <!-- Chatbot: orders -->
+    <string name="chatbot_orders_title">Orders</string>
+    <string name="chatbot_connected">Connected</string>
+    <string name="chatbot_disconnected">WhatsApp not connected</string>
+    <string name="chatbot_tab_orders">Orders</string>
+    <string name="chatbot_tab_conversations">Conversations</string>
+    <string name="chatbot_filter_all">All</string>
+    <string name="chatbot_filter_to_validate">To validate</string>
+    <string name="chatbot_filter_confirmed">Confirmed</string>
+    <string name="chatbot_filter_cancelled">Cancelled</string>
+    <string name="chatbot_filter_with_count">%1$s · %2$d</string>
+    <string name="chatbot_order_title">%1$s — %2$s</string>
+    <string name="chatbot_empty_orders">No orders yet. Orders placed through the WhatsApp chatbot will appear here.</string>
+    <string name="chatbot_empty_orders_filter">No orders match this filter.</string>
+    <string name="chatbot_empty_conversations">No conversations yet.</string>
 </resources>
