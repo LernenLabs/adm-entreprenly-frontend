@@ -1,6 +1,7 @@
 package online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration
 
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -15,6 +16,10 @@ class RetrofitFactory(
     debug: Boolean
 ) {
     private val client: OkHttpClient = OkHttpClient.Builder()
+        // The free Render instance sleeps when idle and can take about a minute to wake up.
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(90, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(Interceptor { chain ->
             val token = tokenProvider()
             val builder = chain.request().newBuilder()

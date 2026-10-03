@@ -12,15 +12,13 @@
     <!-- IAM: sign in -->
     <string name="sign_in_title">Sign in</string>
     <string name="sign_in_action">Sign in</string>
-    <string name="sign_in_go_to_sign_up">Don\'t have an account? Sign up</string>
 
     <!-- IAM: sign up -->
-    <string name="sign_up_title">Create your account</string>
-    <string name="sign_up_action">Sign up</string>
+    <string name="sign_up_title">Create account</string>
+    <string name="sign_up_action">Create account</string>
     <string name="sign_up_first_name">First name (optional)</string>
     <string name="sign_up_last_name">Last name (optional)</string>
     <string name="sign_up_phone">Phone (optional)</string>
-    <string name="sign_up_go_to_sign_in">Already have an account? Sign in</string>
 
     <!-- IAM: account -->
     <string name="account_title">My account</string>

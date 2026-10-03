@@ -3,11 +3,11 @@ package online.entreprenly.entreprenlyapp.shared.interfaces.navigation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -27,6 +27,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -55,42 +57,55 @@ fun tabForRoute(route: String?): BottomTab? = when (route) {
     else -> BottomTab.entries.firstOrNull { it.route == route }
 }
 
+private val SellButtonSize = 64.dp
+private val SellButtonRise = 26.dp
+
+/**
+ * Bottom bar with the raised round "Sell" button in the middle. The button is drawn in an outer Box,
+ * not inside the Surface, because a Surface clips anything that sticks out of the bar.
+ */
 @Composable
 fun BottomNavigationBar(selected: BottomTab?, onSelect: (BottomTab) -> Unit, modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.extraColors.border)
-    ) {
-        Row(
-            Modifier.navigationBarsPadding().padding(horizontal = 8.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom
+    Box(modifier.fillMaxWidth()) {
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = MaterialTheme.colorScheme.surface,
+            border = BorderStroke(1.dp, MaterialTheme.extraColors.border)
         ) {
-            BottomTab.entries.forEach { tab ->
-                if (tab == BottomTab.SELL) {
-                    SellButton(tab, selected == tab, onSelect)
-                } else {
-                    TabItem(tab, selected == tab, onSelect)
+            Row(
+                Modifier.navigationBarsPadding().padding(horizontal = 4.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                BottomTab.entries.forEach { tab ->
+                    if (tab == BottomTab.SELL) {
+                        SellLabel(tab, selected == tab, onSelect, Modifier.weight(1f))
+                    } else {
+                        TabItem(tab, selected == tab, onSelect, Modifier.weight(1f))
+                    }
                 }
             }
         }
+        SellButton(
+            tab = BottomTab.SELL,
+            onSelect = onSelect,
+            modifier = Modifier.align(Alignment.TopCenter).offset(y = -SellButtonRise)
+        )
     }
 }
 
 @Composable
-private fun TabItem(tab: BottomTab, isSelected: Boolean, onSelect: (BottomTab) -> Unit) {
+private fun TabItem(tab: BottomTab, isSelected: Boolean, onSelect: (BottomTab) -> Unit, modifier: Modifier) {
     Column(
-        Modifier.clickable { onSelect(tab) }.padding(horizontal = 6.dp),
+        modifier.clickable { onSelect(tab) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Box(
             Modifier
                 .background(
-                    if (isSelected) MaterialTheme.extraColors.highlight else androidx.compose.ui.graphics.Color.Transparent,
+                    if (isSelected) MaterialTheme.extraColors.highlight else Color.Transparent,
                     RoundedCornerShape(16.dp)
                 )
-                .padding(horizontal = 14.dp, vertical = 6.dp)
+                .padding(horizontal = 16.dp, vertical = 6.dp)
         ) {
             Icon(
                 tab.icon,
@@ -107,28 +122,40 @@ private fun TabItem(tab: BottomTab, isSelected: Boolean, onSelect: (BottomTab) -
     }
 }
 
-/** Raised round "Sell" button in the middle of the bar. */
+/** Label under the raised button; reserves the slot height so the other tabs stay aligned. */
 @Composable
-private fun SellButton(tab: BottomTab, isSelected: Boolean, onSelect: (BottomTab) -> Unit) {
+private fun SellLabel(tab: BottomTab, isSelected: Boolean, onSelect: (BottomTab) -> Unit, modifier: Modifier) {
     Column(
-        Modifier.clickable { onSelect(tab) }.offset(y = (-18).dp),
+        modifier.clickable { onSelect(tab) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            Modifier
-                .size(60.dp)
-                .background(MaterialTheme.colorScheme.surface, CircleShape)
-                .padding(4.dp)
-                .background(MaterialTheme.colorScheme.primary, CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(tab.icon, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(28.dp))
-        }
+        Box(Modifier.height(36.dp))
         Text(
             stringResource(tab.label),
             fontSize = 11.sp,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
+private fun SellButton(tab: BottomTab, onSelect: (BottomTab) -> Unit, modifier: Modifier = Modifier) {
+    Box(
+        modifier
+            .size(SellButtonSize)
+            .shadow(6.dp, CircleShape)
+            .background(MaterialTheme.colorScheme.surface, CircleShape)
+            .padding(5.dp)
+            .background(MaterialTheme.colorScheme.primary, CircleShape)
+            .clickable { onSelect(tab) },
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            tab.icon,
+            contentDescription = stringResource(tab.label),
+            tint = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier.size(28.dp)
         )
     }
 }

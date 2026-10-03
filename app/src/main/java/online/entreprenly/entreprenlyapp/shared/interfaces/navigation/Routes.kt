@@ -3,6 +3,7 @@ package online.entreprenly.entreprenlyapp.shared.interfaces.navigation
 /** Every navigation destination in the app. Each module registers its own graph (see `<context>/interfaces/ui/navigation`). */
 object Routes {
     // IAM
+    const val WELCOME = "welcome"
     const val SIGN_IN = "sign_in"
     const val SIGN_UP = "sign_up"
     const val ACCOUNT = "account"
