@@ -120,6 +120,15 @@ class AppContainer(context: Context) {
         ProductCommandServiceImpl(productRepository, lotRepository)
     val lotCommandService: LotCommandService = LotCommandServiceImpl(lotRepository)
 
+    // Sales
+    private val salesApi = retrofit.create(online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi::class.java)
+    private val salesRepository = online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories.SalesRepositoryImpl(salesApi)
+    
+    val salesQueryService: online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.queryservices.SalesQueryServiceImpl(salesRepository)
+    val salesCommandService: online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.commandservices.SalesCommandServiceImpl(salesRepository)
+
     init {
         // Mantiene el token en memoria para el interceptor HTTP.
         scope.launch { sessionRepository.session.collect { token = it?.token } }

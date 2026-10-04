@@ -1,16 +1,25 @@
 package online.entreprenly.entreprenlyapp.sales.interfaces.ui.navigation
 
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.shared.interfaces.navigation.Routes
-import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ComingSoonScreen
+import androidx.compose.runtime.remember
+import online.entreprenly.entreprenlyapp.sales.interfaces.ui.screens.SalesScreen
+import online.entreprenly.entreprenlyapp.sales.interfaces.ui.viewmodels.SalesViewModel
 
-/** Sales destinations (the "Sell" tab). TODO(sales team): replace the placeholder with the real screens. */
-fun NavGraphBuilder.salesGraph(navController: NavController) {
+import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+
+/** Sales destinations (the "Sell" tab). */
+fun NavGraphBuilder.salesGraph(navController: NavController, container: AppContainer) {
     composable(Routes.SELL) {
-        ComingSoonScreen(stringResource(R.string.nav_sell))
+        val viewModel: SalesViewModel = viewModel(factory = viewModelFactory {
+            initializer { SalesViewModel(container.salesQueryService, container.salesCommandService) }
+        })
+        SalesScreen(viewModel = viewModel)
     }
 }
+
