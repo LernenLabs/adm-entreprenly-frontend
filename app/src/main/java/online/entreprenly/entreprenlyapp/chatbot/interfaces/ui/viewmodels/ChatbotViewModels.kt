@@ -3,6 +3,7 @@ package online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,11 +112,17 @@ class OrdersViewModel(
         }
     }
 
-    /** Keeps the current content visible while reloading. */
-    fun refresh() {
+    private var loadJob: Job? = null
+
+    /**
+     * Keeps the current content visible while reloading. A [silent] refresh (the periodic one
+     * that picks up new orders and receipts) shows no spinner and is skipped if a load is running.
+     */
+    fun refresh(silent: Boolean = false) {
         val current = _state.value
-        _state.value = if (current is ChatbotState.Ready) current.copy(refreshing = true) else ChatbotState.Loading
-        viewModelScope.launch {
+        if (silent && (current !is ChatbotState.Ready || loadJob?.isActive == true)) return
+        if (!silent) _state.value = if (current is ChatbotState.Ready) current.copy(refreshing = true) else ChatbotState.Loading
+        loadJob = viewModelScope.launch {
             val loaded = load()
             val linked = (_state.value as? ChatbotState.Ready)?.justLinked == true
             _state.value = if (loaded is ChatbotState.Ready && linked) loaded.copy(justLinked = true) else loaded
@@ -206,6 +213,15 @@ class ChatViewModel(
                     )
                 }
             }
+        }
+    }
+
+    /** Called every few seconds while the chat is open so new client and bot messages appear live. */
+    fun poll() {
+        if (_state.value.loading) return
+        viewModelScope.launch {
+            val r = chatMessageQueryService.handle(GetChatMessagesByConversationIdQuery(conversationId))
+            if (r is Result.Success) _state.update { if (it.messages == r.value) it else it.copy(messages = r.value) }
         }
     }
 

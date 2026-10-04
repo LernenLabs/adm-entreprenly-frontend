@@ -65,7 +65,7 @@
     <string name="chat_message_hint">Escribe un mensaje…</string>
     <string name="chat_send">Enviar</string>
     <string name="chat_empty">Aún no hay mensajes en esta conversación.</string>
-    <string name="chat_image_message">Imagen</string>
+    <string name="chat_receipt_message">Comprobante de pago</string>
 
     <string name="common_cancel">Cancelar</string>
     <string name="order_not_found">Este pedido ya no está disponible.</string>
