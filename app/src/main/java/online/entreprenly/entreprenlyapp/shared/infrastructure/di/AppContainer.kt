@@ -55,6 +55,7 @@ import online.entreprenly.entreprenlyapp.profile.infrastructure.local.LocalPrefe
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.ProfilesApi
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.RetrofitFactory
+import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.WarmUpApi
 
 /** Composition root manual (sin framework de DI). Un solo contenedor por proceso. */
 class AppContainer(context: Context) {
@@ -119,8 +120,19 @@ class AppContainer(context: Context) {
         ProductCommandServiceImpl(productRepository, lotRepository)
     val lotCommandService: LotCommandService = LotCommandServiceImpl(lotRepository)
 
+    // Sales
+    private val salesApi = retrofit.create(online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi::class.java)
+    private val salesRepository = online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories.SalesRepositoryImpl(salesApi)
+    
+    val salesQueryService: online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.queryservices.SalesQueryServiceImpl(salesRepository)
+    val salesCommandService: online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.commandservices.SalesCommandServiceImpl(salesRepository)
+
     init {
         // Mantiene el token en memoria para el interceptor HTTP.
         scope.launch { sessionRepository.session.collect { token = it?.token } }
+        // Despierta el backend de Render mientras el usuario ve el splash o escribe sus credenciales.
+        scope.launch { runCatching { retrofit.create(WarmUpApi::class.java).ping() } }
     }
 }
