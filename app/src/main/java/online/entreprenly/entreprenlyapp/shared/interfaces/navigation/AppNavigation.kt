@@ -169,7 +169,7 @@ fun AppNavigation(
                 onSignOut = sessionViewModel::signOut
             )
             inventoryGraph(navController, container)
-            salesGraph(navController)
+            salesGraph(navController, container)
             chatbotGraph(navController, container)
             subscriptionGraph(navController)
         }
