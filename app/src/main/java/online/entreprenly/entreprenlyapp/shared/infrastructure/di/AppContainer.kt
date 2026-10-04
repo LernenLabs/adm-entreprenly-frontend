@@ -6,6 +6,26 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
+import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
+import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
+import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatOrderCommandService
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.commandservices.ChatMessageCommandServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.commandservices.ChatOrderCommandServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.queryservices.ChatMessageQueryServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.queryservices.ChatOrderQueryServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.queryservices.ConversationQueryServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.internal.queryservices.WhatsAppConnectionQueryServiceImpl
+import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatMessageQueryService
+import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ChatOrderQueryService
+import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.ConversationQueryService
+import online.entreprenly.entreprenlyapp.chatbot.application.queryservices.WhatsAppConnectionQueryService
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.acl.SubscriptionAccessApi
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.acl.SubscriptionAccessFacadeImpl
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.api.ChatbotApi
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.ChatMessageRepositoryImpl
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.ChatOrderRepositoryImpl
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.ConversationRepositoryImpl
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.WhatsAppConnectionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.application.commandservices.UserCommandService
 import online.entreprenly.entreprenlyapp.iam.application.internal.commandservices.UserCommandServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.internal.queryservices.SessionQueryServiceImpl
@@ -13,6 +33,20 @@ import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQu
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.LotCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.ProductCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.LotQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.ProductQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.StockAlertQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.InventoryApi
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.StockAlertRepositoryImpl
 import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
 import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
@@ -52,6 +86,38 @@ class AppContainer(context: Context) {
         ProfileCommandServiceImpl(profileRepository, localPreferences)
     val profileQueryService: ProfileQueryService =
         ProfileQueryServiceImpl(profileRepository, localPreferences)
+
+    // Chatbot
+    private val chatbotApi = retrofit.create(ChatbotApi::class.java)
+    private val chatMessageRepository = ChatMessageRepositoryImpl(chatbotApi)
+    private val chatOrderRepository = ChatOrderRepositoryImpl(chatbotApi)
+
+    val conversationQueryService: ConversationQueryService =
+        ConversationQueryServiceImpl(ConversationRepositoryImpl(chatbotApi))
+    val chatMessageQueryService: ChatMessageQueryService = ChatMessageQueryServiceImpl(chatMessageRepository)
+    val chatMessageCommandService: ChatMessageCommandService = ChatMessageCommandServiceImpl(chatMessageRepository)
+    val chatOrderQueryService: ChatOrderQueryService = ChatOrderQueryServiceImpl(chatOrderRepository)
+    val chatOrderCommandService: ChatOrderCommandService =
+        ChatOrderCommandServiceImpl(chatOrderRepository, chatMessageRepository)
+    val whatsAppConnectionQueryService: WhatsAppConnectionQueryService =
+        WhatsAppConnectionQueryServiceImpl(WhatsAppConnectionRepositoryImpl(chatbotApi))
+    val subscriptionAccessFacade: SubscriptionAccessFacade = SubscriptionAccessFacadeImpl(
+        retrofit.create(SubscriptionAccessApi::class.java),
+        sessionQueryService
+    )
+
+    // Inventory
+    private val inventoryApi = retrofit.create(InventoryApi::class.java)
+    private val productRepository = ProductRepositoryImpl(inventoryApi)
+    private val lotRepository = LotRepositoryImpl(inventoryApi)
+    private val stockAlertRepository = StockAlertRepositoryImpl(inventoryApi)
+
+    val productQueryService: ProductQueryService = ProductQueryServiceImpl(productRepository)
+    val lotQueryService: LotQueryService = LotQueryServiceImpl(lotRepository)
+    val stockAlertQueryService: StockAlertQueryService = StockAlertQueryServiceImpl(stockAlertRepository)
+    val productCommandService: ProductCommandService =
+        ProductCommandServiceImpl(productRepository, lotRepository)
+    val lotCommandService: LotCommandService = LotCommandServiceImpl(lotRepository)
 
     init {
         // Mantiene el token en memoria para el interceptor HTTP.

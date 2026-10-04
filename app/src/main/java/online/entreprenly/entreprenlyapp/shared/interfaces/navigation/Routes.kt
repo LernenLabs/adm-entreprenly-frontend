@@ -23,4 +23,24 @@ object Routes {
 
     // Subscription
     const val SUBSCRIPTION = "subscription"
+
+    // Chatbot (the "Orders" tab)
+    const val ARG_CONVERSATION_ID = "conversationId"
+    const val CHAT = "conversations/{$ARG_CONVERSATION_ID}"
+    const val ARG_ORDER_ID = "orderId"
+    const val ORDER_DETAIL = "orders/{$ARG_ORDER_ID}"
+
+    // Inventory
+    const val ARG_PRODUCT_TYPE = "productType"
+    const val ARG_PRODUCT_ID = "productId"
+    const val PRODUCT_DETAIL = "inventory/products/{$ARG_PRODUCT_TYPE}/{$ARG_PRODUCT_ID}"
+    const val ARG_LOT_TYPE = "lotType"
+    const val ARG_LOT_ID = "lotId"
+    const val LOT_DETAIL = "inventory/lots/{$ARG_LOT_TYPE}/{$ARG_LOT_ID}"
+
+    fun chat(conversationId: Long) = "conversations/$conversationId"
+    fun orderDetail(orderId: Long) = "orders/$orderId"
+
+    fun productDetail(type: String, id: Long) = "inventory/products/$type/$id"
+    fun lotDetail(type: String, id: Long) = "inventory/lots/$type/$id"
 }

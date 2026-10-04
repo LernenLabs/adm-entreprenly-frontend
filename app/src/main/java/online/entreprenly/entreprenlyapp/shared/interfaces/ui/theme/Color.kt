@@ -41,3 +41,15 @@ val BrandInk = Color(0xFF0B0F12)
 
 // Dark brown of the sales card on the home dashboard (Figma).
 val BrandBrown = Color(0xFF5C2A00)
+
+// Status colors (badges, timelines, approve/reject actions). Containers are light tints
+// paired with their darker content color, so they read well on both themes.
+val StatusSuccess = Color(0xFF1E7B3A)
+val StatusSuccessContainer = Color(0xFFDDF7E6)
+val StatusDanger = Color(0xFFD12E26)
+val StatusDangerContainer = Color(0xFFFDE2E1)
+val StatusWarning = Color(0xFF9A4F00)
+val StatusWarningContainer = Color(0xFFFDE4CC)
+val StatusNeutral = Color(0xFF3A4550)
+val StatusNeutralContainer = Color(0xFFE8E6E3)
+val StatusInfo = Color(0xFF2F6FE0)

@@ -1,0 +1,130 @@
+<resources>
+    <!-- Inventory: general -->
+    <string name="inventory_title">Inventory</string>
+    <string name="inventory_products">Products</string>
+    <string name="inventory_lots">Lots</string>
+    <string name="inventory_search_product">Search product…</string>
+    <string name="inventory_filter_all">All</string>
+    <string name="inventory_filter_unit">Unit</string>
+    <string name="inventory_filter_weight">Weight</string>
+    <string name="inventory_retry">Retry</string>
+    <string name="inventory_not_available">This item is no longer available.</string>
+
+    <!-- Inventory: pills -->
+    <string name="inventory_pill_low_stock">Low stock</string>
+    <string name="inventory_pill_out_of_stock">Out of stock</string>
+    <string name="inventory_pill_new">New</string>
+    <string name="inventory_pill_active">Active</string>
+    <string name="inventory_pill_expired">Expired</string>
+    <string name="inventory_pill_expires_today">Expires today</string>
+    <plurals name="inventory_pill_expires_in">
+        <item quantity="one">Expires in %d day</item>
+        <item quantity="other">Expires in %d days</item>
+    </plurals>
+
+    <!-- Inventory: empty / no results -->
+    <string name="inventory_empty_title">You don\'t have products yet</string>
+    <string name="inventory_empty_message">Register your first product to track your stock and sell from the app.</string>
+    <string name="inventory_empty_action">Add your first product</string>
+    <string name="inventory_no_results">No products matched your search</string>
+    <string name="inventory_add_product">Add product</string>
+    <plurals name="inventory_results">
+        <item quantity="one">%d result</item>
+        <item quantity="other">%d results</item>
+    </plurals>
+
+    <!-- Inventory: product form -->
+    <string name="inventory_form_add_title">Add product</string>
+    <string name="inventory_form_edit_title">Edit product</string>
+    <string name="inventory_form_name">Product name*</string>
+    <string name="inventory_form_name_hint">E.g. Costeño Rice 5 kg</string>
+    <string name="inventory_form_measure">Measure type*</string>
+    <string name="inventory_form_measure_unit">Unit</string>
+    <string name="inventory_form_measure_weight">Weight (kg)</string>
+    <string name="inventory_form_price">Price (S/)*</string>
+    <string name="inventory_form_price_hint">0.00</string>
+    <string name="inventory_form_initial_stock">Initial stock*</string>
+    <string name="inventory_form_initial_stock_hint">0</string>
+    <string name="inventory_form_save">Save</string>
+    <string name="inventory_form_save_changes">Save changes</string>
+    <string name="inventory_form_required">Required field</string>
+    <string name="inventory_form_stock_help">Stock is managed through lots.</string>
+    <string name="inventory_product_created">Product registered successfully</string>
+    <string name="inventory_product_updated">Changes saved successfully</string>
+    <string name="inventory_product_partial_stock">Product created, but the initial stock could not be registered. Add it from a lot.</string>
+
+    <!-- Inventory: product detail -->
+    <string name="inventory_detail_price">Price</string>
+    <string name="inventory_detail_stock">Stock</string>
+    <string name="inventory_detail_low_stock">Low stock</string>
+    <string name="inventory_detail_remaining_units">%1$s units left.</string>
+    <string name="inventory_detail_remaining_kg">%1$s kg left.</string>
+    <string name="inventory_detail_out_of_stock">Product out of stock</string>
+    <string name="inventory_detail_out_of_stock_units">No units available. The chatbot no longer offers it to customers.</string>
+    <string name="inventory_detail_out_of_stock_kg">No kilos available. The chatbot no longer offers it to customers.</string>
+    <string name="inventory_detail_lots">Associated lots</string>
+    <string name="inventory_detail_no_lots">This product has no lots yet.</string>
+    <string name="inventory_detail_edit">Edit</string>
+    <string name="inventory_detail_create_lot">+ Create lot</string>
+
+    <!-- Inventory: lots tab -->
+    <string name="inventory_lots_active">Active</string>
+    <string name="inventory_lots_expiring">Expiring soon</string>
+    <string name="inventory_lots_expired">Expired</string>
+    <string name="inventory_lots_filter_expiring">Expiring soon</string>
+    <string name="inventory_lots_filter_expired">Expired</string>
+    <string name="inventory_lots_filter_active">Active</string>
+    <plurals name="inventory_lots_banner_expiring">
+        <item quantity="one">%d lot expiring soon. It is shown first in the list.</item>
+        <item quantity="other">%d lots expiring soon. They are shown first in the list.</item>
+    </plurals>
+    <plurals name="inventory_lots_banner_expired">
+        <item quantity="one">%d expired lot. Remove it from sale and update its stock.</item>
+        <item quantity="other">%d expired lots. Remove them from sale and update their stock.</item>
+    </plurals>
+    <string name="inventory_lots_empty_title">You don\'t have lots yet</string>
+    <string name="inventory_lots_empty_message">Register a lot to track expirations.</string>
+    <string name="inventory_lots_no_products">Register a product first.</string>
+
+    <!-- Inventory: create lot -->
+    <string name="inventory_lot_create_title">Create lot</string>
+    <string name="inventory_lot_product">Product*</string>
+    <string name="inventory_lot_search_product">Search product</string>
+    <string name="inventory_lot_select_product">Select a product</string>
+    <string name="inventory_lot_number">Lot No.</string>
+    <string name="inventory_lot_quantity">Quantity*</string>
+    <string name="inventory_lot_entry_date">Entry date*</string>
+    <string name="inventory_lot_expiry">Expiration*</string>
+    <string name="inventory_lot_add">Add</string>
+    <string name="inventory_lot_date_title">Expiration date</string>
+    <string name="inventory_lot_date_note">Past dates cannot be selected.</string>
+    <string name="inventory_lot_confirm_date">Confirm date</string>
+    <string name="inventory_lot_created">Lot registered successfully</string>
+    <string name="inventory_lot_row_expires">Expires %1$s</string>
+    <string name="inventory_lot_row_entered">Entered %1$s</string>
+
+    <!-- Inventory: lot detail -->
+    <string name="inventory_lot_status">Status</string>
+    <string name="inventory_lot_product_label">Product</string>
+    <string name="inventory_lot_entry">Entry date</string>
+    <string name="inventory_lot_expiry_label">Expiration date</string>
+    <string name="inventory_lot_quantity_label">Current quantity</string>
+    <string name="inventory_lot_expiring_title">Expiring soon</string>
+    <plurals name="inventory_lot_expiring_message">
+        <item quantity="one">This lot expires in %d day. Prioritize selling it.</item>
+        <item quantity="other">This lot expires in %d days. Prioritize selling it.</item>
+    </plurals>
+    <string name="inventory_lot_expired_title">Expired lot</string>
+    <string name="inventory_lot_expired_message">Remove it from sale and update its stock.</string>
+
+    <!-- Inventory: formats -->
+    <string name="inventory_money">S/ %1$.2f</string>
+    <string name="inventory_money_per_kg">S/ %1$.2f/kg</string>
+    <plurals name="inventory_quantity_units">
+        <item quantity="one">%1$d unit</item>
+        <item quantity="other">%1$d units</item>
+    </plurals>
+    <string name="inventory_quantity_kg">%1$s kg</string>
+    <string name="inventory_measure_unit">Unit</string>
+    <string name="inventory_measure_weight">Weight (kg)</string>
+</resources>
