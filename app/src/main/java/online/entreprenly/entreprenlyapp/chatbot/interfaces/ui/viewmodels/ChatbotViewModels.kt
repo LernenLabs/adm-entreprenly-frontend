@@ -84,8 +84,9 @@ class OrdersViewModel(
         refresh()
     }
 
-    fun approvePayment(order: ChatOrder) = review(R.string.order_payment_approved) {
-        chatOrderCommandService.handle(ApproveOrderPaymentCommand(order.id))
+    /** [message] is the confirmation the bot sends to the client. */
+    fun approvePayment(order: ChatOrder, message: String) = review(R.string.order_payment_approved) {
+        chatOrderCommandService.handle(ApproveOrderPaymentCommand(order.id, order.conversationId, message))
     }
 
     /** [message] is the reason the bot sends to the client. */

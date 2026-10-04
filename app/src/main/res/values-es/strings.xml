@@ -99,6 +99,7 @@
     <string name="order_reject_reason_other">Otro motivo</string>
     <string name="order_reject_detail">Detalle (opcional)</string>
     <string name="order_reject_confirm">Confirmar rechazo</string>
+    <string name="order_approved_message">¡Pago aprobado! Tu pedido %1$s por %2$s está confirmado. Gracias por tu compra, ya lo estamos preparando.</string>
     <string name="order_reject_message">No pudimos validar tu pago del pedido %1$s. Motivo: %2$s. Por favor envía un nuevo comprobante.</string>
     <string name="order_approve_title">¿Aprobar pago de %1$s?</string>
     <string name="order_approve_message">Se descontará el stock y se registrará la venta del pedido de %1$s.</string>

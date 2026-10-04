@@ -108,6 +108,7 @@
     <string name="order_reject_reason_other">Other reason</string>
     <string name="order_reject_detail">Detail (optional)</string>
     <string name="order_reject_confirm">Confirm rejection</string>
+    <string name="order_approved_message">Payment approved! Your order %1$s for %2$s is confirmed. Thanks for your purchase, we are preparing it.</string>
     <string name="order_reject_message">We could not validate your payment for order %1$s. Reason: %2$s. Please send a new receipt.</string>
     <string name="order_approve_title">Approve payment of %1$s?</string>
     <string name="order_approve_message">Stock will be deducted and the sale registered for %1$s\'s order.</string>
