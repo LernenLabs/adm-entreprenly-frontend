@@ -44,12 +44,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.aggregates.ChatMessage
 import online.entreprenly.entreprenlyapp.chatbot.domain.model.valueobjects.MessageSender
@@ -65,20 +67,32 @@ import online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.viewmodels.ChatVi
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusSuccess
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusSuccessContainer
 
+private const val CHAT_POLL_MILLIS = 4_000L
+
 /** Conversation with a client: client bubbles on the right, the bot's on the left. */
 @Composable
 fun ChatScreen(
     viewModel: ChatViewModel,
     clientName: String?,
+    receiptImage: String?,
     onBack: () -> Unit,
     onViewPlans: () -> Unit,
+    onMessagesChanged: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
     val listState = rememberLazyListState()
 
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(CHAT_POLL_MILLIS)
+            viewModel.poll()
+        }
+    }
     LaunchedEffect(state.messages.size) {
         if (state.messages.isNotEmpty()) listState.animateScrollToItem(state.messages.lastIndex)
+        // A new message may come with a receipt or an order change: reload the orders too.
+        onMessagesChanged()
     }
 
     Column(modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
@@ -95,7 +109,7 @@ fun ChatScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.messages, key = { it.id }) { message -> MessageItem(message, clientName) }
+                    items(state.messages, key = { it.id }) { message -> MessageItem(message, clientName, receiptImage) }
                 }
             }
         }
@@ -153,7 +167,7 @@ private fun ChatTopBar(clientName: String?, onBack: () -> Unit) {
 }
 
 @Composable
-private fun MessageItem(message: ChatMessage, clientName: String?) {
+private fun MessageItem(message: ChatMessage, clientName: String?, receiptImage: String?) {
     when (message.sender) {
         MessageSender.SYSTEM -> Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             Text(
@@ -172,6 +186,7 @@ private fun MessageItem(message: ChatMessage, clientName: String?) {
         ) {
             Bubble(
                 message,
+                receiptImage = receiptImage,
                 container = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 content = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp, 16.dp, 4.dp, 16.dp),
@@ -187,6 +202,7 @@ private fun MessageItem(message: ChatMessage, clientName: String?) {
             BotAvatar()
             Bubble(
                 message,
+                receiptImage = null,
                 container = MaterialTheme.colorScheme.surface,
                 content = MaterialTheme.colorScheme.onSurface,
                 shape = RoundedCornerShape(16.dp, 16.dp, 16.dp, 4.dp),
@@ -199,6 +215,7 @@ private fun MessageItem(message: ChatMessage, clientName: String?) {
 @Composable
 private fun Bubble(
     message: ChatMessage,
+    receiptImage: String?,
     container: Color,
     content: Color,
     shape: RoundedCornerShape,
@@ -206,17 +223,19 @@ private fun Bubble(
 ) {
     Surface(color = container, contentColor = content, shape = shape, shadowElevation = 1.dp, modifier = modifier.widthIn(max = 300.dp)) {
         Column(Modifier.padding(horizontal = 14.dp, vertical = 10.dp)) {
-            val image = remember(message.id) {
-                if (message.type == MessageType.IMAGE) decodeDataUrl(message.content) else null
+            // The backend keeps the receipt photo on the order; the message only marks that one arrived.
+            val image = remember(message.id, receiptImage) {
+                if (message.type == MessageType.IMAGE) decodeDataUrl(message.content) ?: decodeDataUrl(receiptImage) else null
             }
             when {
                 image != null -> Image(
                     bitmap = image,
-                    contentDescription = stringResource(R.string.chat_image_message),
+                    contentDescription = stringResource(R.string.chat_receipt_message),
                     contentScale = ContentScale.FillWidth,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp))
                 )
-                message.type == MessageType.IMAGE -> Text(stringResource(R.string.chat_image_message))
+                message.type == MessageType.IMAGE ->
+                    Text(stringResource(R.string.chat_receipt_message), style = MaterialTheme.typography.bodyLarge)
                 else -> Text(message.content, style = MaterialTheme.typography.bodyLarge)
             }
             message.sentAt?.let {

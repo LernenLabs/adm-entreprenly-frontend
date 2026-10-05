@@ -74,6 +74,7 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusNeutra
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.StatusSuccess
 
 private const val QR_POLL_MILLIS = 3_000L
+private const val ORDERS_POLL_MILLIS = 15_000L
 
 private enum class ChatbotTab(@StringRes val label: Int) {
     ORDERS(R.string.chatbot_tab_orders),
@@ -118,10 +119,10 @@ fun OrdersScreen(
                 var relinking by rememberSaveable { mutableStateOf(false) }
                 LaunchedEffect(linked) {
                     if (linked) relinking = false
-                    // Poll while unlinked so the QR refreshes and the link is detected.
-                    while (!linked) {
-                        delay(QR_POLL_MILLIS)
-                        viewModel.pollConnection()
+                    // Unlinked: poll the QR and link state. Linked: pick up new orders and receipts.
+                    while (true) {
+                        delay(if (linked) ORDERS_POLL_MILLIS else QR_POLL_MILLIS)
+                        if (linked) viewModel.refresh(silent = true) else viewModel.pollConnection()
                     }
                 }
                 val hasHistory = s.orders.isNotEmpty() || s.conversations.isNotEmpty()
