@@ -26,17 +26,78 @@ import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignInView
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignUpViewModel
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 
+<<<<<<< Updated upstream
 object Routes {
     const val SIGN_IN = "sign_in"
     const val SIGN_UP = "sign_up"
     const val ACCOUNT = "account"
 }
+=======
+/** Routes where the bottom navigation bar is visible. */
+private val barRoutes = setOf(
+    Routes.HOME, Routes.INVENTORY, Routes.SELL, Routes.ORDERS, Routes.MORE,
+    Routes.PROFILE, Routes.PREFERENCES, Routes.ACCOUNT,
+    Routes.PRODUCT_DETAIL, Routes.LOT_DETAIL
+)
+>>>>>>> Stashed changes
 
 @Composable
 fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
     val sessionViewModel: SessionViewModel = viewModel(factory = viewModelFactory {
         initializer { SessionViewModel(container.sessionQueryService, container.userCommandService) }
     })
+<<<<<<< Updated upstream
+=======
+    val profileViewModel: ProfileViewModel = viewModel(factory = viewModelFactory {
+        initializer {
+            ProfileViewModel(
+                container.sessionQueryService,
+                container.profileQueryService,
+                container.profileCommandService
+            )
+        }
+    })
+    val preferences by profileViewModel.appPreferences.collectAsState()
+    val darkTheme = preferences?.theme?.let { it == AppTheme.DARK } ?: isSystemInDarkTheme()
+
+    WithLanguage(preferences?.language?.code) {
+        EntreprenlyAppTheme(darkTheme = darkTheme) {
+            AppNavigation(container, sessionViewModel, profileViewModel)
+        }
+    }
+}
+
+/** Overrides the resources locale for everything inside [content]; null keeps the device language. */
+@Composable
+private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit) {
+    val base = LocalContext.current
+    val systemConfiguration = LocalConfiguration.current
+    val languageConfiguration = remember(systemConfiguration, languageCode) {
+        Configuration(systemConfiguration).apply {
+            if (languageCode != null) setLocale(Locale.forLanguageTag(languageCode))
+        }
+    }
+    val localized = remember(base, languageCode, languageConfiguration) {
+        if (languageCode == null) {
+            base
+        } else {
+            base.createConfigurationContext(languageConfiguration)
+        }
+    }
+    CompositionLocalProvider(
+        LocalContext provides localized,
+        LocalConfiguration provides languageConfiguration
+    ) { content() }
+}
+
+@Composable
+fun AppNavigation(
+    container: AppContainer,
+    sessionViewModel: SessionViewModel,
+    profileViewModel: ProfileViewModel,
+    modifier: Modifier = Modifier
+) {
+>>>>>>> Stashed changes
     val sessionState by sessionViewModel.state.collectAsState()
 
     if (sessionState is SessionState.Loading) {
@@ -81,6 +142,13 @@ fun AppNavigation(container: AppContainer, modifier: Modifier = Modifier) {
                 email = signedIn?.session?.email.orEmpty(),
                 onSignOut = sessionViewModel::signOut
             )
+<<<<<<< Updated upstream
+=======
+            inventoryGraph(navController, container)
+            salesGraph(navController, container)
+            chatbotGraph(navController, container)
+            subscriptionGraph(navController, container)
+>>>>>>> Stashed changes
         }
     }
 }
