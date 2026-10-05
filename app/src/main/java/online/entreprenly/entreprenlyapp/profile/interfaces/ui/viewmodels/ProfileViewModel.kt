@@ -2,6 +2,7 @@ package online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -12,6 +13,7 @@ import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQueryService
 import online.entreprenly.entreprenlyapp.iam.domain.model.queries.GetCurrentSessionQuery
+import online.entreprenly.entreprenlyapp.profile.application.acl.SubscriptionPlanFacade
 import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
 import online.entreprenly.entreprenlyapp.profile.application.queryservices.ProfileQueryService
 import online.entreprenly.entreprenlyapp.profile.domain.model.aggregates.Profile
@@ -41,7 +43,8 @@ sealed interface ProfileUiState {
 class ProfileViewModel(
     private val sessionQueryService: SessionQueryService,
     private val profileQueryService: ProfileQueryService,
-    private val profileCommandService: ProfileCommandService
+    private val profileCommandService: ProfileCommandService,
+    private val subscriptionPlanFacade: SubscriptionPlanFacade
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
@@ -66,14 +69,19 @@ class ProfileViewModel(
 
     private var userId: Long? = null
 
+    /** Plan name from the subscription context; overrides the profile endpoint's stale `plan`. */
+    private var planName: String? = null
+
     init {
         viewModelScope.launch {
             sessionQueryService.handle(GetCurrentSessionQuery).collect { session ->
                 if (session == null) {
                     userId = null
+                    planName = null
                     _uiState.value = ProfileUiState.Loading
                 } else if (session.userId != userId) {
                     userId = session.userId
+                    planName = null
                     load()
                 }
             }
@@ -84,12 +92,31 @@ class ProfileViewModel(
         val id = userId ?: return
         _uiState.value = ProfileUiState.Loading
         viewModelScope.launch {
-            _uiState.value = when (val r = profileQueryService.handle(GetProfileByUserIdQuery(id))) {
-                is Result.Success -> ProfileUiState.Loaded(r.value)
-                is Result.Failure -> r.error.toUiState(UiText.Res(R.string.profile_load_error))
+            val plan = async { subscriptionPlanFacade.currentPlanName(id) }
+            val profile = profileQueryService.handle(GetProfileByUserIdQuery(id))
+            val name = (plan.await() as? Result.Success)?.value
+            if (userId != id) return@launch
+            if (name != null) planName = name
+            _uiState.value = when (profile) {
+                is Result.Success -> loaded(profile.value)
+                is Result.Failure -> profile.error.toUiState(UiText.Res(R.string.profile_load_error))
             }
         }
     }
+
+    /** Re-reads the plan without reloading the profile, so a new subscription shows up right away. */
+    fun refreshPlan() {
+        val id = userId ?: return
+        viewModelScope.launch {
+            val name = (subscriptionPlanFacade.currentPlanName(id) as? Result.Success)?.value ?: return@launch
+            if (userId != id) return@launch
+            planName = name
+            _uiState.update { state -> (state as? ProfileUiState.Loaded)?.let { loaded(it.profile) } ?: state }
+        }
+    }
+
+    private fun loaded(profile: Profile): ProfileUiState =
+        ProfileUiState.Loaded(planName?.let { profile.copy(plan = it) } ?: profile)
 
     fun dismissProfileUpdated() {
         _profileUpdated.value = false
@@ -118,7 +145,7 @@ class ProfileViewModel(
             )
             when (val r = profileCommandService.handle(command)) {
                 is Result.Success -> {
-                    _uiState.value = ProfileUiState.Loaded(r.value)
+                    _uiState.value = loaded(r.value)
                     _editForm.value = FormState()
                     _profileUpdated.value = true
                     onSuccess()
@@ -138,7 +165,7 @@ class ProfileViewModel(
         _uiState.value = ProfileUiState.Loaded(current.copy(preferences = preferences))
         viewModelScope.launch {
             when (val r = profileCommandService.handle(UpdatePreferencesCommand(current.id, preferences))) {
-                is Result.Success -> _uiState.value = ProfileUiState.Loaded(r.value)
+                is Result.Success -> _uiState.value = loaded(r.value)
                 is Result.Failure -> {
                     _uiState.value = ProfileUiState.Loaded(current)
                     _preferencesError.value = UiText.Res(R.string.prefs_save_error)
@@ -155,7 +182,7 @@ class ProfileViewModel(
             _notificationsForm.value =
                 when (val r = profileCommandService.handle(UpdateNotificationSettingsCommand(current.id, stockAlerts))) {
                     is Result.Success -> {
-                        _uiState.value = ProfileUiState.Loaded(r.value)
+                        _uiState.value = loaded(r.value)
                         FormState(
                             success = UiText.Res(
                                 if (stockAlerts) R.string.notif_saved_on else R.string.notif_saved_off

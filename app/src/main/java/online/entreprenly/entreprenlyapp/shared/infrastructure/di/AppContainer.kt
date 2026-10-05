@@ -53,10 +53,12 @@ import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.Inv
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.StockAlertRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.application.acl.SubscriptionPlanFacade
 import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
 import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.queryservices.ProfileQueryService
+import online.entreprenly.entreprenlyapp.profile.infrastructure.acl.SubscriptionPlanFacadeImpl
 import online.entreprenly.entreprenlyapp.profile.infrastructure.local.LocalPreferencesRepositoryImpl
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.ProfilesApi
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
@@ -102,6 +104,7 @@ class AppContainer(context: Context) {
         SubscriptionQueryServiceImpl(subscriptionRepository)
     val subscriptionCommandService: SubscriptionCommandService =
         SubscriptionCommandServiceImpl(subscriptionRepository)
+    val subscriptionPlanFacade: SubscriptionPlanFacade = SubscriptionPlanFacadeImpl(subscriptionQueryService)
 
     // Chatbot
     private val chatbotApi = retrofit.create(ChatbotApi::class.java)

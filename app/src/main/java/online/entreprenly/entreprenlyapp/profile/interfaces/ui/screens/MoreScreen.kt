@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,6 +36,8 @@ fun MoreScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val profile: Profile? = (state as? ProfileUiState.Loaded)?.profile
+    // The plan may have changed in the subscription screen since the profile was loaded.
+    LaunchedEffect(Unit) { viewModel.refreshPlan() }
 
     Column(modifier.fillMaxSize()) {
         AppTopBar(stringResource(R.string.more_title))
