@@ -75,6 +75,7 @@
     <string name="chat_send">Send</string>
     <string name="chat_empty">No messages in this conversation yet.</string>
     <string name="chat_receipt_message">Payment receipt</string>
+    <string name="chat_jump_to_latest">Go to the latest messages</string>
 
     <!-- Chatbot: order detail -->
     <string name="common_cancel">Cancel</string>
