@@ -15,8 +15,6 @@
 local.properties
 
 .idea/discord.xml
-<<<<<<< Updated upstream
-=======
 
 .idea/
 .agents/
@@ -24,4 +22,3 @@ local.properties
 skills-lock.json
 
 .kotlin/
->>>>>>> Stashed changes
