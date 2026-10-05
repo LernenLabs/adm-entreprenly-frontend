@@ -1,6 +1,6 @@
 package online.entreprenly.entreprenlyapp.shared.application.result
 
-/** Resultado explícito de una operación: éxito con valor o fallo con [ApplicationError]. */
+/** Explicit operation result: success with a value or failure with an [ApplicationError]. */
 sealed interface Result<out T> {
     data class Success<out T>(val value: T) : Result<T>
     data class Failure(val error: ApplicationError) : Result<Nothing>

@@ -1,24 +1,31 @@
 package online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration
 
+import java.util.Locale
+import java.util.concurrent.TimeUnit
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-/** Construye el cliente Retrofit; adjunta el Bearer token si hay sesión activa. */
+/** Builds the Retrofit client; attaches the Bearer token when a session exists and
+ * sends Accept-Language so backend messages match the device language. */
 class RetrofitFactory(
     baseUrl: String,
     private val tokenProvider: () -> String?,
     debug: Boolean
 ) {
     private val client: OkHttpClient = OkHttpClient.Builder()
+        // The free Render instance sleeps when idle and can take about a minute to wake up.
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(90, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
         .addInterceptor(Interceptor { chain ->
             val token = tokenProvider()
-            val request = if (token != null) {
-                chain.request().newBuilder().header("Authorization", "Bearer $token").build()
-            } else chain.request()
-            chain.proceed(request)
+            val builder = chain.request().newBuilder()
+                .header("Accept-Language", Locale.getDefault().toLanguageTag())
+            if (token != null) builder.header("Authorization", "Bearer $token")
+            chain.proceed(builder.build())
         })
         .apply {
             if (debug) addInterceptor(

@@ -1,3 +1,137 @@
 <resources>
     <string name="app_name">Entreprenly App</string>
+
+    <!-- Shared -->
+    <string name="field_email">Email</string>
+    <string name="field_password">Password</string>
+
+    <!-- IAM: validation -->
+    <string name="error_invalid_email">Enter a valid email</string>
+    <string name="error_invalid_password">Password must be between 8 and 255 characters</string>
+
+    <!-- IAM: sign in -->
+    <string name="sign_in_title">Sign in</string>
+    <string name="sign_in_action">Sign in</string>
+
+    <!-- IAM: sign up -->
+    <string name="sign_up_title">Create account</string>
+    <string name="sign_up_action">Create account</string>
+    <string name="sign_up_first_name">First name (optional)</string>
+    <string name="sign_up_last_name">Last name (optional)</string>
+    <string name="sign_up_phone">Phone (optional)</string>
+
+    <!-- IAM: account -->
+    <string name="account_title">My account</string>
+    <string name="account_change_password_title">Change password</string>
+    <string name="account_current_password">Current password</string>
+    <string name="account_new_password">New password</string>
+    <string name="account_change_password_action">Update password</string>
+    <string name="account_password_updated">Password updated</string>
+    <string name="account_change_email_title">Change email</string>
+    <string name="account_change_email_hint">You will need to sign in again after changing it.</string>
+    <string name="account_new_email">New email</string>
+    <string name="account_change_email_action">Update email</string>
+    <string name="account_email_updated">Email updated</string>
+    <string name="account_sign_out">Sign out</string>
+
+
+    <!-- Chatbot: common -->
+    <string name="chatbot_money">S/ %1$.2f</string>
+    <string name="chatbot_unknown_client">Client</string>
+    <string name="chatbot_refresh">Refresh</string>
+    <string name="chatbot_retry">Retry</string>
+    <string name="chatbot_plan_required_title">Plan Control required</string>
+    <string name="chatbot_plan_required_message">The WhatsApp chatbot, its orders and conversations are included in the Plan Control subscription. Upgrade your plan to use them.</string>
+    <string name="chatbot_view_plans">View plans</string>
+
+    <!-- Chatbot: order status -->
+    <string name="chatbot_status_pending">In progress</string>
+    <string name="chatbot_status_waiting_payment">Awaiting payment</string>
+    <string name="chatbot_status_to_validate">To validate</string>
+    <string name="chatbot_status_confirmed">Payment approved</string>
+    <string name="chatbot_status_cancelled">Cancelled</string>
+    <string name="chatbot_status_blocked">Blocked</string>
+
+    <!-- Chatbot: orders -->
+    <string name="chatbot_orders_title">Orders</string>
+    <string name="chatbot_connected">Connected</string>
+    <string name="chatbot_disconnected">WhatsApp Business not linked</string>
+    <string name="chatbot_tab_orders">Orders</string>
+    <string name="chatbot_tab_conversations">Conversations</string>
+    <string name="chatbot_filter_all">All</string>
+    <string name="chatbot_filter_to_validate">To validate</string>
+    <string name="chatbot_filter_confirmed">Confirmed</string>
+    <string name="chatbot_filter_cancelled">Cancelled</string>
+    <string name="chatbot_filter_with_count">%1$s · %2$d</string>
+    <string name="chatbot_order_title">%1$s — %2$s</string>
+    <string name="chatbot_empty_orders">No orders yet. Orders placed through the WhatsApp chatbot will appear here.</string>
+    <string name="chatbot_empty_orders_filter">No orders match this filter.</string>
+    <string name="chatbot_empty_conversations">No conversations yet.</string>
+
+    <!-- Chatbot: chat -->
+    <string name="common_back">Back</string>
+    <string name="chat_handled_by_bot">Handled by the bot</string>
+    <string name="chat_message_hint">Write a message…</string>
+    <string name="chat_send">Send</string>
+    <string name="chat_empty">No messages in this conversation yet.</string>
+    <string name="chat_receipt_message">Payment receipt</string>
+
+    <!-- Chatbot: order detail -->
+    <string name="common_cancel">Cancel</string>
+    <string name="order_not_found">This order is no longer available.</string>
+    <string name="order_item_line">%1$d × %2$s</string>
+    <string name="order_detail_delivery">Delivery: %1$s</string>
+    <string name="order_detail_total">Total</string>
+    <string name="order_detail_receipt">Payment receipt</string>
+    <string name="order_detail_no_receipt">No receipt yet</string>
+    <string name="order_detail_timeline">Timeline</string>
+    <string name="order_timeline_with_time">%1$s — %2$s</string>
+    <string name="order_timeline_registered">Order registered</string>
+    <string name="order_timeline_receipt_received">Receipt received via WhatsApp</string>
+    <plurals name="order_timeline_rejections">
+        <item quantity="one">Receipt rejected %d time</item>
+        <item quantity="other">Receipt rejected %d times</item>
+    </plurals>
+    <string name="order_timeline_pending_validation">Pending validation</string>
+    <string name="order_timeline_awaiting_payment">Waiting for the client\'s payment</string>
+    <string name="order_timeline_confirmed">Payment approved: stock deducted and sale registered</string>
+    <string name="order_timeline_cancelled">Order cancelled</string>
+    <string name="order_timeline_blocked">Blocked after too many rejected receipts</string>
+    <string name="order_timeline_in_progress">Order in progress with the bot</string>
+    <string name="order_reject">Reject</string>
+    <string name="order_approve">Approve payment</string>
+    <string name="order_reject_title">Reject payment</string>
+    <string name="order_reject_subtitle">Choose the reason. The chatbot will send it to the client.</string>
+    <string name="order_reject_reason_amount">Incorrect amount</string>
+    <string name="order_reject_reason_unreadable">Unreadable receipt</string>
+    <string name="order_reject_reason_duplicate">Duplicate receipt</string>
+    <string name="order_reject_reason_other">Other reason</string>
+    <string name="order_reject_detail">Detail (optional)</string>
+    <string name="order_reject_confirm">Confirm rejection</string>
+    <string name="order_approved_message">Payment approved! Your order %1$s for %2$s is confirmed. Thanks for your purchase, we are preparing it.</string>
+    <string name="order_reject_message">We could not validate your payment for order %1$s. Reason: %2$s. Please send a new receipt.</string>
+    <string name="order_approve_title">Approve payment of %1$s?</string>
+    <string name="order_approve_message">Stock will be deducted and the sale registered for %1$s\'s order.</string>
+    <string name="order_approve_confirm">Confirm</string>
+    <string name="order_payment_approved">Payment approved</string>
+    <string name="order_payment_rejected">Payment rejected. The reason was sent to the client.</string>
+
+    <!-- Chatbot: link WhatsApp -->
+    <string name="chatbot_link_title">Link WhatsApp Business</string>
+    <string name="chatbot_link_subtitle">Turn on the chatbot to receive orders automatically.</string>
+    <string name="chatbot_link_expires_in">The code expires in %1$02d:%2$02d</string>
+    <string name="chatbot_link_qr_description">QR code to link WhatsApp</string>
+    <string name="chatbot_link_waiting_qr">Waiting for the code… If it doesn\'t show up in a minute, the WhatsApp service may be offline.</string>
+    <string name="chatbot_link_code_expired">The code expired</string>
+    <string name="chatbot_link_code_renewed">We generated a new one automatically.</string>
+    <string name="chatbot_link_code_waiting">Waiting for a new code…</string>
+    <string name="chatbot_link_step_open">Open WhatsApp on the business phone</string>
+    <string name="chatbot_link_step_settings">Go to Settings → Linked devices</string>
+    <string name="chatbot_link_step_link">Tap Link a device</string>
+    <string name="chatbot_link_step_scan">Scan this code</string>
+    <string name="chatbot_linked_title">Account linked successfully</string>
+    <string name="chatbot_linked_message">The chatbot can now receive and answer your clients\' messages.</string>
+    <string name="chatbot_session_expired_title">Session expired</string>
+    <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
+    <string name="chatbot_relink">Link again</string>
 </resources>

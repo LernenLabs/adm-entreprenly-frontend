@@ -1,0 +1,136 @@
+<resources>
+    <!-- Inventario: generales -->
+    <string name="inventory_title">Inventario</string>
+    <string name="inventory_products">Productos</string>
+    <string name="inventory_lots">Lotes</string>
+    <string name="inventory_search_product">Buscar producto…</string>
+    <string name="inventory_filter_all">Todos</string>
+    <string name="inventory_filter_unit">Unidad</string>
+    <string name="inventory_filter_weight">Peso</string>
+    <string name="inventory_retry">Reintentar</string>
+    <string name="inventory_not_available">Este elemento ya no está disponible.</string>
+
+    <!-- Inventario: píldoras -->
+    <string name="inventory_pill_low_stock">Stock bajo</string>
+    <string name="inventory_pill_out_of_stock">Agotado</string>
+    <string name="inventory_pill_new">Nuevo</string>
+    <string name="inventory_pill_active">Activo</string>
+    <string name="inventory_pill_expired">Vencido</string>
+    <string name="inventory_pill_expires_today">Vence hoy</string>
+    <plurals name="inventory_pill_expires_in">
+        <item quantity="one">Vence en %d día</item>
+        <item quantity="other">Vence en %d días</item>
+        <item quantity="many">Vence en %d días</item>
+    </plurals>
+
+    <!-- Inventario: vacío / sin resultados -->
+    <string name="inventory_empty_title">Aún no tienes productos</string>
+    <string name="inventory_empty_message">Registra tu primer producto para controlar tu stock y vender desde la app.</string>
+    <string name="inventory_empty_action">Agregar tu primer producto</string>
+    <string name="inventory_no_results">No se encontraron productos que coincidan con tu búsqueda</string>
+    <string name="inventory_add_product">Agregar producto</string>
+    <plurals name="inventory_results">
+        <item quantity="one">%d resultado</item>
+        <item quantity="other">%d resultados</item>
+        <item quantity="many">%d resultados</item>
+    </plurals>
+
+    <!-- Inventario: formulario de producto -->
+    <string name="inventory_form_add_title">Agregar producto</string>
+    <string name="inventory_form_edit_title">Editar producto</string>
+    <string name="inventory_form_name">Nombre del producto*</string>
+    <string name="inventory_form_name_hint">Ej. Arroz Costeño 5 kg</string>
+    <string name="inventory_form_measure">Tipo de medida*</string>
+    <string name="inventory_form_measure_unit">Unidad</string>
+    <string name="inventory_form_measure_weight">Peso (kg)</string>
+    <string name="inventory_form_price">Precio (S/)*</string>
+    <string name="inventory_form_price_hint">0.00</string>
+    <string name="inventory_form_initial_stock">Stock inicial*</string>
+    <string name="inventory_form_initial_stock_hint">0</string>
+    <string name="inventory_form_save">Guardar</string>
+    <string name="inventory_form_save_changes">Guardar cambios</string>
+    <string name="inventory_form_required">Campo obligatorio</string>
+    <string name="inventory_form_stock_help">El stock se administra por lotes.</string>
+    <string name="inventory_product_created">Producto registrado correctamente</string>
+    <string name="inventory_product_updated">Cambios guardados correctamente</string>
+    <string name="inventory_product_partial_stock">Producto creado, pero no se pudo registrar el stock inicial. Agrégalo desde un lote.</string>
+
+    <!-- Inventario: detalle de producto -->
+    <string name="inventory_detail_price">Precio</string>
+    <string name="inventory_detail_stock">Stock</string>
+    <string name="inventory_detail_low_stock">Stock bajo</string>
+    <string name="inventory_detail_remaining_units">Quedan %1$s unidades.</string>
+    <string name="inventory_detail_remaining_kg">Quedan %1$s kg.</string>
+    <string name="inventory_detail_out_of_stock">Producto agotado</string>
+    <string name="inventory_detail_out_of_stock_units">No hay unidades disponibles. El chatbot ya no lo ofrece a los clientes.</string>
+    <string name="inventory_detail_out_of_stock_kg">No hay kilos disponibles. El chatbot ya no lo ofrece a los clientes.</string>
+    <string name="inventory_detail_lots">Lotes asociados</string>
+    <string name="inventory_detail_no_lots">Este producto aún no tiene lotes.</string>
+    <string name="inventory_detail_edit">Editar</string>
+    <string name="inventory_detail_create_lot">+ Crear lote</string>
+
+    <!-- Inventario: pestaña Lotes -->
+    <string name="inventory_lots_active">Activos</string>
+    <string name="inventory_lots_expiring">Por vencer</string>
+    <string name="inventory_lots_expired">Vencidos</string>
+    <string name="inventory_lots_filter_expiring">Próximos a vencer</string>
+    <string name="inventory_lots_filter_expired">Vencidos</string>
+    <string name="inventory_lots_filter_active">Activos</string>
+    <plurals name="inventory_lots_banner_expiring">
+        <item quantity="one">%d lote próximo a vencer. Se muestra primero en la lista.</item>
+        <item quantity="other">%d lotes próximos a vencer. Se muestran primero en la lista.</item>
+        <item quantity="many">%d lotes próximos a vencer. Se muestran primero en la lista.</item>
+    </plurals>
+    <plurals name="inventory_lots_banner_expired">
+        <item quantity="one">%d lote vencido. Retíralo de la venta y actualiza su stock.</item>
+        <item quantity="other">%d lotes vencidos. Retíralos de la venta y actualiza su stock.</item>
+        <item quantity="many">%d lotes vencidos. Retíralos de la venta y actualiza su stock.</item>
+    </plurals>
+    <string name="inventory_lots_empty_title">Aún no tienes lotes</string>
+    <string name="inventory_lots_empty_message">Registra un lote para controlar los vencimientos.</string>
+    <string name="inventory_lots_no_products">Primero registra un producto.</string>
+
+    <!-- Inventario: crear lote -->
+    <string name="inventory_lot_create_title">Crear lote</string>
+    <string name="inventory_lot_product">Producto*</string>
+    <string name="inventory_lot_search_product">Buscar producto</string>
+    <string name="inventory_lot_select_product">Selecciona un producto</string>
+    <string name="inventory_lot_number">N° de lote</string>
+    <string name="inventory_lot_quantity">Cantidad*</string>
+    <string name="inventory_lot_entry_date">Fecha de ingreso*</string>
+    <string name="inventory_lot_expiry">Vencimiento*</string>
+    <string name="inventory_lot_add">Agregar</string>
+    <string name="inventory_lot_date_title">Fecha de vencimiento</string>
+    <string name="inventory_lot_date_note">Las fechas pasadas no se pueden seleccionar.</string>
+    <string name="inventory_lot_confirm_date">Confirmar fecha</string>
+    <string name="inventory_lot_created">Lote registrado correctamente</string>
+    <string name="inventory_lot_row_expires">Vence %1$s</string>
+    <string name="inventory_lot_row_entered">Ingreso %1$s</string>
+
+    <!-- Inventario: detalle de lote -->
+    <string name="inventory_lot_status">Estado</string>
+    <string name="inventory_lot_product_label">Producto</string>
+    <string name="inventory_lot_entry">Fecha de ingreso</string>
+    <string name="inventory_lot_expiry_label">Fecha de vencimiento</string>
+    <string name="inventory_lot_quantity_label">Cantidad actual</string>
+    <string name="inventory_lot_expiring_title">Próximo a vencer</string>
+    <plurals name="inventory_lot_expiring_message">
+        <item quantity="one">Este lote vence en %d día. Prioriza su venta.</item>
+        <item quantity="other">Este lote vence en %d días. Prioriza su venta.</item>
+        <item quantity="many">Este lote vence en %d días. Prioriza su venta.</item>
+    </plurals>
+    <string name="inventory_lot_expired_title">Lote vencido</string>
+    <string name="inventory_lot_expired_message">Retíralo de la venta y actualiza su stock.</string>
+
+    <!-- Inventario: formatos -->
+    <string name="inventory_money">S/ %1$.2f</string>
+    <string name="inventory_money_per_kg">S/ %1$.2f/kg</string>
+    <plurals name="inventory_quantity_units">
+        <item quantity="one">%1$d und</item>
+        <item quantity="other">%1$d und</item>
+        <item quantity="many">%1$d und</item>
+    </plurals>
+    <string name="inventory_quantity_kg">%1$s kg</string>
+    <string name="inventory_measure_unit">Unidad</string>
+    <string name="inventory_measure_weight">Peso (kg)</string>
+</resources>

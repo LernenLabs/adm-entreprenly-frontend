@@ -1,0 +1,44 @@
+<resources>
+    <string name="splash_tagline">Smart Retail for your business</string>
+
+    <string name="welcome_title">Manage your business from your phone</string>
+    <string name="welcome_subtitle">Inventory, sales and WhatsApp orders in a single app.</string>
+    <string name="welcome_create_account">Create account</string>
+
+    <string name="sign_in_welcome_back">Welcome back to Entreprenly.</string>
+    <string name="sign_in_error_title">Incorrect email or password</string>
+    <string name="sign_in_error_message">Check your details and try again.</string>
+
+    <string name="sign_up_subtitle">Sign up for free and start with the Free plan.</string>
+
+    <string name="auth_no_account">Don\'t have an account?</string>
+    <string name="auth_sign_up_link">Sign up</string>
+    <string name="auth_have_account">Already have an account?</string>
+    <string name="auth_sign_in_link">Sign in</string>
+
+    <string name="password_rule_length">At least 8 characters</string>
+    <string name="password_rule_uppercase">One uppercase letter</string>
+    <string name="password_rule_digit">One number</string>
+
+    <string name="home_date_format">EEE, d MMM</string>
+    <string name="home_quick_new_product">New product</string>
+    <string name="home_quick_create_lot">Create lot</string>
+    <string name="home_sales_today">Today\'s sales</string>
+    <string name="home_cash">Cash</string>
+    <string name="home_digital">Digital</string>
+    <string name="home_stat_sales">Sales</string>
+    <string name="home_stat_lots">Expiring lots</string>
+    <string name="home_stat_orders">Orders to validate</string>
+    <string name="home_chatbot_title">WhatsApp Chatbot</string>
+    <string name="home_chatbot_connected">Active</string>
+    <string name="home_chatbot_disconnected">Disconnected</string>
+    <string name="home_chatbot_hint">Link your WhatsApp to receive orders automatically.</string>
+    <string name="home_chatbot_connect">Connect now</string>
+    <string name="home_alerts">Alerts</string>
+    <string name="home_alerts_ok_title">Inventory in good shape</string>
+    <string name="home_alerts_ok_message">There are no active stock alerts.</string>
+    <string name="home_orders_title">Chatbot orders</string>
+    <string name="home_orders_empty_title">No orders yet</string>
+    <string name="home_orders_empty_message">Chatbot orders will appear here.</string>
+    <string name="home_inventory_empty">No products registered</string>
+</resources>

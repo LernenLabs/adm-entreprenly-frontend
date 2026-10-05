@@ -4,11 +4,8 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
-<<<<<<< Updated upstream
-=======
 import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
 import online.entreprenly.entreprenlyapp.subscription.application.internal.queryservices.SubscriptionQueryServiceImpl
 import online.entreprenly.entreprenlyapp.subscription.application.commandservices.SubscriptionCommandService
@@ -35,7 +32,6 @@ import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositor
 import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.ChatOrderRepositoryImpl
 import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.ConversationRepositoryImpl
 import online.entreprenly.entreprenlyapp.chatbot.infrastructure.remote.repositories.WhatsAppConnectionRepositoryImpl
->>>>>>> Stashed changes
 import online.entreprenly.entreprenlyapp.iam.application.commandservices.UserCommandService
 import online.entreprenly.entreprenlyapp.iam.application.internal.commandservices.UserCommandServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.internal.queryservices.SessionQueryServiceImpl
@@ -43,7 +39,29 @@ import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQu
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.LotCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.ProductCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.LotQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.ProductQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.StockAlertQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.InventoryApi
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.StockAlertRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
+import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
+import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
+import online.entreprenly.entreprenlyapp.profile.application.queryservices.ProfileQueryService
+import online.entreprenly.entreprenlyapp.profile.infrastructure.local.LocalPreferencesRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.ProfilesApi
+import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.RetrofitFactory
+import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.WarmUpApi
 
 /** Composition root manual (sin framework de DI). Un solo contenedor por proceso. */
 class AppContainer(context: Context) {
@@ -59,6 +77,7 @@ class AppContainer(context: Context) {
         debug = BuildConfig.DEBUG
     ).retrofit
 
+    // IAM
     private val sessionRepository = SessionRepositoryImpl(context)
     private val userRepository = UserRepositoryImpl(retrofit.create(IamApi::class.java))
 
@@ -66,8 +85,6 @@ class AppContainer(context: Context) {
         UserCommandServiceImpl(userRepository, sessionRepository)
     val sessionQueryService: SessionQueryService = SessionQueryServiceImpl(sessionRepository)
 
-<<<<<<< Updated upstream
-=======
     // Profile
     private val localPreferences = LocalPreferencesRepositoryImpl(context)
     private val profileRepository = ProfileRepositoryImpl(retrofit.create(ProfilesApi::class.java))
@@ -127,9 +144,10 @@ class AppContainer(context: Context) {
     val salesCommandService: online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService = 
         online.entreprenly.entreprenlyapp.sales.application.internal.commandservices.SalesCommandServiceImpl(salesRepository)
 
->>>>>>> Stashed changes
     init {
         // Mantiene el token en memoria para el interceptor HTTP.
         scope.launch { sessionRepository.session.collect { token = it?.token } }
+        // Despierta el backend de Render mientras el usuario ve el splash o escribe sus credenciales.
+        scope.launch { runCatching { retrofit.create(WarmUpApi::class.java).ping() } }
     }
 }

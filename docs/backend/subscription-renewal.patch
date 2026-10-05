@@ -1,0 +1,78 @@
+diff --git a/src/main/java/online/entreprenly/platform/subscription/domain/model/aggregates/Subscription.java b/src/main/java/online/entreprenly/platform/subscription/domain/model/aggregates/Subscription.java
+index e6b5f6d..f6bb923 100644
+--- a/src/main/java/online/entreprenly/platform/subscription/domain/model/aggregates/Subscription.java
++++ b/src/main/java/online/entreprenly/platform/subscription/domain/model/aggregates/Subscription.java
+@@ -47,17 +47,19 @@ public class Subscription extends AbstractDomainAggregateRoot<Subscription> {
+             activate(billingPeriod);
+             return;
+         }
+-        if (payment.getStatus() == PaymentStatus.PENDING) {
++        if (!isActiveAt(Instant.now())) {
+             this.status = SubscriptionStatus.PENDING_PAYMENT;
+-            return;
+         }
+-        this.status = SubscriptionStatus.PENDING_PAYMENT;
+     }
+ 
+     public void activate(BillingPeriod billingPeriod) {
+         this.billingPeriod = billingPeriod == null ? BillingPeriod.MONTHLY : billingPeriod;
+         this.status = SubscriptionStatus.ACTIVE;
+-        this.currentPeriodEnd = calculatePeriodEnd(Instant.now(), this.billingPeriod);
++        var periodStart = Instant.now();
++        if (currentPeriodEnd != null && currentPeriodEnd.isAfter(periodStart)) {
++            periodStart = currentPeriodEnd;
++        }
++        this.currentPeriodEnd = calculatePeriodEnd(periodStart, this.billingPeriod);
+         this.cancelledAt = null;
+     }
+ 
+diff --git a/src/test/java/online/entreprenly/platform/subscription/domain/model/aggregates/SubscriptionTests.java b/src/test/java/online/entreprenly/platform/subscription/domain/model/aggregates/SubscriptionTests.java
+index eac8593..322af57 100644
+--- a/src/test/java/online/entreprenly/platform/subscription/domain/model/aggregates/SubscriptionTests.java
++++ b/src/test/java/online/entreprenly/platform/subscription/domain/model/aggregates/SubscriptionTests.java
+@@ -48,6 +48,45 @@ class SubscriptionTests {
+         assertEquals(2L, subscription.getLatestPaymentId());
+     }
+ 
++    @Test
++    void approvedRenewalExtendsTheCurrentPeriod() {
++        var subscription = activeSubscription();
++        var previousEnd = subscription.getCurrentPeriodEnd();
++
++        subscription.applyPayment(payment(PaymentStatus.APPROVED), BillingPeriod.MONTHLY);
++
++        assertEquals(previousEnd.plus(java.time.Duration.ofDays(30)), subscription.getCurrentPeriodEnd());
++        assertEquals(SubscriptionStatus.ACTIVE, subscription.getStatus());
++    }
++
++    @Test
++    void unsuccessfulRenewalKeepsAccessAndTheCurrentPeriod() {
++        for (var status : List.of(PaymentStatus.DECLINED, PaymentStatus.FAILED, PaymentStatus.PENDING)) {
++            var subscription = activeSubscription();
++            var previousEnd = subscription.getCurrentPeriodEnd();
++
++            subscription.applyPayment(payment(status), BillingPeriod.MONTHLY);
++
++            assertEquals(previousEnd, subscription.getCurrentPeriodEnd());
++            assertEquals(SubscriptionStatus.ACTIVE, subscription.getStatus());
++            assertTrue(subscription.isActiveAt(Instant.now()));
++        }
++    }
++
++    private static Subscription activeSubscription() {
++        var subscription = new Subscription(1L, plan());
++        subscription.restoreState(1L, 1L, 1L, SubscriptionStatus.ACTIVE, Instant.now(),
++                Instant.now().plus(java.time.Duration.ofDays(15)), null, 1L, BillingPeriod.MONTHLY);
++        return subscription;
++    }
++
++    private static Payment payment(PaymentStatus status) {
++        var payment = new Payment(1L, 1L, 1L, plan().getPrice(), "FAKE_CARD", status,
++                "fake_tx_renewal", "Renewal test", status, BillingPeriod.MONTHLY);
++        payment.setId(2L);
++        return payment;
++    }
++
+     private static SubscriptionPlan plan() {
+         var plan = new SubscriptionPlan("plan-control", "Premium", "Premium plan",
+                 new Money(BigDecimal.valueOf(49.90), "USD"),
