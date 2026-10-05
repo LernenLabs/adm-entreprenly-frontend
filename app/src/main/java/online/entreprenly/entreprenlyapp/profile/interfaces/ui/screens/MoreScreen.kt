@@ -43,10 +43,10 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             profile?.let { ProfileHeaderCard(it, showBiography = false) }
+            NavigationCard(stringResource(R.string.more_subscription), profile?.plan ?: stringResource(R.string.more_subscription_sub), onClick = onSubscription)
             NavigationCard(stringResource(R.string.more_profile), stringResource(R.string.more_profile_sub), onClick = onProfile)
             NavigationCard(stringResource(R.string.more_preferences), stringResource(R.string.more_preferences_sub), onClick = onPreferences)
             NavigationCard(stringResource(R.string.more_notifications), stringResource(R.string.more_notifications_sub), onClick = onNotifications)
-            NavigationCard(stringResource(R.string.more_subscription), stringResource(R.string.more_subscription_sub), onClick = onSubscription)
             NavigationCard(stringResource(R.string.more_account_security), stringResource(R.string.more_account_security_sub), onClick = onAccountSecurity)
             SecondaryPillButton(stringResource(R.string.more_sign_out), onSignOut)
         }

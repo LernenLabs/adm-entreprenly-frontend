@@ -38,7 +38,7 @@ private val ButtonShape = RoundedCornerShape(28.dp)
 
 /** Orange top bar used by every inner screen (title plus optional back arrow). */
 @Composable
-fun AppTopBar(title: String, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier) {
+fun AppTopBar(title: String, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier, subtitle: String? = null) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -60,12 +60,17 @@ fun AppTopBar(title: String, onBack: (() -> Unit)? = null, modifier: Modifier = 
             } else {
                 Box(Modifier.padding(start = 8.dp))
             }
-            Text(
-                title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            Column {
+                Text(
+                    title,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+                subtitle?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimary)
+                }
+            }
         }
     }
 }
