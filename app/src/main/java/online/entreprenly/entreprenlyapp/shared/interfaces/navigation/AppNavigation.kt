@@ -46,7 +46,7 @@ import online.entreprenly.entreprenlyapp.subscription.interfaces.ui.navigation.s
 /** Routes where the bottom navigation bar is visible. */
 private val barRoutes = setOf(
     Routes.HOME, Routes.INVENTORY, Routes.SELL, Routes.ORDERS, Routes.MORE,
-    Routes.PROFILE, Routes.PREFERENCES, Routes.SUBSCRIPTION, Routes.ACCOUNT,
+    Routes.PROFILE, Routes.PREFERENCES, Routes.ACCOUNT,
     Routes.PRODUCT_DETAIL, Routes.LOT_DETAIL
 )
 
@@ -82,19 +82,22 @@ fun AppRoot(container: AppContainer) {
 @Composable
 private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit) {
     val base = LocalContext.current
-    val localized = remember(base, languageCode) {
+    val systemConfiguration = LocalConfiguration.current
+    val languageConfiguration = remember(systemConfiguration, languageCode) {
+        Configuration(systemConfiguration).apply {
+            if (languageCode != null) setLocale(Locale.forLanguageTag(languageCode))
+        }
+    }
+    val localized = remember(base, languageCode, languageConfiguration) {
         if (languageCode == null) {
             base
         } else {
-            val configuration = Configuration(base.resources.configuration).apply {
-                setLocale(Locale.forLanguageTag(languageCode))
-            }
-            base.createConfigurationContext(configuration)
+            base.createConfigurationContext(languageConfiguration)
         }
     }
     CompositionLocalProvider(
         LocalContext provides localized,
-        LocalConfiguration provides localized.resources.configuration
+        LocalConfiguration provides languageConfiguration
     ) { content() }
 }
 
@@ -171,7 +174,7 @@ fun AppNavigation(
             inventoryGraph(navController, container)
             salesGraph(navController, container)
             chatbotGraph(navController, container)
-            subscriptionGraph(navController)
+            subscriptionGraph(navController, container)
         }
     }
 }

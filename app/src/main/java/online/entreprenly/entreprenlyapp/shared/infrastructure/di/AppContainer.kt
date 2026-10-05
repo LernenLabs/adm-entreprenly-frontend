@@ -6,6 +6,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
+import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.internal.queryservices.SubscriptionQueryServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.commandservices.SubscriptionCommandService
+import online.entreprenly.entreprenlyapp.subscription.application.queryservices.SubscriptionQueryService
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.api.SubscriptionApi
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.repositories.SubscriptionRepositoryImpl
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatOrderCommandService
@@ -87,6 +93,15 @@ class AppContainer(context: Context) {
         ProfileCommandServiceImpl(profileRepository, localPreferences)
     val profileQueryService: ProfileQueryService =
         ProfileQueryServiceImpl(profileRepository, localPreferences)
+
+    // Subscription
+    private val subscriptionRepository = SubscriptionRepositoryImpl(
+        retrofit.create(SubscriptionApi::class.java)
+    )
+    val subscriptionQueryService: SubscriptionQueryService =
+        SubscriptionQueryServiceImpl(subscriptionRepository)
+    val subscriptionCommandService: SubscriptionCommandService =
+        SubscriptionCommandServiceImpl(subscriptionRepository)
 
     // Chatbot
     private val chatbotApi = retrofit.create(ChatbotApi::class.java)

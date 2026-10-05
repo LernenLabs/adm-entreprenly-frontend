@@ -2,7 +2,6 @@ package online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -44,12 +43,19 @@ fun NavGraphBuilder.chatbotGraph(navController: NavController, container: AppCon
                 ChatViewModel(conversationId, container.chatMessageQueryService, container.chatMessageCommandService)
             }
         })
-        val chatbotState by ordersViewModel(navController, entry, container).state.collectAsState()
+        val ordersVm = ordersViewModel(navController, entry, container)
+        val ready = ordersVm.state.collectAsState().value as? ChatbotState.Ready
         ChatScreen(
             viewModel = vm,
-            clientName = (chatbotState as? ChatbotState.Ready)?.conversation(conversationId)?.displayName,
+            clientName = ready?.conversation(conversationId)?.displayName,
+            // Latest receipt the client sent in this conversation (the backend stores it on the order).
+            receiptImage = ready?.orders
+                ?.filter { it.conversationId == conversationId && it.receiptImage != null }
+                ?.maxByOrNull { it.createdAt ?: java.time.Instant.MIN }
+                ?.receiptImage,
             onBack = { navController.popBackStack() },
-            onViewPlans = onViewPlans
+            onViewPlans = onViewPlans,
+            onMessagesChanged = { ordersVm.refresh(silent = true) }
         )
     }
     composable(
