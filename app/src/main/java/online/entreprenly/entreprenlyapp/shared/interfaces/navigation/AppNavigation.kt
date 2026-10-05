@@ -64,7 +64,8 @@ fun AppRoot(container: AppContainer) {
             ProfileViewModel(
                 container.sessionQueryService,
                 container.profileQueryService,
-                container.profileCommandService
+                container.profileCommandService,
+                container.subscriptionPlanFacade
             )
         }
     })
