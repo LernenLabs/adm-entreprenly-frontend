@@ -1,14 +1,17 @@
 package online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories
 
+import java.time.LocalDate
 import kotlinx.coroutines.delay
 import online.entreprenly.entreprenlyapp.sales.domain.model.aggregates.Sale
 import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.CashRegisterSummary
+import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.DailySalesSummary
 import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.PaymentMethod
 import online.entreprenly.entreprenlyapp.sales.domain.repositories.SalesRepository
 import online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi
 import online.entreprenly.entreprenlyapp.sales.interfaces.rest.resources.CreateSaleRequest
 import online.entreprenly.entreprenlyapp.sales.interfaces.rest.resources.SaleItemResource
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCall
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCallWithBody
 
 class SalesRepositoryImpl(
@@ -57,6 +60,14 @@ class SalesRepositoryImpl(
             }
         }
     }
+
+    /** Real figures only: unlike the cash register above, a failure here is reported as a failure. */
+    override suspend fun getDailySummary(date: LocalDate): Result<DailySalesSummary> =
+        safeApiCall({ api.getSales(date.toString()) }) { body ->
+            val sales = body.orEmpty().filterNot { it.status.equals("CANCELLED", ignoreCase = true) }
+            val (cash, digital) = sales.partition { it.paymentMethod.equals("CASH", ignoreCase = true) }
+            DailySalesSummary(sales.size, cash.sumOf { it.total }, digital.sumOf { it.total })
+        }
 
     override suspend fun getCashRegisterSummary(): Result<CashRegisterSummary> {
         val apiResult = safeApiCallWithBody(

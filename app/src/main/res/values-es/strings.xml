@@ -126,4 +126,10 @@
     <string name="chatbot_session_expired_title">Sesión expirada</string>
     <string name="chatbot_session_expired_message">El chatbot no puede responder mensajes.</string>
     <string name="chatbot_relink">Volver a vincular</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Lote vencido</string>
+    <string name="home_alert_out_of_stock">Sin stock</string>
+    <string name="home_alert_expiring_soon">Lote por vencer</string>
+    <string name="home_alert_low_stock">Stock bajo</string>
 </resources>

@@ -19,6 +19,13 @@ data class SaleResource(
     val timestamp: String
 )
 
+/** Backend payment methods: CASH, YAPE, PLIN, CARD. */
+data class SaleSummaryResource(
+    val total: Double,
+    val paymentMethod: String?,
+    val status: String?
+)
+
 data class CashRegisterResource(
     val cashTotal: Double,
     val digitalTotal: Double

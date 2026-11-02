@@ -135,4 +135,10 @@
     <string name="chatbot_session_expired_title">Session expired</string>
     <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
     <string name="chatbot_relink">Link again</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Expired lot</string>
+    <string name="home_alert_out_of_stock">Out of stock</string>
+    <string name="home_alert_expiring_soon">Lot expiring soon</string>
+    <string name="home_alert_low_stock">Low stock</string>
 </resources>
