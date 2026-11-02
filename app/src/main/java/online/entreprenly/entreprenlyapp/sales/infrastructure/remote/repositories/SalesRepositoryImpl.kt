@@ -32,7 +32,8 @@ class SalesRepositoryImpl(
                     productName = it.productName,
                     quantity = if (it.isUnit) it.quantity.toInt() else null,
                     weightKg = if (it.isUnit) null else it.quantity,
-                    unitPrice = it.unitPrice
+                    unitPrice = it.unitPrice,
+                    subtotal = it.subtotal
                 )
             }
         )

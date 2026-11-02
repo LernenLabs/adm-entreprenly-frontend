@@ -2,7 +2,6 @@ package online.entreprenly.entreprenlyapp.shared.interfaces.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import java.time.LocalDate
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -29,6 +28,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetStock
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.AlertSeverity
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.AlertType
 import online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService
+import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.BusinessDay
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.state.HomeAlert
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.state.HomeAlertKind
@@ -64,7 +64,7 @@ class HomeViewModel(
     }
 
     private suspend fun load(current: HomeUiState): HomeUiState = coroutineScope {
-        val sales = async { salesQueryService.getDailySummary(LocalDate.now()) }
+        val sales = async { salesQueryService.getDailySummary(BusinessDay.today()) }
         val alerts = async { stockAlertQueryService.handle(GetStockAlertsQuery) }
         val products = async { productQueryService.handle(GetAllProductsQuery) }
         val chatbot = async { loadChatbot() }

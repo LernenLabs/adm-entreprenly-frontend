@@ -12,10 +12,10 @@ import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.Payment
 
 import online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService
 import online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService
+import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.BusinessDay
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
-import java.time.LocalDate
 
 data class SalesUiState(
     val cashTotalToday: Double = 0.0,
@@ -59,7 +59,7 @@ class SalesViewModel(
 
     private fun loadTodaySummary() {
         viewModelScope.launch {
-            val result = salesQueryService.getDailySummary(LocalDate.now())
+            val result = salesQueryService.getDailySummary(BusinessDay.today())
             if (result is Result.Success) {
                 _uiState.update {
                     it.copy(cashTotalToday = result.value.cashTotal, digitalTotalToday = result.value.digitalTotal)

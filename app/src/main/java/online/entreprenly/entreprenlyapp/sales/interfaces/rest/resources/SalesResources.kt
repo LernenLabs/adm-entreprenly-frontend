@@ -1,6 +1,6 @@
 package online.entreprenly.entreprenlyapp.sales.interfaces.rest.resources
 
-/** The backend recomputes the total and the subtotals, so they are not sent. */
+/** The backend recomputes the total, so it is not sent. */
 data class CreateSaleRequest(
     val sellerId: Long,
     val paymentMethod: String,
@@ -14,7 +14,9 @@ data class SaleItemResource(
     val productName: String,
     val quantity: Int?,
     val weightKg: Double?,
-    val unitPrice: Double
+    val unitPrice: Double,
+    /** Required by the backend even though it recomputes it: leaving it out fails with a 500. */
+    val subtotal: Double
 )
 
 data class SaleResource(
