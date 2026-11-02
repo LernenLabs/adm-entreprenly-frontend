@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -95,6 +96,12 @@ private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit)
         } else {
             base.createConfigurationContext(languageConfiguration)
         }
+    }
+    // Dialogs and bottom sheets are separate windows that rebuild these locals from the activity,
+    // so without this they ignore the chosen language and follow the device's.
+    SideEffect {
+        @Suppress("DEPRECATION")
+        base.resources.updateConfiguration(languageConfiguration, base.resources.displayMetrics)
     }
     CompositionLocalProvider(
         LocalContext provides localized,
