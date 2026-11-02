@@ -132,4 +132,9 @@
     <string name="home_alert_out_of_stock">Sin stock</string>
     <string name="home_alert_expiring_soon">Lote por vencer</string>
     <string name="home_alert_low_stock">Stock bajo</string>
+
+    <!-- Sales: errors -->
+    <string name="sales_error_title">La venta no se registró</string>
+    <string name="sales_error_message">No se pudo guardar. Tu ticket sigue ahí para que lo intentes de nuevo.</string>
+    <string name="sales_error_close">Cerrar</string>
 </resources>

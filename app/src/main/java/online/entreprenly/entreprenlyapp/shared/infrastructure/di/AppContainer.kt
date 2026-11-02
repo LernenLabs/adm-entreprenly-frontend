@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
 import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
@@ -36,6 +37,7 @@ import online.entreprenly.entreprenlyapp.iam.application.commandservices.UserCom
 import online.entreprenly.entreprenlyapp.iam.application.internal.commandservices.UserCommandServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.internal.queryservices.SessionQueryServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQueryService
+import online.entreprenly.entreprenlyapp.iam.domain.model.queries.GetCurrentSessionQuery
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
@@ -140,7 +142,9 @@ class AppContainer(context: Context) {
 
     // Sales
     private val salesApi = retrofit.create(online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi::class.java)
-    private val salesRepository = online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories.SalesRepositoryImpl(salesApi)
+    private val salesRepository = online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories.SalesRepositoryImpl(salesApi) {
+        sessionQueryService.handle(GetCurrentSessionQuery).first()?.userId
+    }
     
     val salesQueryService: online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService = 
         online.entreprenly.entreprenlyapp.sales.application.internal.queryservices.SalesQueryServiceImpl(salesRepository)

@@ -2,7 +2,6 @@ package online.entreprenly.entreprenlyapp.sales.application.internal.queryservic
 
 import online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService
 import java.time.LocalDate
-import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.CashRegisterSummary
 import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.DailySalesSummary
 import online.entreprenly.entreprenlyapp.sales.domain.repositories.SalesRepository
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
@@ -10,10 +9,6 @@ import online.entreprenly.entreprenlyapp.shared.application.result.Result
 class SalesQueryServiceImpl(
     private val salesRepository: SalesRepository
 ) : SalesQueryService {
-    override suspend fun getCashRegisterSummary(): Result<CashRegisterSummary> {
-        return salesRepository.getCashRegisterSummary()
-    }
-
     override suspend fun getDailySummary(date: LocalDate): Result<DailySalesSummary> =
         salesRepository.getDailySummary(date)
 }
