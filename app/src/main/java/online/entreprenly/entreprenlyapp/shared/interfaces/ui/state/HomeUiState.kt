@@ -1,10 +1,12 @@
 package online.entreprenly.entreprenlyapp.shared.interfaces.ui.state
 
+import androidx.annotation.StringRes
+
 enum class HomeAlertKind { WARNING, ERROR }
 
-data class HomeAlert(val kind: HomeAlertKind, val title: String, val detail: String)
+data class HomeAlert(val kind: HomeAlertKind, @param:StringRes val title: Int, val detail: String)
 
-data class HomeOrder(val code: String, val customer: String, val detail: String, val status: String)
+data class HomeOrder(val code: String, val customer: String?, val total: Double, @param:StringRes val status: Int)
 
 /**
  * Everything the home dashboard shows. The defaults describe a brand-new account (empty state);
@@ -20,5 +22,6 @@ data class HomeUiState(
     val chatbotConnected: Boolean = false,
     val alerts: List<HomeAlert> = emptyList(),
     val recentOrders: List<HomeOrder> = emptyList(),
-    val productCount: Int = 0
+    /** Null until loaded, so the "add your first product" card does not flash for existing stores. */
+    val productCount: Int? = null
 )

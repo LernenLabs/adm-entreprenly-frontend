@@ -10,6 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,9 +40,12 @@ import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.Profil
 import online.entreprenly.entreprenlyapp.sales.interfaces.ui.navigation.salesGraph
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.HomeScreen
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.viewmodels.HomeViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens.SplashScreen
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.EntreprenlyAppTheme
 import online.entreprenly.entreprenlyapp.subscription.interfaces.ui.navigation.subscriptionGraph
+
+private const val HOME_REFRESH_MILLIS = 20_000L
 
 /** Routes where the bottom navigation bar is visible. */
 private val barRoutes = setOf(
@@ -95,6 +99,12 @@ private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit)
         } else {
             base.createConfigurationContext(languageConfiguration)
         }
+    }
+    // Dialogs and bottom sheets are separate windows that rebuild these locals from the activity,
+    // so without this they ignore the chosen language and follow the device's.
+    SideEffect {
+        @Suppress("DEPRECATION")
+        base.resources.updateConfiguration(languageConfiguration, base.resources.displayMetrics)
     }
     CompositionLocalProvider(
         LocalContext provides localized,
@@ -158,12 +168,34 @@ fun AppNavigation(
         ) {
             iamGraph(navController, container, signedIn?.session?.email.orEmpty())
             composable(Routes.HOME) {
+                val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory {
+                    initializer {
+                        HomeViewModel(
+                            container.salesQueryService,
+                            container.stockAlertQueryService,
+                            container.productQueryService,
+                            container.subscriptionAccessFacade,
+                            container.chatOrderQueryService,
+                            container.conversationQueryService,
+                            container.whatsAppConnectionQueryService
+                        )
+                    }
+                })
+                val homeState by homeViewModel.state.collectAsState()
+                // Reloads on every return to the tab and keeps up with new sales and orders.
+                LaunchedEffect(Unit) {
+                    while (true) {
+                        homeViewModel.refresh()
+                        delay(HOME_REFRESH_MILLIS)
+                    }
+                }
                 HomeScreen(
                     userName = userName,
                     currencySymbol = currencySymbol,
                     onSell = { navController.navigateToTab(BottomTab.SELL) },
                     onInventory = { navController.navigateToTab(BottomTab.INVENTORY) },
-                    onOrders = { navController.navigateToTab(BottomTab.ORDERS) }
+                    onOrders = { navController.navigateToTab(BottomTab.ORDERS) },
+                    state = homeState
                 )
             }
             profileGraph(
