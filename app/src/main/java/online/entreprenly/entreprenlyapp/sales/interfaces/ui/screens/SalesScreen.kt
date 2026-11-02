@@ -14,9 +14,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.sales.domain.model.entities.SaleProduct
 import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.PaymentMethod
 import online.entreprenly.entreprenlyapp.sales.interfaces.ui.viewmodels.SalesUiState
@@ -163,6 +165,17 @@ fun SalesScreen(viewModel: SalesViewModel) {
             },
             confirmButton = {
                 TextButton(onClick = { viewModel.onToggleHistory(false) }) { Text("Cerrar") }
+            }
+        )
+    }
+
+    if (uiState.saleFailed) {
+        AlertDialog(
+            onDismissRequest = { viewModel.onDismissSaleError() },
+            title = { Text(stringResource(R.string.sales_error_title)) },
+            text = { Text(stringResource(R.string.sales_error_message)) },
+            confirmButton = {
+                PrimaryPillButton(stringResource(R.string.sales_error_close), onClick = { viewModel.onDismissSaleError() })
             }
         )
     }

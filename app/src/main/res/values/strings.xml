@@ -135,4 +135,15 @@
     <string name="chatbot_session_expired_title">Session expired</string>
     <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
     <string name="chatbot_relink">Link again</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Expired lot</string>
+    <string name="home_alert_out_of_stock">Out of stock</string>
+    <string name="home_alert_expiring_soon">Lot expiring soon</string>
+    <string name="home_alert_low_stock">Low stock</string>
+
+    <!-- Sales: errors -->
+    <string name="sales_error_title">The sale was not registered</string>
+    <string name="sales_error_message">It could not be saved. Your ticket is still there, so you can try again.</string>
+    <string name="sales_error_close">Close</string>
 </resources>
