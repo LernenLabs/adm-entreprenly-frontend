@@ -6,6 +6,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
@@ -84,6 +85,12 @@ class LotRepositoryImpl(private val api: InventoryApi) : LotRepository {
                 safeApiCallWithBody({ api.createUnitLot(command.toUnitResource()) }) { it.toEntity() }
             ProductType.WEIGHT ->
                 safeApiCallWithBody({ api.createWeightLot(command.toWeightResource()) }) { it.toEntity() }
+        }
+
+    override suspend fun delete(command: DeleteLotCommand): Result<Unit> =
+        when (command.type) {
+            ProductType.UNIT -> safeApiCall({ api.deleteUnitLot(command.id) }) { Unit }
+            ProductType.WEIGHT -> safeApiCall({ api.deleteWeightLot(command.id) }) { Unit }
         }
 }
 

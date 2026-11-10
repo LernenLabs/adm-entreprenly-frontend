@@ -116,6 +116,13 @@
     </plurals>
     <string name="inventory_lot_expired_title">Expired lot</string>
     <string name="inventory_lot_expired_message">Remove it from sale and update its stock.</string>
+    <string name="inventory_lot_delete">Delete lot</string>
+    <string name="inventory_lot_delete_title">Delete lot?</string>
+    <string name="inventory_lot_delete_message">Lot %1$s will be permanently deleted. This action cannot be undone.</string>
+    <string name="inventory_lot_deleted">Lot deleted successfully</string>
+    <string name="inventory_lot_delete_failed">Could not delete the lot</string>
+    <string name="inventory_delete">Delete</string>
+    <string name="inventory_cancel">Cancel</string>
 
     <!-- Inventory: formats -->
     <string name="inventory_money">S/ %1$.2f</string>

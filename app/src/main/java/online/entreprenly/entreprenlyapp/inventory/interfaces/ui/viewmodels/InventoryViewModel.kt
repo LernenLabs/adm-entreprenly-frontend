@@ -18,6 +18,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
@@ -75,6 +76,9 @@ class InventoryViewModel(
     private val _lotForm = MutableStateFlow(FormState())
     val lotForm: StateFlow<FormState> = _lotForm.asStateFlow()
 
+    private val _lotDeleteForm = MutableStateFlow(FormState())
+    val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
+
     init {
         refresh()
     }
@@ -101,6 +105,10 @@ class InventoryViewModel(
 
     fun clearLotForm() {
         _lotForm.value = FormState()
+    }
+
+    fun clearLotDeleteForm() {
+        _lotDeleteForm.value = FormState()
     }
 
     fun createProduct(command: CreateProductCommand) {
@@ -161,6 +169,28 @@ class InventoryViewModel(
                     )
                 }
                 is Result.Failure -> _lotForm.value = FormState(error = UiText.Raw(r.error.message))
+            }
+        }
+    }
+
+    fun deleteLot(type: ProductType, id: Long) {
+        if (_lotDeleteForm.value.loading) return
+        _lotDeleteForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = lotCommandService.handle(DeleteLotCommand(type, id))) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = null,
+                        notice = UiText.Res(R.string.inventory_lot_deleted),
+                        keepContent = true
+                    )
+                    _lotDeleteForm.value = FormState(success = UiText.Res(R.string.inventory_lot_deleted))
+                }
+                is Result.Failure -> _lotDeleteForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_lot_delete_failed),
+                    error = UiText.Raw(r.error.message)
+                )
             }
         }
     }

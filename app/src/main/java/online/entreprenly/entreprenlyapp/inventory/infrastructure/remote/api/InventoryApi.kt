@@ -13,6 +13,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Wei
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightProductResource
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -66,6 +67,9 @@ interface InventoryApi {
     @GET("api/v1/inventory-unit-lots/{id}")
     suspend fun getUnitLot(@Path("id") id: Long): Response<UnitLotResource>
 
+    @DELETE("api/v1/inventory-unit-lots/{id}")
+    suspend fun deleteUnitLot(@Path("id") id: Long): Response<Unit>
+
     // ---- Weight lots ----
 
     @POST("api/v1/inventory-weight-lots")
@@ -76,6 +80,9 @@ interface InventoryApi {
 
     @GET("api/v1/inventory-weight-lots/{id}")
     suspend fun getWeightLot(@Path("id") id: Long): Response<WeightLotResource>
+
+    @DELETE("api/v1/inventory-weight-lots/{id}")
+    suspend fun deleteWeightLot(@Path("id") id: Long): Response<Unit>
 
     // ---- Stock alerts ----
 

@@ -8,6 +8,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
@@ -54,4 +55,7 @@ class LotCommandServiceImpl(
 ) : LotCommandService {
     override suspend fun handle(command: CreateLotCommand): Result<Lot> =
         lotRepository.create(command)
+
+    override suspend fun handle(command: DeleteLotCommand): Result<Unit> =
+        lotRepository.delete(command)
 }

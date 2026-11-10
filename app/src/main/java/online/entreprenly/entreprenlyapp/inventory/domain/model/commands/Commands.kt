@@ -33,3 +33,9 @@ data class CreateLotCommand(
     val quantityUnits: Int,
     val quantityKg: Double
 )
+
+/** Deletes a lot. Identity is (type, id), matching the backend routes. */
+data class DeleteLotCommand(
+    val type: ProductType,
+    val id: Long
+)
