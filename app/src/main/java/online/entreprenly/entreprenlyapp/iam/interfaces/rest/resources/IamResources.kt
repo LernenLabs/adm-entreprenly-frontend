@@ -20,3 +20,6 @@ data class UserResource(val id: Long, val email: String, val roles: List<String>
 data class ChangeEmailResource(val email: String)
 
 data class ChangePasswordResource(val currentPassword: String, val newPassword: String)
+
+data class PasswordResetLinkResource(val userId: Long, val token: String)
+data class PasswordResetResource(val userId: Long, val token: String, val newPassword: String)

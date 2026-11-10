@@ -3,6 +3,8 @@ package online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.AuthenticatedUserResource
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.ChangeEmailResource
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.ChangePasswordResource
+import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.PasswordResetLinkResource
+import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.PasswordResetResource
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.SignInResource
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.SignUpResource
 import online.entreprenly.entreprenlyapp.iam.interfaces.rest.resources.UserResource
@@ -12,6 +14,15 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 
 interface IamApi {
+    @POST("api/v1/authentication/password-resets")
+    suspend fun requestPasswordReset(@Body resource: ChangeEmailResource): Response<Unit>
+
+    @POST("api/v1/authentication/password-resets/validate")
+    suspend fun validatePasswordReset(@Body resource: PasswordResetLinkResource): Response<Unit>
+
+    @POST("api/v1/authentication/password-resets/confirm")
+    suspend fun confirmPasswordReset(@Body resource: PasswordResetResource): Response<Unit>
+
     @POST("api/v1/authentication/sign-in")
     suspend fun signIn(@Body resource: SignInResource): Response<AuthenticatedUserResource>
 

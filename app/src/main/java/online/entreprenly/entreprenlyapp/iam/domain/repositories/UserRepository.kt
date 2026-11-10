@@ -6,10 +6,17 @@ import online.entreprenly.entreprenlyapp.iam.domain.model.commands.ChangePasswor
 import online.entreprenly.entreprenlyapp.iam.domain.model.commands.SignInCommand
 import online.entreprenly.entreprenlyapp.iam.domain.model.commands.SignUpCommand
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.AuthSession
+import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Email
+import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.Password
+import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.PasswordResetLink
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 
 /** Puerto hacia el IAM del backend. */
 interface UserRepository {
+    suspend fun requestPasswordReset(email: Email): Result<Unit>
+    suspend fun validatePasswordReset(link: PasswordResetLink): Result<Unit>
+    suspend fun confirmPasswordReset(link: PasswordResetLink, password: Password): Result<Unit>
+
     suspend fun signIn(command: SignInCommand): Result<AuthSession>
     suspend fun signUp(command: SignUpCommand): Result<User>
     suspend fun changePassword(command: ChangePasswordCommand): Result<Unit>
