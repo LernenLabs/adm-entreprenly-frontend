@@ -127,6 +127,11 @@
     </plurals>
     <string name="inventory_lot_expired_title">Expired lot</string>
     <string name="inventory_lot_expired_message">Remove it from sale and update its stock.</string>
+    <string name="inventory_lot_edit">Edit lot</string>
+    <string name="inventory_lot_edit_title">Edit lot</string>
+    <string name="inventory_lot_updated">Lot updated successfully</string>
+    <string name="inventory_lot_update_failed">Could not update the lot</string>
+    <string name="inventory_lot_date_note_edit">Choose the lot dates. Past dates are allowed for existing lots.</string>
     <string name="inventory_lot_delete">Delete lot</string>
     <string name="inventory_lot_delete_title">Delete lot?</string>
     <string name="inventory_lot_delete_message">Lot %1$s will be permanently deleted. This action cannot be undone.</string>

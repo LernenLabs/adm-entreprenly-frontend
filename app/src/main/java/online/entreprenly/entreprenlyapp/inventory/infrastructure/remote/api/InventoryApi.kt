@@ -7,7 +7,9 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Cre
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.StockAlertResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitProductResource
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateUnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateUnitProductResource
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightProductResource
@@ -73,6 +75,12 @@ interface InventoryApi {
     @GET("api/v1/inventory-unit-lots/{id}")
     suspend fun getUnitLot(@Path("id") id: Long): Response<UnitLotResource>
 
+    @PUT("api/v1/inventory-unit-lots/{id}")
+    suspend fun updateUnitLot(
+        @Path("id") id: Long,
+        @Body resource: UpdateUnitLotResource
+    ): Response<UnitLotResource>
+
     @DELETE("api/v1/inventory-unit-lots/{id}")
     suspend fun deleteUnitLot(@Path("id") id: Long): Response<Unit>
 
@@ -86,6 +94,12 @@ interface InventoryApi {
 
     @GET("api/v1/inventory-weight-lots/{id}")
     suspend fun getWeightLot(@Path("id") id: Long): Response<WeightLotResource>
+
+    @PUT("api/v1/inventory-weight-lots/{id}")
+    suspend fun updateWeightLot(
+        @Path("id") id: Long,
+        @Body resource: UpdateWeightLotResource
+    ): Response<WeightLotResource>
 
     @DELETE("api/v1/inventory-weight-lots/{id}")
     suspend fun deleteWeightLot(@Path("id") id: Long): Response<Unit>

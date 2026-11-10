@@ -25,10 +25,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +55,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.Inve
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryError
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryLoading
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.LotStatusPill
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SheetHeader
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.lotPill
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryState
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
@@ -60,10 +63,12 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText as SharedUiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 
 /**
  * Lot detail (US-06): status banner when it applies, plus status, product,
- * dates and current quantity. Deletion (US-04) is confirmed in a dialog.
+ * dates and current quantity. Editing (US-02) and deletion (US-04) open a
+ * sheet and a confirmation dialog respectively.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +82,7 @@ fun LotDetailScreen(
     val state by viewModel.state.collectAsState()
     val deleteForm by viewModel.lotDeleteForm.collectAsState()
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showEdit by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(type, id) { viewModel.clearLotDeleteForm() }
     LaunchedEffect(deleteForm.success) {
@@ -116,6 +122,7 @@ fun LotDetailScreen(
                         viewModel = viewModel,
                         refreshing = s.refreshing,
                         onBack = onBack,
+                        onEdit = { showEdit = true },
                         onDelete = { showDeleteDialog = true },
                         modifier = Modifier.padding(padding)
                     )
@@ -124,7 +131,31 @@ fun LotDetailScreen(
         }
     }
 
-    val currentLot = (state as? InventoryState.Ready)?.lot(type, id)
+    val ready = state as? InventoryState.Ready
+    val currentLot = ready?.lot(type, id)
+    if (showEdit && currentLot != null && ready != null) {
+        val product = ready.products.firstOrNull {
+            it.type == currentLot.type && it.id == currentLot.productId
+        }
+        ModalBottomSheet(
+            onDismissRequest = { showEdit = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            SheetHeader(
+                title = stringResource(R.string.inventory_lot_edit_title),
+                onClose = { showEdit = false },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            LotFormSheet(
+                viewModel = viewModel,
+                products = ready.products,
+                preselected = product,
+                locked = true,
+                initial = currentLot,
+                onClose = { showEdit = false }
+            )
+        }
+    }
     if (showDeleteDialog && currentLot != null) {
         DeleteLotDialog(
             lot = currentLot,
@@ -143,6 +174,7 @@ private fun LotDetailContent(
     viewModel: InventoryViewModel,
     refreshing: Boolean,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -249,6 +281,10 @@ private fun LotDetailContent(
                         )
                     }
                 }
+                PrimaryPillButton(
+                    text = stringResource(R.string.inventory_lot_edit),
+                    onClick = onEdit
+                )
                 DangerPillButton(
                     text = stringResource(R.string.inventory_lot_delete),
                     onClick = onDelete

@@ -7,6 +7,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.AlertSeverity
@@ -19,7 +20,9 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Cre
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.StockAlertResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitProductResource
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateUnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateUnitProductResource
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightProductResource
@@ -125,6 +128,21 @@ fun CreateLotCommand.toUnitResource() = CreateUnitLotResource(
 )
 
 fun CreateLotCommand.toWeightResource() = CreateWeightLotResource(
+    productId = productId,
+    codeQR = codeQR?.takeIf { it.isNotBlank() },
+    entryDate = entryDate.toResourceString(),
+    quantityKg = quantityKg
+)
+
+fun UpdateLotCommand.toUnitResource() = UpdateUnitLotResource(
+    productId = productId,
+    codeQR = codeQR?.takeIf { it.isNotBlank() },
+    entryDate = entryDate.toResourceString(),
+    quantity = quantityUnits,
+    expiryDate = expiryDate?.toResourceString()
+)
+
+fun UpdateLotCommand.toWeightResource() = UpdateWeightLotResource(
     productId = productId,
     codeQR = codeQR?.takeIf { it.isNotBlank() },
     entryDate = entryDate.toResourceString(),

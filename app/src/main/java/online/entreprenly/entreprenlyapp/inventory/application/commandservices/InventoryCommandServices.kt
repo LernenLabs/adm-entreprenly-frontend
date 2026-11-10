@@ -6,6 +6,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 
@@ -27,5 +28,6 @@ interface ProductCommandService {
 
 interface LotCommandService {
     suspend fun handle(command: CreateLotCommand): Result<Lot>
+    suspend fun handle(command: UpdateLotCommand): Result<Lot>
     suspend fun handle(command: DeleteLotCommand): Result<Unit>
 }

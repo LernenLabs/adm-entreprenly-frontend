@@ -9,6 +9,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
@@ -61,6 +62,9 @@ class ProductCommandServiceTest {
                 Lot(command.productType, 7, command.productId, null, command.entryDate, command.expiryDate, command.quantityUnits, command.quantityKg)
             )
         }
+        override suspend fun update(command: UpdateLotCommand): Result<Lot> =
+            Result.Failure(ApplicationError.Unexpected("not used"))
+
         override suspend fun delete(command: DeleteLotCommand): Result<Unit> = Result.Success(Unit)
     }
 

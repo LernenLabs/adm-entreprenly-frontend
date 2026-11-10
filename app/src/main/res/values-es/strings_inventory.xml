@@ -133,6 +133,11 @@
     </plurals>
     <string name="inventory_lot_expired_title">Lote vencido</string>
     <string name="inventory_lot_expired_message">Retíralo de la venta y actualiza su stock.</string>
+    <string name="inventory_lot_edit">Editar lote</string>
+    <string name="inventory_lot_edit_title">Editar lote</string>
+    <string name="inventory_lot_updated">Lote actualizado correctamente</string>
+    <string name="inventory_lot_update_failed">No se pudo actualizar el lote</string>
+    <string name="inventory_lot_date_note_edit">Elige las fechas del lote. Se permiten fechas pasadas en lotes existentes.</string>
     <string name="inventory_lot_delete">Eliminar lote</string>
     <string name="inventory_lot_delete_title">¿Eliminar lote?</string>
     <string name="inventory_lot_delete_message">El lote %1$s se eliminará permanentemente. Esta acción no se puede deshacer.</string>

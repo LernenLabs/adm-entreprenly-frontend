@@ -229,6 +229,17 @@ class InventoryRulesTest {
     }
 
     @Test
+    fun validations_lotEditsAllowPastDatesAndZeroQuantity() {
+        val entry = today.minusDays(30)
+        assertTrue(InventoryRules.isValidExpiry(today.minusDays(1), entry, today, allowPast = true))
+        assertFalse(InventoryRules.isValidExpiry(entry.minusDays(1), entry, today, allowPast = true))
+        assertTrue(InventoryRules.isValidLotQuantity(ProductType.UNIT, "0", allowZero = true))
+        assertTrue(InventoryRules.isValidLotQuantity(ProductType.WEIGHT, "0", allowZero = true))
+        assertFalse(InventoryRules.isValidLotQuantity(ProductType.UNIT, "0"))
+        assertFalse(InventoryRules.isValidLotQuantity(ProductType.WEIGHT, "0"))
+    }
+
+    @Test
     fun initials_followDesignExamples() {
         assertEquals("LG", InventoryRules.initials("Leche Gloria 400 g"))
         assertEquals("MA", InventoryRules.initials("Manzanas"))

@@ -38,8 +38,10 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryTextField
@@ -51,8 +53,8 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.Primary
 private val SheetDateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy", Locale.ROOT)
 
 /**
- * Create-lot sheet content (US-03). [preselected] with [locked] comes from an
- * out-of-stock product: the product is fixed and cannot be changed.
+ * Create/edit lot sheet content (US-03, US-02). [preselected] with [locked]
+ * fixes the product; [initial] turns the form into an edit of that lot.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -61,22 +63,34 @@ fun LotFormSheet(
     products: List<Product>,
     preselected: Product?,
     locked: Boolean,
+    initial: Lot? = null,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val today = InventoryRules.todayUtc()
-    var query by rememberSaveable(preselected?.key) { mutableStateOf(preselected?.name.orEmpty()) }
-    var selectedKey by rememberSaveable(preselected?.key) { mutableStateOf(preselected?.key) }
+    val editing = initial != null
+    val initialEntry = initial?.entryDate?.let(InventoryRules::instantToLocalDate) ?: today
+    var query by rememberSaveable(preselected?.key, initial?.key) { mutableStateOf(preselected?.name.orEmpty()) }
+    var selectedKey by rememberSaveable(preselected?.key, initial?.key) { mutableStateOf(preselected?.key) }
     var selectorTouched by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var codeQR by rememberSaveable { mutableStateOf("") }
-    var quantity by rememberSaveable { mutableStateOf("") }
+    var codeQR by rememberSaveable(initial?.key) { mutableStateOf(initial?.codeQR.orEmpty()) }
+    var quantity by rememberSaveable(initial?.key) {
+        mutableStateOf(
+            initial?.let {
+                if (it.type == ProductType.UNIT) it.quantityUnits.toString()
+                else InventoryRules.formatKg(it.quantityKg)
+            }.orEmpty()
+        )
+    }
     var quantityTouched by rememberSaveable { mutableStateOf(false) }
     // Dates are kept as UTC-millis Longs: LocalDate is not Bundle-saveable.
-    var entryMillis by rememberSaveable {
-        mutableLongStateOf(InventoryRules.localDateToInstant(today).toEpochMilli())
+    var entryMillis by rememberSaveable(initial?.key) {
+        mutableLongStateOf(InventoryRules.localDateToInstant(initialEntry).toEpochMilli())
     }
-    var expiryMillis by rememberSaveable { mutableStateOf<Long?>(null) }
+    var expiryMillis by rememberSaveable(initial?.key) {
+        mutableStateOf(initial?.expiryDate?.toEpochMilli())
+    }
     var expiryTouched by rememberSaveable { mutableStateOf(false) }
     var submitted by rememberSaveable { mutableStateOf(false) }
     var picking by rememberSaveable { mutableStateOf<String?>(null) }
@@ -84,12 +98,16 @@ fun LotFormSheet(
     val entryDate = Instant.ofEpochMilli(entryMillis).atZone(ZoneOffset.UTC).toLocalDate()
     val expiryDate = expiryMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toLocalDate() }
 
-    val form by viewModel.lotForm.collectAsState()
-    LaunchedEffect(preselected?.key) { viewModel.clearLotForm() }
+    val createForm by viewModel.lotForm.collectAsState()
+    val editForm by viewModel.lotEditForm.collectAsState()
+    val form = if (editing) editForm else createForm
+    LaunchedEffect(preselected?.key, initial?.key) {
+        if (editing) viewModel.clearLotEditForm() else viewModel.clearLotForm()
+    }
     LaunchedEffect(form.success) {
         if (form.success != null) {
             onClose()
-            viewModel.clearLotForm()
+            if (editing) viewModel.clearLotEditForm() else viewModel.clearLotForm()
         }
     }
 
@@ -100,10 +118,12 @@ fun LotFormSheet(
     val productError = (effective == null).takeIf { it }?.let {
         stringResource(R.string.inventory_lot_select_product)
     }
-    val quantityError = (effective == null || !InventoryRules.isValidLotQuantity(effective.type, quantity))
-        .takeIf { it }?.let { stringResource(R.string.inventory_form_required) }
+    val quantityError = (
+        effective == null ||
+            !InventoryRules.isValidLotQuantity(effective.type, quantity, allowZero = editing)
+        ).takeIf { it }?.let { stringResource(R.string.inventory_form_required) }
     val expiryError = if (effective?.type == ProductType.UNIT) {
-        (!InventoryRules.isValidExpiry(expiryDate, entryDate, today)).takeIf { it }?.let {
+        (!InventoryRules.isValidExpiry(expiryDate, entryDate, today, allowPast = editing)).takeIf { it }?.let {
             stringResource(R.string.inventory_form_required)
         }
     } else null
@@ -236,7 +256,9 @@ fun LotFormSheet(
         }
         form.error?.let { ErrorBanner(title = it.asString(), message = null) }
         PrimaryPillButton(
-            text = stringResource(R.string.inventory_lot_add),
+            text = stringResource(
+                if (editing) R.string.inventory_form_save_changes else R.string.inventory_lot_add
+            ),
             onClick = {
                 submitted = true
                 selectorTouched = true
@@ -250,19 +272,36 @@ fun LotFormSheet(
                 val qtyKg = if (product.type == ProductType.WEIGHT) {
                     InventoryRules.parseWeightStock(quantity) ?: return@PrimaryPillButton
                 } else 0.0
-                viewModel.createLot(
-                    CreateLotCommand(
-                        productType = product.type,
-                        productId = product.id,
-                        codeQR = codeQR.takeIf { it.isNotBlank() },
-                        entryDate = InventoryRules.localDateToInstant(entryDate),
-                        expiryDate = if (product.type == ProductType.UNIT) {
-                            expiryDate?.let(InventoryRules::localDateToInstant)
-                        } else null,
-                        quantityUnits = qtyUnits,
-                        quantityKg = qtyKg
+                val entry = InventoryRules.localDateToInstant(entryDate)
+                val expiry = if (product.type == ProductType.UNIT) {
+                    expiryDate?.let(InventoryRules::localDateToInstant)
+                } else null
+                if (initial == null) {
+                    viewModel.createLot(
+                        CreateLotCommand(
+                            productType = product.type,
+                            productId = product.id,
+                            codeQR = codeQR.takeIf { it.isNotBlank() },
+                            entryDate = entry,
+                            expiryDate = expiry,
+                            quantityUnits = qtyUnits,
+                            quantityKg = qtyKg
+                        )
                     )
-                )
+                } else {
+                    viewModel.updateLot(
+                        UpdateLotCommand(
+                            type = initial.type,
+                            id = initial.id,
+                            productId = product.id,
+                            codeQR = codeQR.takeIf { it.isNotBlank() },
+                            entryDate = entry,
+                            expiryDate = expiry,
+                            quantityUnits = qtyUnits,
+                            quantityKg = qtyKg
+                        )
+                    )
+                }
             },
             enabled = valid && !form.loading
         )
@@ -277,7 +316,7 @@ fun LotFormSheet(
             initialSelectedDateMillis = initialMillis,
             selectableDates = object : SelectableDates {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
-                    if (utcTimeMillis < todayStart) return false
+                    if (!editing && utcTimeMillis < todayStart) return false
                     if (forExpiry && utcTimeMillis < entryStart) return false
                     return true
                 }
@@ -308,7 +347,10 @@ fun LotFormSheet(
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    stringResource(R.string.inventory_lot_date_note),
+                    stringResource(
+                        if (editing) R.string.inventory_lot_date_note_edit
+                        else R.string.inventory_lot_date_note
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

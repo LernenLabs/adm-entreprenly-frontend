@@ -206,19 +206,32 @@ object InventoryRules {
 
     fun isValidProductName(name: String): Boolean = name.trim().isNotEmpty()
 
-    /** Lot quantity must be strictly > 0. */
-    fun isValidLotQuantity(type: ProductType, quantityText: String): Boolean =
+    /** Lot quantity must be > 0 on creation; edits may set it to 0. */
+    fun isValidLotQuantity(
+        type: ProductType,
+        quantityText: String,
+        allowZero: Boolean = false
+    ): Boolean =
         if (type == ProductType.UNIT) {
             val v = parseUnitStock(quantityText)
-            v != null && v > 0
+            v != null && if (allowZero) v >= 0 else v > 0
         } else {
             val v = parseWeightStock(quantityText)
-            v != null && v > 0.0
+            v != null && if (allowZero) v >= 0.0 else v > 0.0
         }
 
-    /** Expiry (unit only): required, not before today and not before entry date. */
-    fun isValidExpiry(expiry: LocalDate?, entry: LocalDate, today: LocalDate = todayUtc()): Boolean {
+    /**
+     * Expiry (unit only): required and not before the entry date. On creation it
+     * also cannot be before today; edits may keep an already-expired lot.
+     */
+    fun isValidExpiry(
+        expiry: LocalDate?,
+        entry: LocalDate,
+        today: LocalDate = todayUtc(),
+        allowPast: Boolean = false
+    ): Boolean {
         if (expiry == null) return false
-        return !expiry.isBefore(today) && !expiry.isBefore(entry)
+        if (!allowPast && expiry.isBefore(today)) return false
+        return !expiry.isBefore(entry)
     }
 }

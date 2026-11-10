@@ -20,6 +20,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
@@ -77,6 +78,9 @@ class InventoryViewModel(
     private val _lotForm = MutableStateFlow(FormState())
     val lotForm: StateFlow<FormState> = _lotForm.asStateFlow()
 
+    private val _lotEditForm = MutableStateFlow(FormState())
+    val lotEditForm: StateFlow<FormState> = _lotEditForm.asStateFlow()
+
     private val _lotDeleteForm = MutableStateFlow(FormState())
     val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
 
@@ -109,6 +113,10 @@ class InventoryViewModel(
 
     fun clearLotForm() {
         _lotForm.value = FormState()
+    }
+
+    fun clearLotEditForm() {
+        _lotEditForm.value = FormState()
     }
 
     fun clearLotDeleteForm() {
@@ -177,6 +185,28 @@ class InventoryViewModel(
                     )
                 }
                 is Result.Failure -> _lotForm.value = FormState(error = UiText.Raw(r.error.message))
+            }
+        }
+    }
+
+    fun updateLot(command: UpdateLotCommand) {
+        if (_lotEditForm.value.loading) return
+        _lotEditForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = lotCommandService.handle(command)) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = r.value.key,
+                        notice = UiText.Res(R.string.inventory_lot_updated),
+                        keepContent = true
+                    )
+                    _lotEditForm.value = FormState(success = UiText.Res(R.string.inventory_lot_updated))
+                }
+                is Result.Failure -> _lotEditForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_lot_update_failed),
+                    error = UiText.Raw(r.error.message)
+                )
             }
         }
     }
