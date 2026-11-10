@@ -2,6 +2,7 @@ package online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configura
 
 import com.google.gson.Gson
 import java.io.IOException
+import kotlinx.coroutines.CancellationException
 import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.rest.resources.ErrorResource
@@ -18,6 +19,8 @@ suspend fun <D, T> safeApiCall(
     } else {
         Result.Failure(response.toApplicationError())
     }
+} catch (e: CancellationException) {
+    throw e
 } catch (e: IOException) {
     Result.Failure(ApplicationError.Network("Could not reach the server"))
 } catch (e: Exception) {

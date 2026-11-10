@@ -155,13 +155,14 @@ fun OrderDetailScreen(
         )
     }
     if (order != null && showApprove) {
+        val confirmation = stringResource(R.string.order_approved_message, order.orderNumber, formatMoney(order.total))
         ApprovePaymentDialog(
             order = order,
             clientName = clientName,
             onDismiss = { showApprove = false },
             onConfirm = {
                 showApprove = false
-                viewModel.approvePayment(order)
+                viewModel.approvePayment(order, confirmation)
             }
         )
     }

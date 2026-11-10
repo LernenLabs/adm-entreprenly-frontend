@@ -2,7 +2,6 @@ package online.entreprenly.entreprenlyapp.chatbot.interfaces.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -44,12 +43,29 @@ fun NavGraphBuilder.chatbotGraph(navController: NavController, container: AppCon
                 ChatViewModel(conversationId, container.chatMessageQueryService, container.chatMessageCommandService)
             }
         })
-        val chatbotState by ordersViewModel(navController, entry, container).state.collectAsState()
+        val ordersVm = ordersViewModel(navController, entry, container)
+        val ready = ordersVm.state.collectAsState().value as? ChatbotState.Ready
         ChatScreen(
             viewModel = vm,
-            clientName = (chatbotState as? ChatbotState.Ready)?.conversation(conversationId)?.displayName,
+            clientName = ready?.conversation(conversationId)?.displayName,
+            // The backend stores each receipt on its order: an image message shows the receipt of
+            // the latest order created before it, so older receipts are not replaced by newer ones.
+            receiptFor = { message ->
+                ready?.orders
+                    ?.filter { it.conversationId == conversationId && it.receiptImage != null }
+                    ?.sortedBy { it.createdAt ?: java.time.Instant.MIN }
+                    ?.let { withReceipt ->
+                        withReceipt.lastOrNull { order ->
+                            val created = order.createdAt
+                            val sent = message.sentAt
+                            created == null || sent == null || !created.isAfter(sent)
+                        } ?: withReceipt.lastOrNull()
+                    }
+                    ?.receiptImage
+            },
             onBack = { navController.popBackStack() },
-            onViewPlans = onViewPlans
+            onViewPlans = onViewPlans,
+            onMessagesChanged = { ordersVm.refresh(silent = true) }
         )
     }
     composable(

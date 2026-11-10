@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -35,6 +36,8 @@ fun MoreScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val profile: Profile? = (state as? ProfileUiState.Loaded)?.profile
+    // The plan may have changed in the subscription screen since the profile was loaded.
+    LaunchedEffect(Unit) { viewModel.refreshPlan() }
 
     Column(modifier.fillMaxSize()) {
         AppTopBar(stringResource(R.string.more_title))
@@ -43,10 +46,10 @@ fun MoreScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             profile?.let { ProfileHeaderCard(it, showBiography = false) }
+            NavigationCard(stringResource(R.string.more_subscription), profile?.plan ?: stringResource(R.string.more_subscription_sub), onClick = onSubscription)
             NavigationCard(stringResource(R.string.more_profile), stringResource(R.string.more_profile_sub), onClick = onProfile)
             NavigationCard(stringResource(R.string.more_preferences), stringResource(R.string.more_preferences_sub), onClick = onPreferences)
             NavigationCard(stringResource(R.string.more_notifications), stringResource(R.string.more_notifications_sub), onClick = onNotifications)
-            NavigationCard(stringResource(R.string.more_subscription), stringResource(R.string.more_subscription_sub), onClick = onSubscription)
             NavigationCard(stringResource(R.string.more_account_security), stringResource(R.string.more_account_security_sub), onClick = onAccountSecurity)
             SecondaryPillButton(stringResource(R.string.more_sign_out), onSignOut)
         }

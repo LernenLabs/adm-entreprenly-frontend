@@ -18,14 +18,20 @@ class ChatOrderCommandServiceImpl(
     /** Stock deduction and sale registration happen in the backend on CONFIRMED. */
     override suspend fun handle(command: ApproveOrderPaymentCommand): Result<ChatOrder> =
         chatOrderRepository.updateStatus(command.orderId, OrderStatus.CONFIRMED, hasReceipt = true)
+            .also { notifyClient(it, command.conversationId, command.message) }
 
     /** The backend counts the rejection (and blocks the order after too many). */
     override suspend fun handle(command: RejectOrderPaymentCommand): Result<ChatOrder> =
         chatOrderRepository.updateStatus(command.orderId, OrderStatus.WAITING_PAYMENT, hasReceipt = false)
-            .also {
-                // Best effort: the rejection already happened even if the reason fails to send.
-                if (it is Result.Success && command.message.isNotBlank()) {
-                    chatMessageRepository.send(SendChatMessageCommand(command.conversationId, command.message))
-                }
-            }
+            .also { notifyClient(it, command.conversationId, command.message) }
+
+    /**
+     * Sends [message] as a bot message once the status change succeeded; the backend relays bot
+     * messages to the client's WhatsApp. Best effort: the decision stands even if it fails.
+     */
+    private suspend fun notifyClient(result: Result<ChatOrder>, conversationId: Long, message: String) {
+        if (result is Result.Success && message.isNotBlank()) {
+            chatMessageRepository.send(SendChatMessageCommand(conversationId, message))
+        }
+    }
 }

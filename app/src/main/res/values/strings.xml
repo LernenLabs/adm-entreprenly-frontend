@@ -74,7 +74,8 @@
     <string name="chat_message_hint">Write a message…</string>
     <string name="chat_send">Send</string>
     <string name="chat_empty">No messages in this conversation yet.</string>
-    <string name="chat_image_message">Image</string>
+    <string name="chat_receipt_message">Payment receipt</string>
+    <string name="chat_jump_to_latest">Go to the latest messages</string>
 
     <!-- Chatbot: order detail -->
     <string name="common_cancel">Cancel</string>
@@ -108,6 +109,7 @@
     <string name="order_reject_reason_other">Other reason</string>
     <string name="order_reject_detail">Detail (optional)</string>
     <string name="order_reject_confirm">Confirm rejection</string>
+    <string name="order_approved_message">Payment approved! Your order %1$s for %2$s is confirmed. Thanks for your purchase, we are preparing it.</string>
     <string name="order_reject_message">We could not validate your payment for order %1$s. Reason: %2$s. Please send a new receipt.</string>
     <string name="order_approve_title">Approve payment of %1$s?</string>
     <string name="order_approve_message">Stock will be deducted and the sale registered for %1$s\'s order.</string>
@@ -133,4 +135,15 @@
     <string name="chatbot_session_expired_title">Session expired</string>
     <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
     <string name="chatbot_relink">Link again</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Expired lot</string>
+    <string name="home_alert_out_of_stock">Out of stock</string>
+    <string name="home_alert_expiring_soon">Lot expiring soon</string>
+    <string name="home_alert_low_stock">Low stock</string>
+
+    <!-- Sales: errors -->
+    <string name="sales_error_title">The sale was not registered</string>
+    <string name="sales_error_message">It could not be saved. Your ticket is still there, so you can try again.</string>
+    <string name="sales_error_close">Close</string>
 </resources>

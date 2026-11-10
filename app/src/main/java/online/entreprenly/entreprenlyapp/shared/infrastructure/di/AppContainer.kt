@@ -4,8 +4,15 @@ import android.content.Context
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
+import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.internal.queryservices.SubscriptionQueryServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.commandservices.SubscriptionCommandService
+import online.entreprenly.entreprenlyapp.subscription.application.queryservices.SubscriptionQueryService
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.api.SubscriptionApi
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.repositories.SubscriptionRepositoryImpl
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatOrderCommandService
@@ -30,6 +37,7 @@ import online.entreprenly.entreprenlyapp.iam.application.commandservices.UserCom
 import online.entreprenly.entreprenlyapp.iam.application.internal.commandservices.UserCommandServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.internal.queryservices.SessionQueryServiceImpl
 import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQueryService
+import online.entreprenly.entreprenlyapp.iam.domain.model.queries.GetCurrentSessionQuery
 import online.entreprenly.entreprenlyapp.iam.infrastructure.local.SessionRepositoryImpl
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.api.IamApi
 import online.entreprenly.entreprenlyapp.iam.infrastructure.remote.repositories.UserRepositoryImpl
@@ -47,14 +55,17 @@ import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.Inv
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.StockAlertRepositoryImpl
+import online.entreprenly.entreprenlyapp.profile.application.acl.SubscriptionPlanFacade
 import online.entreprenly.entreprenlyapp.profile.application.commandservices.ProfileCommandService
 import online.entreprenly.entreprenlyapp.profile.application.internal.commandservices.ProfileCommandServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.internal.queryservices.ProfileQueryServiceImpl
 import online.entreprenly.entreprenlyapp.profile.application.queryservices.ProfileQueryService
+import online.entreprenly.entreprenlyapp.profile.infrastructure.acl.SubscriptionPlanFacadeImpl
 import online.entreprenly.entreprenlyapp.profile.infrastructure.local.LocalPreferencesRepositoryImpl
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.ProfilesApi
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.RetrofitFactory
+import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.WarmUpApi
 
 /** Composition root manual (sin framework de DI). Un solo contenedor por proceso. */
 class AppContainer(context: Context) {
@@ -86,6 +97,16 @@ class AppContainer(context: Context) {
         ProfileCommandServiceImpl(profileRepository, localPreferences)
     val profileQueryService: ProfileQueryService =
         ProfileQueryServiceImpl(profileRepository, localPreferences)
+
+    // Subscription
+    private val subscriptionRepository = SubscriptionRepositoryImpl(
+        retrofit.create(SubscriptionApi::class.java)
+    )
+    val subscriptionQueryService: SubscriptionQueryService =
+        SubscriptionQueryServiceImpl(subscriptionRepository)
+    val subscriptionCommandService: SubscriptionCommandService =
+        SubscriptionCommandServiceImpl(subscriptionRepository)
+    val subscriptionPlanFacade: SubscriptionPlanFacade = SubscriptionPlanFacadeImpl(subscriptionQueryService)
 
     // Chatbot
     private val chatbotApi = retrofit.create(ChatbotApi::class.java)
@@ -119,8 +140,21 @@ class AppContainer(context: Context) {
         ProductCommandServiceImpl(productRepository, lotRepository)
     val lotCommandService: LotCommandService = LotCommandServiceImpl(lotRepository)
 
+    // Sales
+    private val salesApi = retrofit.create(online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi::class.java)
+    private val salesRepository = online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories.SalesRepositoryImpl(salesApi) {
+        sessionQueryService.handle(GetCurrentSessionQuery).first()?.userId
+    }
+    
+    val salesQueryService: online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.queryservices.SalesQueryServiceImpl(salesRepository)
+    val salesCommandService: online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService = 
+        online.entreprenly.entreprenlyapp.sales.application.internal.commandservices.SalesCommandServiceImpl(salesRepository)
+
     init {
         // Mantiene el token en memoria para el interceptor HTTP.
         scope.launch { sessionRepository.session.collect { token = it?.token } }
+        // Despierta el backend de Render mientras el usuario ve el splash o escribe sus credenciales.
+        scope.launch { runCatching { retrofit.create(WarmUpApi::class.java).ping() } }
     }
 }
