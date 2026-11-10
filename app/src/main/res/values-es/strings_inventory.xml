@@ -107,6 +107,11 @@
     <string name="inventory_lot_product">Producto*</string>
     <string name="inventory_lot_search_product">Buscar producto</string>
     <string name="inventory_lot_select_product">Selecciona un producto</string>
+    <string name="inventory_lot_quantity_required">Ingresa la cantidad</string>
+    <string name="inventory_lot_quantity_invalid">La cantidad debe ser mayor a 0</string>
+    <string name="inventory_lot_expiry_required">Selecciona la fecha de vencimiento</string>
+    <string name="inventory_lot_expiry_before_entry">El vencimiento no puede ser anterior a la fecha de ingreso</string>
+    <string name="inventory_lot_expiry_before_today">El vencimiento no puede ser anterior a hoy</string>
     <string name="inventory_lot_number">N° de lote</string>
     <string name="inventory_lot_quantity">Cantidad*</string>
     <string name="inventory_lot_entry_date">Fecha de ingreso*</string>

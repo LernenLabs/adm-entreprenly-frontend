@@ -102,6 +102,11 @@
     <string name="inventory_lot_product">Product*</string>
     <string name="inventory_lot_search_product">Search product</string>
     <string name="inventory_lot_select_product">Select a product</string>
+    <string name="inventory_lot_quantity_required">Enter the quantity</string>
+    <string name="inventory_lot_quantity_invalid">Quantity must be greater than 0</string>
+    <string name="inventory_lot_expiry_required">Select the expiry date</string>
+    <string name="inventory_lot_expiry_before_entry">Expiry cannot be before the entry date</string>
+    <string name="inventory_lot_expiry_before_today">Expiry cannot be before today</string>
     <string name="inventory_lot_number">Lot No.</string>
     <string name="inventory_lot_quantity">Quantity*</string>
     <string name="inventory_lot_entry_date">Entry date*</string>

@@ -118,13 +118,20 @@ fun LotFormSheet(
     val productError = (effective == null).takeIf { it }?.let {
         stringResource(R.string.inventory_lot_select_product)
     }
-    val quantityError = (
-        effective == null ||
-            !InventoryRules.isValidLotQuantity(effective.type, quantity, allowZero = editing)
-        ).takeIf { it }?.let { stringResource(R.string.inventory_form_required) }
+    val quantityError = effective?.let { product ->
+        when {
+            quantity.isBlank() -> stringResource(R.string.inventory_lot_quantity_required)
+            !InventoryRules.isValidLotQuantity(product.type, quantity, allowZero = editing) ->
+                stringResource(R.string.inventory_lot_quantity_invalid)
+            else -> null
+        }
+    }
     val expiryError = if (effective?.type == ProductType.UNIT) {
-        (!InventoryRules.isValidExpiry(expiryDate, entryDate, today, allowPast = editing)).takeIf { it }?.let {
-            stringResource(R.string.inventory_form_required)
+        when {
+            expiryDate == null -> stringResource(R.string.inventory_lot_expiry_required)
+            expiryDate.isBefore(entryDate) -> stringResource(R.string.inventory_lot_expiry_before_entry)
+            !editing && expiryDate.isBefore(today) -> stringResource(R.string.inventory_lot_expiry_before_today)
+            else -> null
         }
     } else null
 
