@@ -48,11 +48,21 @@ fun NavGraphBuilder.chatbotGraph(navController: NavController, container: AppCon
         ChatScreen(
             viewModel = vm,
             clientName = ready?.conversation(conversationId)?.displayName,
-            // Latest receipt the client sent in this conversation (the backend stores it on the order).
-            receiptImage = ready?.orders
-                ?.filter { it.conversationId == conversationId && it.receiptImage != null }
-                ?.maxByOrNull { it.createdAt ?: java.time.Instant.MIN }
-                ?.receiptImage,
+            // The backend stores each receipt on its order: an image message shows the receipt of
+            // the latest order created before it, so older receipts are not replaced by newer ones.
+            receiptFor = { message ->
+                ready?.orders
+                    ?.filter { it.conversationId == conversationId && it.receiptImage != null }
+                    ?.sortedBy { it.createdAt ?: java.time.Instant.MIN }
+                    ?.let { withReceipt ->
+                        withReceipt.lastOrNull { order ->
+                            val created = order.createdAt
+                            val sent = message.sentAt
+                            created == null || sent == null || !created.isAfter(sent)
+                        } ?: withReceipt.lastOrNull()
+                    }
+                    ?.receiptImage
+            },
             onBack = { navController.popBackStack() },
             onViewPlans = onViewPlans,
             onMessagesChanged = { ordersVm.refresh(silent = true) }

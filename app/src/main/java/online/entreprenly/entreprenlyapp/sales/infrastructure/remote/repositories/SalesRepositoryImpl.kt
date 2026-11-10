@@ -1,81 +1,59 @@
 package online.entreprenly.entreprenlyapp.sales.infrastructure.remote.repositories
 
-import kotlinx.coroutines.delay
+import java.time.LocalDate
 import online.entreprenly.entreprenlyapp.sales.domain.model.aggregates.Sale
-import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.CashRegisterSummary
+import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.DailySalesSummary
 import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.PaymentMethod
 import online.entreprenly.entreprenlyapp.sales.domain.repositories.SalesRepository
 import online.entreprenly.entreprenlyapp.sales.infrastructure.remote.api.SalesApi
 import online.entreprenly.entreprenlyapp.sales.interfaces.rest.resources.CreateSaleRequest
 import online.entreprenly.entreprenlyapp.sales.interfaces.rest.resources.SaleItemResource
+import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCall
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCallWithBody
 
 class SalesRepositoryImpl(
-    private val api: SalesApi
+    private val api: SalesApi,
+    private val currentUserId: suspend () -> Long?
 ) : SalesRepository {
 
-    // --- Mocks: Simulan los datos en caso la API no esté disponible o haya problemas de red.
-    private var mockCashTotal = 150.50
-    private var mockDigitalTotal = 320.00
-    private val mockSales = mutableListOf<Sale>()
-
+    /** A sale only counts once the backend saved it: failures reach the seller, ticket intact. */
     override suspend fun createSale(sale: Sale): Result<Sale> {
+        val sellerId = currentUserId()
+            ?: return Result.Failure(ApplicationError.Unauthorized("No active session"))
         val request = CreateSaleRequest(
-            paymentMethod = sale.paymentMethod.name,
-            total = sale.total,
+            sellerId = sellerId,
+            paymentMethod = sale.paymentMethod.toBackendValue(),
+            status = STATUS_COMPLETED,
             items = sale.items.map {
                 SaleItemResource(
-                    productId = it.productId,
-                    quantity = it.quantity,
-                    unitPrice = it.unitPrice
+                    productId = it.productId.toLongOrNull(),
+                    productName = it.productName,
+                    quantity = if (it.isUnit) it.quantity.toInt() else null,
+                    weightKg = if (it.isUnit) null else it.quantity,
+                    unitPrice = it.unitPrice,
+                    subtotal = it.subtotal
                 )
             }
         )
-
-        val apiResult = safeApiCallWithBody(
-            call = { api.createSale(request) },
-            transform = { response -> 
-                // En un escenario real, reconstruimos la entidad a partir de los datos recibidos.
-                sale.copy(id = response.id) 
-            }
-        )
-
-        return when (apiResult) {
-            is Result.Success -> apiResult
-            is Result.Failure -> {
-                // FALLBACK: Simulamos un retardo de red de 800ms
-                delay(800)
-                mockSales.add(sale)
-                if (sale.paymentMethod == PaymentMethod.CASH) {
-                    mockCashTotal += sale.total
-                } else {
-                    mockDigitalTotal += sale.total
-                }
-                // Como es offline/fallback, devolvemos el Sale generado localmente (que ya tiene UUID)
-                Result.Success(sale) 
-            }
-        }
+        return safeApiCallWithBody({ api.createSale(request) }) { response -> sale.copy(id = response.id) }
     }
 
-    override suspend fun getCashRegisterSummary(): Result<CashRegisterSummary> {
-        val apiResult = safeApiCallWithBody(
-            call = { api.getCashRegisters() },
-            transform = { response ->
-                CashRegisterSummary(
-                    cashTotal = response.cashTotal,
-                    digitalTotal = response.digitalTotal
-                )
-            }
-        )
-
-        return when (apiResult) {
-            is Result.Success -> apiResult
-            is Result.Failure -> {
-                // FALLBACK: Simulamos un retardo de red de 500ms
-                delay(500)
-                Result.Success(CashRegisterSummary(mockCashTotal, mockDigitalTotal))
-            }
+    override suspend fun getDailySummary(date: LocalDate): Result<DailySalesSummary> =
+        safeApiCall({ api.getSales(date.toString()) }) { body ->
+            val sales = body.orEmpty().filterNot { it.status.equals("CANCELLED", ignoreCase = true) }
+            val (cash, digital) = sales.partition { it.paymentMethod.equals("CASH", ignoreCase = true) }
+            DailySalesSummary(sales.size, cash.sumOf { it.total }, digital.sumOf { it.total })
         }
+
+    /** The backend has no generic "digital" method; the POS groups Yape, Plin and card under it. */
+    private fun PaymentMethod.toBackendValue(): String = when (this) {
+        PaymentMethod.CASH -> "CASH"
+        PaymentMethod.DIGITAL -> "YAPE"
+    }
+
+    private companion object {
+        const val STATUS_COMPLETED = "COMPLETED"
     }
 }

@@ -23,10 +23,12 @@
     <string name="account_change_password_action">Actualizar contraseña</string>
     <string name="account_password_updated">Contraseña actualizada</string>
     <string name="account_change_email_title">Cambiar correo</string>
-    <string name="account_change_email_hint">Deberás iniciar sesión nuevamente después de cambiarlo.</string>
+    <string name="account_change_email_hint">Tu correo actual sigue activo hasta que confirmes el enlace enviado a la nueva dirección.</string>
     <string name="account_new_email">Nuevo correo</string>
-    <string name="account_change_email_action">Actualizar correo</string>
-    <string name="account_email_updated">Correo actualizado</string>
+    <string name="account_change_email_action">Enviar enlace de confirmación</string>
+    <string name="account_email_link_sent">Enlace enviado. Confírmalo desde tu nuevo correo.</string>
+    <string name="account_confirm_password">Confirmar nueva contraseña</string>
+    <string name="account_password_mismatch">Las contraseñas nuevas no coinciden.</string>
     <string name="account_sign_out">Cerrar sesión</string>
 
 
@@ -66,6 +68,7 @@
     <string name="chat_send">Enviar</string>
     <string name="chat_empty">Aún no hay mensajes en esta conversación.</string>
     <string name="chat_receipt_message">Comprobante de pago</string>
+    <string name="chat_jump_to_latest">Ir a los últimos mensajes</string>
 
     <string name="common_cancel">Cancelar</string>
     <string name="order_not_found">Este pedido ya no está disponible.</string>
@@ -125,4 +128,15 @@
     <string name="chatbot_session_expired_title">Sesión expirada</string>
     <string name="chatbot_session_expired_message">El chatbot no puede responder mensajes.</string>
     <string name="chatbot_relink">Volver a vincular</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Lote vencido</string>
+    <string name="home_alert_out_of_stock">Sin stock</string>
+    <string name="home_alert_expiring_soon">Lote por vencer</string>
+    <string name="home_alert_low_stock">Stock bajo</string>
+
+    <!-- Sales: errors -->
+    <string name="sales_error_title">La venta no se registró</string>
+    <string name="sales_error_message">No se pudo guardar. Tu ticket sigue ahí para que lo intentes de nuevo.</string>
+    <string name="sales_error_close">Cerrar</string>
 </resources>

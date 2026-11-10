@@ -12,6 +12,7 @@ import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.Payment
 
 import online.entreprenly.entreprenlyapp.sales.application.commandservices.SalesCommandService
 import online.entreprenly.entreprenlyapp.sales.application.queryservices.SalesQueryService
+import online.entreprenly.entreprenlyapp.sales.domain.model.valueobjects.BusinessDay
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
@@ -27,7 +28,9 @@ data class SalesUiState(
     val showSuccessDialog: Boolean = false,
     val lastSale: Sale? = null,
     val salesHistory: List<Sale> = emptyList(),
-    val isHistoryOpen: Boolean = false
+    val isHistoryOpen: Boolean = false,
+    /** The backend did not save the sale; the ticket stays so the seller can retry. */
+    val saleFailed: Boolean = false
 ) {
     val ticketTotal: Double
         get() = currentTicket.sumOf { it.subtotal }
@@ -51,22 +54,15 @@ class SalesViewModel(
         )
         _uiState.update { it.copy(allProducts = mocks, filteredProducts = mocks) }
         
-        loadCashRegisterSummary()
+        loadTodaySummary()
     }
 
-    private fun loadCashRegisterSummary() {
+    private fun loadTodaySummary() {
         viewModelScope.launch {
-            when (val result = salesQueryService.getCashRegisterSummary()) {
-                is Result.Success -> {
-                    _uiState.update {
-                        it.copy(
-                            cashTotalToday = result.value.cashTotal,
-                            digitalTotalToday = result.value.digitalTotal
-                        )
-                    }
-                }
-                is Result.Failure -> {
-                    // Manejar error si es necesario (el repositorio impl usa fallback, así que rara vez llegará aquí)
+            val result = salesQueryService.getDailySummary(BusinessDay.today())
+            if (result is Result.Success) {
+                _uiState.update {
+                    it.copy(cashTotalToday = result.value.cashTotal, digitalTotalToday = result.value.digitalTotal)
                 }
             }
         }
@@ -153,11 +149,13 @@ class SalesViewModel(
                         )
                     }
                 }
-                is Result.Failure -> {
-                    // Manejo de error si la API y el fallback fallaran simultáneamente.
-                }
+                is Result.Failure -> _uiState.update { it.copy(saleFailed = true) }
             }
         }
+    }
+
+    fun onDismissSaleError() {
+        _uiState.update { it.copy(saleFailed = false) }
     }
 
     fun onDismissSuccessDialog() {

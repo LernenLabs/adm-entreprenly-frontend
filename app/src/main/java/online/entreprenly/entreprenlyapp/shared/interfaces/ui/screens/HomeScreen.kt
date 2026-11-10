@@ -98,7 +98,7 @@ fun HomeScreen(
                     stringResource(R.string.home_orders_empty_message)
                 )
             } else {
-                state.recentOrders.forEach { OrderRow(it) }
+                state.recentOrders.forEach { OrderRow(it, currencySymbol, onClick = onOrders) }
             }
             if (state.productCount == 0) {
                 SectionTitle(stringResource(R.string.nav_inventory))
@@ -285,22 +285,25 @@ private fun AlertCard(alert: HomeAlert) {
     }
     Surface(shape = RoundedCornerShape(10.dp), color = bg, border = BorderStroke(1.dp, fg.copy(alpha = 0.3f)), modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(12.dp)) {
-            Text(alert.title, color = fg, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-            Text(alert.detail, color = fg, style = MaterialTheme.typography.bodySmall)
+            Text(stringResource(alert.title), color = fg, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+            if (alert.detail.isNotBlank()) {
+                Text(alert.detail, color = fg, style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }
 
 @Composable
-private fun OrderRow(order: HomeOrder) {
-    AppCard {
+private fun OrderRow(order: HomeOrder, currencySymbol: String, onClick: () -> Unit) {
+    val customer = order.customer ?: stringResource(R.string.chatbot_unknown_client)
+    AppCard(onClick = onClick) {
         Row(Modifier.fillMaxWidth().padding(12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
             Column(Modifier.weight(1f)) {
-                Text("${order.code} — ${order.customer}", fontWeight = FontWeight.Bold)
-                Text(order.detail, color = MaterialTheme.extraColors.muted, style = MaterialTheme.typography.bodySmall)
+                Text("${order.code} — $customer", fontWeight = FontWeight.Bold)
+                Text(money(currencySymbol, order.total), color = MaterialTheme.extraColors.muted, style = MaterialTheme.typography.bodySmall)
             }
             Surface(shape = RoundedCornerShape(50), color = MaterialTheme.extraColors.highlight) {
-                Text(order.status, color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
+                Text(stringResource(order.status), color = MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp))
             }
         }
     }

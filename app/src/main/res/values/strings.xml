@@ -28,10 +28,12 @@
     <string name="account_change_password_action">Update password</string>
     <string name="account_password_updated">Password updated</string>
     <string name="account_change_email_title">Change email</string>
-    <string name="account_change_email_hint">You will need to sign in again after changing it.</string>
+    <string name="account_change_email_hint">Your current email stays active until you confirm the link sent to the new address.</string>
     <string name="account_new_email">New email</string>
-    <string name="account_change_email_action">Update email</string>
-    <string name="account_email_updated">Email updated</string>
+    <string name="account_change_email_action">Send confirmation link</string>
+    <string name="account_email_link_sent">Link sent. Confirm it from your new inbox.</string>
+    <string name="account_confirm_password">Confirm new password</string>
+    <string name="account_password_mismatch">The new passwords do not match.</string>
     <string name="account_sign_out">Sign out</string>
 
 
@@ -75,6 +77,7 @@
     <string name="chat_send">Send</string>
     <string name="chat_empty">No messages in this conversation yet.</string>
     <string name="chat_receipt_message">Payment receipt</string>
+    <string name="chat_jump_to_latest">Go to the latest messages</string>
 
     <!-- Chatbot: order detail -->
     <string name="common_cancel">Cancel</string>
@@ -134,4 +137,15 @@
     <string name="chatbot_session_expired_title">Session expired</string>
     <string name="chatbot_session_expired_message">The chatbot can\'t answer messages.</string>
     <string name="chatbot_relink">Link again</string>
+
+    <!-- Home: stock alerts -->
+    <string name="home_alert_expired">Expired lot</string>
+    <string name="home_alert_out_of_stock">Out of stock</string>
+    <string name="home_alert_expiring_soon">Lot expiring soon</string>
+    <string name="home_alert_low_stock">Low stock</string>
+
+    <!-- Sales: errors -->
+    <string name="sales_error_title">The sale was not registered</string>
+    <string name="sales_error_message">It could not be saved. Your ticket is still there, so you can try again.</string>
+    <string name="sales_error_close">Close</string>
 </resources>
