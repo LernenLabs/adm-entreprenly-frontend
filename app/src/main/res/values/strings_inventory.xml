@@ -85,13 +85,13 @@
     <string name="inventory_detail_create_lot">+ Create lot</string>
     <string name="inventory_product_delete">Delete product</string>
     <string name="inventory_product_delete_title">Delete product?</string>
-    <string name="inventory_product_delete_message">%1$s will be permanently deleted. This action cannot be undone.</string>
+    <string name="inventory_product_delete_message">%1$s and its stock will be permanently deleted. This action cannot be undone.</string>
     <plurals name="inventory_product_delete_cascade">
-        <item quantity="one">Its %d lot will also be deleted.</item>
-        <item quantity="other">Its %d lots will also be deleted.</item>
+        <item quantity="one">Its %d lot will also be deleted, along with its stock.</item>
+        <item quantity="other">Its %d lots will also be deleted, along with their stock.</item>
     </plurals>
     <string name="inventory_product_deleted">Product deleted successfully</string>
-    <string name="inventory_product_delete_failed">Could not delete the product</string>
+    <string name="inventory_product_delete_failed">Could not delete the product. Please try again.</string>
 
     <!-- Inventory: lots tab -->
     <string name="inventory_lots_active">Active</string>
@@ -158,7 +158,7 @@
     <string name="inventory_lot_delete_title">Delete lot?</string>
     <string name="inventory_lot_delete_message">Lot %1$s will be permanently deleted. This action cannot be undone.</string>
     <string name="inventory_lot_deleted">Lot deleted successfully</string>
-    <string name="inventory_lot_delete_failed">Could not delete the lot</string>
+    <string name="inventory_lot_delete_failed">Could not delete the lot. Please try again.</string>
     <string name="inventory_delete">Delete</string>
     <string name="inventory_cancel">Cancel</string>
 
