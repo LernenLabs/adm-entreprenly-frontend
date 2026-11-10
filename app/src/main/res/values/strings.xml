@@ -28,10 +28,12 @@
     <string name="account_change_password_action">Update password</string>
     <string name="account_password_updated">Password updated</string>
     <string name="account_change_email_title">Change email</string>
-    <string name="account_change_email_hint">You will need to sign in again after changing it.</string>
+    <string name="account_change_email_hint">Your current email stays active until you confirm the link sent to the new address.</string>
     <string name="account_new_email">New email</string>
-    <string name="account_change_email_action">Update email</string>
-    <string name="account_email_updated">Email updated</string>
+    <string name="account_change_email_action">Send confirmation link</string>
+    <string name="account_email_link_sent">Link sent. Confirm it from your new inbox.</string>
+    <string name="account_confirm_password">Confirm new password</string>
+    <string name="account_password_mismatch">The new passwords do not match.</string>
     <string name="account_sign_out">Sign out</string>
 
 

@@ -115,7 +115,12 @@ class AccountViewModel(private val userCommandService: UserCommandService) : Vie
     private val _emailForm = MutableStateFlow(FormState())
     val emailForm: StateFlow<FormState> = _emailForm.asStateFlow()
 
-    fun changePassword(current: String, new: String) {
+    fun changePassword(current: String, new: String, confirmation: String) {
+        if (_passwordForm.value.loading) return
+        if (new != confirmation) {
+            _passwordForm.value = FormState(error = UiText.Res(R.string.account_password_mismatch))
+            return
+        }
         val c = Password.of(current) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
         val n = Password.of(new) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
         _passwordForm.value = FormState(loading = true)
@@ -127,14 +132,16 @@ class AccountViewModel(private val userCommandService: UserCommandService) : Vie
         }
     }
 
-    /** On success the session is cleared (the JWT carries the old email); navigation returns to sign-in. */
     fun changeEmail(newEmail: String) {
+        if (_emailForm.value.loading) return
         val e = Email.of(newEmail) ?: return _emailForm.update { FormState(error = UiText.Res(R.string.error_invalid_email)) }
         _emailForm.value = FormState(loading = true)
         viewModelScope.launch {
             _emailForm.value = when (val r = userCommandService.handle(ChangeEmailCommand(e))) {
-                is Result.Success -> FormState(success = UiText.Res(R.string.account_email_updated))
-                is Result.Failure -> FormState(error = UiText.Raw(r.error.message))
+                is Result.Success -> FormState(success = UiText.Res(R.string.account_email_link_sent))
+                is Result.Failure -> FormState(error = if (r.error is ApplicationError.NotFound) {
+                    UiText.Res(R.string.profile_operation_unavailable)
+                } else UiText.Raw(r.error.message))
             }
         }
     }

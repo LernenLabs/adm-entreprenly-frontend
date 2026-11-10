@@ -61,7 +61,7 @@ fun ProfileHeaderCard(profile: Profile, modifier: Modifier = Modifier, showBiogr
     AppCard(modifier) {
         Column(Modifier.padding(14.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                InitialsAvatar(profile.initials, 76.dp)
+                ProfileAvatar(profile.initials, profile.avatarUrl)
                 Column {
                     Text(
                         profile.fullName,
