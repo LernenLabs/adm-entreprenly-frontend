@@ -31,7 +31,11 @@ android {
             versionNameSuffix = "-av2"
             matchingFallbacks += "debug"
             val av2ApiUrl = providers.gradleProperty("av2ApiUrl").orElse("http://127.0.0.1:8092/").get()
-            require(av2ApiUrl in setOf("http://127.0.0.1:8092/", "http://10.0.2.2:8092/"))
+            require(av2ApiUrl in setOf(
+                "http://127.0.0.1:8092/",
+                "http://10.0.2.2:8092/",
+                "https://adm-entreprenly-backend.onrender.com/"
+            ))
             buildConfigField("String", "API_BASE_URL", "\"$av2ApiUrl\"")
         }
         release {
