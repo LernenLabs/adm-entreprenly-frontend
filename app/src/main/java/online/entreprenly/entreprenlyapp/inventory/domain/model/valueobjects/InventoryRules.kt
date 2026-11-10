@@ -124,6 +124,51 @@ object InventoryRules {
                 (it.productType == null || it.productType == product.type)
         }
 
+    /** Date-based expiry, independent of the remaining quantity. */
+    fun isExpired(lot: Lot, today: LocalDate = todayUtc()): Boolean =
+        lot.expiryDate?.let { instantToLocalDate(it).isBefore(today) } ?: false
+
+    /** Date-based expiring-soon check, independent of the remaining quantity. */
+    fun isExpiringSoon(lot: Lot, today: LocalDate = todayUtc()): Boolean =
+        lot.expiryDate?.let { daysLeft(it, today) in 0..EXPIRING_SOON_DAYS } ?: false
+
+    /** All critical states shown together in the product detail (US-12). */
+    data class ProductAlertSummary(
+        val outOfStock: Boolean,
+        val lowStock: Boolean,
+        val expiredLots: Int,
+        val expiringSoonLots: Int
+    ) {
+        val hasAlerts: Boolean
+            get() = outOfStock || lowStock || expiredLots > 0 || expiringSoonLots > 0
+    }
+
+    /**
+     * Groups stock and expiry alerts for one product. Out of stock wins over
+     * low stock. Expired and expiring counts are date-based, so a lot with zero
+     * quantity and a past expiry counts as both out of stock and expired.
+     */
+    fun productAlertSummary(
+        product: Product,
+        lots: List<Lot>,
+        alerts: List<StockAlert>,
+        today: LocalDate = todayUtc()
+    ): ProductAlertSummary {
+        val outOfStock = isOutOfStock(product, lots)
+        var expired = 0
+        var expiring = 0
+        for (lot in lotsOfProduct(product, lots)) {
+            if (isExpired(lot, today)) expired++
+            else if (isExpiringSoon(lot, today)) expiring++
+        }
+        return ProductAlertSummary(
+            outOfStock = outOfStock,
+            lowStock = !outOfStock && isLowStock(alerts, product),
+            expiredLots = expired,
+            expiringSoonLots = expiring
+        )
+    }
+
     // ---- Search ----
 
     fun normalizeSearch(raw: String): String =
@@ -137,6 +182,20 @@ object InventoryRules {
         val haystacks = listOfNotNull(product.name, product.brand, product.codeQR)
             .map(::normalizeSearch)
         return haystacks.any { it.contains(q) }
+    }
+
+    /**
+     * Lots whose product matches [query] by name, brand or codeQR. Lots without
+     * a matching product in [products] fall back to their own label.
+     */
+    fun lotsMatchingSearch(lots: List<Lot>, products: List<Product>, query: String): List<Lot> {
+        if (query.isBlank()) return lots
+        val productsByKey = products.associateBy { it.type to it.id }
+        return lots.filter { lot ->
+            val product = productsByKey[lot.type to lot.productId]
+            product?.let { matchesSearch(it, query) }
+                ?: lot.label.contains(query.trim(), ignoreCase = true)
+        }
     }
 
     // ---- Text helpers ----
@@ -192,19 +251,32 @@ object InventoryRules {
 
     fun isValidProductName(name: String): Boolean = name.trim().isNotEmpty()
 
-    /** Lot quantity must be strictly > 0. */
-    fun isValidLotQuantity(type: ProductType, quantityText: String): Boolean =
+    /** Lot quantity must be > 0 on creation; edits may set it to 0. */
+    fun isValidLotQuantity(
+        type: ProductType,
+        quantityText: String,
+        allowZero: Boolean = false
+    ): Boolean =
         if (type == ProductType.UNIT) {
             val v = parseUnitStock(quantityText)
-            v != null && v > 0
+            v != null && if (allowZero) v >= 0 else v > 0
         } else {
             val v = parseWeightStock(quantityText)
-            v != null && v > 0.0
+            v != null && if (allowZero) v >= 0.0 else v > 0.0
         }
 
-    /** Expiry (unit only): required, not before today and not before entry date. */
-    fun isValidExpiry(expiry: LocalDate?, entry: LocalDate, today: LocalDate = todayUtc()): Boolean {
+    /**
+     * Expiry (unit only): required and not before the entry date. On creation it
+     * also cannot be before today; edits may keep an already-expired lot.
+     */
+    fun isValidExpiry(
+        expiry: LocalDate?,
+        entry: LocalDate,
+        today: LocalDate = todayUtc(),
+        allowPast: Boolean = false
+    ): Boolean {
         if (expiry == null) return false
-        return !expiry.isBefore(today) && !expiry.isBefore(entry)
+        if (!allowPast && expiry.isBefore(today)) return false
+        return !expiry.isBefore(entry)
     }
 }

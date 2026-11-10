@@ -33,3 +33,27 @@ data class CreateLotCommand(
     val quantityUnits: Int,
     val quantityKg: Double
 )
+
+/** Full-replacement update of a lot; the product cannot be changed. */
+data class UpdateLotCommand(
+    val type: ProductType,
+    val id: Long,
+    val productId: Long,
+    val codeQR: String?,
+    val entryDate: Instant,
+    val expiryDate: Instant?,
+    val quantityUnits: Int,
+    val quantityKg: Double
+)
+
+/** Deletes a lot. Identity is (type, id), matching the backend routes. */
+data class DeleteLotCommand(
+    val type: ProductType,
+    val id: Long
+)
+
+/** Deletes a product and its lots. Identity is (type, id), matching the backend routes. */
+data class DeleteProductCommand(
+    val type: ProductType,
+    val id: Long
+)

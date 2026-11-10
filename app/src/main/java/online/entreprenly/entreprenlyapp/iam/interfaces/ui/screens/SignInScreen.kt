@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.PasswordResetViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignInViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.LabeledTextField
@@ -40,11 +41,13 @@ import androidx.compose.ui.text.input.KeyboardType
 @Composable
 fun SignInScreen(
     viewModel: SignInViewModel,
+    passwordReset: PasswordResetViewModel,
     onBack: () -> Unit,
     onGoToSignUp: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val form by viewModel.form.collectAsState()
+    var showRecovery by rememberSaveable { mutableStateOf(false) }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
 
@@ -77,6 +80,7 @@ fun SignInScreen(
                 isPassword = true,
                 isError = form.errorTitle != null
             )
+            LinkText(stringResource(R.string.reset_forgot_password), onClick = { showRecovery = true })
             if (form.errorTitle == null) {
                 form.error?.let { Text(it.asString(), color = MaterialTheme.colorScheme.error) }
             }
@@ -95,6 +99,12 @@ fun SignInScreen(
                 Text(stringResource(R.string.auth_no_account), color = MaterialTheme.extraColors.muted)
                 LinkText(stringResource(R.string.auth_sign_up_link), onGoToSignUp)
             }
+        }
+    }
+    if (showRecovery) {
+        PasswordRecoveryDialog(passwordReset) {
+            showRecovery = false
+            passwordReset.clearRequest()
         }
     }
 }

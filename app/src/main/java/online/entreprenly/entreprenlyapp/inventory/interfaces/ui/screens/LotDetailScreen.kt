@@ -10,22 +10,34 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -37,20 +49,26 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.LotStatus
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.DangerPillButton
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryAlertBanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryBannerKind
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryError
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryLoading
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.LotStatusPill
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SheetHeader
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.lotPill
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryState
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText as SharedUiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 
 /**
  * Lot detail (US-06): status banner when it applies, plus status, product,
- * dates and current quantity. No initial quantity, no edit/delete actions.
+ * dates and current quantity. Editing (US-02) and deletion (US-04) open a
+ * sheet and a confirmation dialog respectively.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +80,17 @@ fun LotDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val deleteForm by viewModel.lotDeleteForm.collectAsState()
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var showEdit by rememberSaveable { mutableStateOf(false) }
+
+    LaunchedEffect(type, id) { viewModel.clearLotDeleteForm() }
+    LaunchedEffect(deleteForm.success) {
+        if (deleteForm.success != null) {
+            viewModel.clearLotDeleteForm()
+            onBack()
+        }
+    }
 
     Scaffold(modifier = modifier, containerColor = MaterialTheme.colorScheme.background) { padding ->
         when (val s = state) {
@@ -75,12 +104,16 @@ fun LotDetailScreen(
             is InventoryState.Ready -> {
                 val lot = s.lot(type, id)
                 if (lot == null) {
-                    InventoryError(
-                        message = SharedUiText.Res(R.string.inventory_not_available),
-                        onRetry = viewModel::refresh,
-                        retryText = stringResource(R.string.inventory_retry),
-                        modifier = Modifier.padding(padding)
-                    )
+                    if (deleteForm.success != null) {
+                        InventoryLoading(Modifier.padding(padding))
+                    } else {
+                        InventoryError(
+                            message = SharedUiText.Res(R.string.inventory_not_available),
+                            onRetry = viewModel::refresh,
+                            retryText = stringResource(R.string.inventory_retry),
+                            modifier = Modifier.padding(padding)
+                        )
+                    }
                 } else {
                     val product = s.products.firstOrNull { it.type == lot.type && it.id == lot.productId }
                     LotDetailContent(
@@ -89,11 +122,47 @@ fun LotDetailScreen(
                         viewModel = viewModel,
                         refreshing = s.refreshing,
                         onBack = onBack,
+                        onEdit = { showEdit = true },
+                        onDelete = { showDeleteDialog = true },
                         modifier = Modifier.padding(padding)
                     )
                 }
             }
         }
+    }
+
+    val ready = state as? InventoryState.Ready
+    val currentLot = ready?.lot(type, id)
+    if (showEdit && currentLot != null && ready != null) {
+        val product = ready.products.firstOrNull {
+            it.type == currentLot.type && it.id == currentLot.productId
+        }
+        ModalBottomSheet(
+            onDismissRequest = { showEdit = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            SheetHeader(
+                title = stringResource(R.string.inventory_lot_edit_title),
+                onClose = { showEdit = false },
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            LotFormSheet(
+                viewModel = viewModel,
+                products = ready.products,
+                preselected = product,
+                locked = true,
+                initial = currentLot,
+                onClose = { showEdit = false }
+            )
+        }
+    }
+    if (showDeleteDialog && currentLot != null) {
+        DeleteLotDialog(
+            lot = currentLot,
+            form = deleteForm,
+            onDismiss = { if (!deleteForm.loading) showDeleteDialog = false },
+            onConfirm = { viewModel.deleteLot(currentLot.type, currentLot.id) }
+        )
     }
 }
 
@@ -105,6 +174,8 @@ private fun LotDetailContent(
     viewModel: InventoryViewModel,
     refreshing: Boolean,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val today = InventoryRules.todayUtc()
@@ -210,11 +281,68 @@ private fun LotDetailContent(
                         )
                     }
                 }
-                // Extension point: edit lot (out of scope).
-                // Extension point: delete lot (out of scope).
+                PrimaryPillButton(
+                    text = stringResource(R.string.inventory_lot_edit),
+                    onClick = onEdit
+                )
+                DangerPillButton(
+                    text = stringResource(R.string.inventory_lot_delete),
+                    onClick = onDelete
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DeleteLotDialog(
+    lot: Lot,
+    form: FormState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.inventory_lot_delete_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.inventory_lot_delete_message, lot.label))
+                val error = form.error
+                val errorTitle = form.errorTitle
+                if (errorTitle != null || error != null) {
+                    ErrorBanner(
+                        title = errorTitle?.asString() ?: error?.asString().orEmpty(),
+                        message = if (errorTitle != null) error?.asString() else null
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = !form.loading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                if (form.loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onError
+                    )
+                } else {
+                    Text(stringResource(R.string.inventory_delete))
+                }
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss, enabled = !form.loading) {
+                Text(stringResource(R.string.inventory_cancel))
+            }
+        }
+    )
 }
 
 @Composable

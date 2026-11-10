@@ -18,6 +18,9 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
@@ -75,6 +78,15 @@ class InventoryViewModel(
     private val _lotForm = MutableStateFlow(FormState())
     val lotForm: StateFlow<FormState> = _lotForm.asStateFlow()
 
+    private val _lotEditForm = MutableStateFlow(FormState())
+    val lotEditForm: StateFlow<FormState> = _lotEditForm.asStateFlow()
+
+    private val _lotDeleteForm = MutableStateFlow(FormState())
+    val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
+
+    private val _productDeleteForm = MutableStateFlow(FormState())
+    val productDeleteForm: StateFlow<FormState> = _productDeleteForm.asStateFlow()
+
     init {
         refresh()
     }
@@ -101,6 +113,18 @@ class InventoryViewModel(
 
     fun clearLotForm() {
         _lotForm.value = FormState()
+    }
+
+    fun clearLotEditForm() {
+        _lotEditForm.value = FormState()
+    }
+
+    fun clearLotDeleteForm() {
+        _lotDeleteForm.value = FormState()
+    }
+
+    fun clearProductDeleteForm() {
+        _productDeleteForm.value = FormState()
     }
 
     fun createProduct(command: CreateProductCommand) {
@@ -161,6 +185,74 @@ class InventoryViewModel(
                     )
                 }
                 is Result.Failure -> _lotForm.value = FormState(error = UiText.Raw(r.error.message))
+            }
+        }
+    }
+
+    fun updateLot(command: UpdateLotCommand) {
+        if (_lotEditForm.value.loading) return
+        _lotEditForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = lotCommandService.handle(command)) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = r.value.key,
+                        notice = UiText.Res(R.string.inventory_lot_updated),
+                        keepContent = true
+                    )
+                    _lotEditForm.value = FormState(success = UiText.Res(R.string.inventory_lot_updated))
+                }
+                is Result.Failure -> _lotEditForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_lot_update_failed),
+                    error = UiText.Raw(r.error.message)
+                )
+            }
+        }
+    }
+
+    fun deleteProduct(type: ProductType, id: Long) {
+        if (_productDeleteForm.value.loading) return
+        _productDeleteForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = productCommandService.handle(DeleteProductCommand(type, id))) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = null,
+                        notice = UiText.Res(R.string.inventory_product_deleted),
+                        keepContent = true
+                    )
+                    _productDeleteForm.value = FormState(
+                        success = UiText.Res(R.string.inventory_product_deleted)
+                    )
+                }
+                is Result.Failure -> _productDeleteForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_product_delete_failed),
+                    error = UiText.Raw(r.error.message)
+                )
+            }
+        }
+    }
+
+    fun deleteLot(type: ProductType, id: Long) {
+        if (_lotDeleteForm.value.loading) return
+        _lotDeleteForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = lotCommandService.handle(DeleteLotCommand(type, id))) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = null,
+                        notice = UiText.Res(R.string.inventory_lot_deleted),
+                        keepContent = true
+                    )
+                    _lotDeleteForm.value = FormState(success = UiText.Res(R.string.inventory_lot_deleted))
+                }
+                is Result.Failure -> _lotDeleteForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_lot_delete_failed),
+                    error = UiText.Raw(r.error.message)
+                )
             }
         }
     }

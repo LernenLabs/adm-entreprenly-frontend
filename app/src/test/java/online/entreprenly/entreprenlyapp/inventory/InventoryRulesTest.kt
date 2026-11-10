@@ -150,6 +150,87 @@ class InventoryRulesTest {
         assertFalse(InventoryRules.isLowStock(alerts, unitProduct(id = 11)))
     }
 
+    @Test
+    fun productAlertSummary_groupsLowStockExpiredAndExpiring() {
+        val product = unitProduct(id = 10)
+        val alerts = listOf(
+            StockAlert(1, null, 10, ProductType.UNIT, "Arroz", AlertType.LOW_STOCK, AlertSeverity.WARNING, null)
+        )
+        val lots = listOf(
+            unitLot(id = 1, productId = 10, quantity = 2, expiry = today.minusDays(1)),
+            unitLot(id = 2, productId = 10, quantity = 2, expiry = today.plusDays(2)),
+            unitLot(id = 3, productId = 99, quantity = 2, expiry = today.minusDays(3))
+        )
+
+        val summary = InventoryRules.productAlertSummary(product, lots, alerts, today)
+
+        assertTrue(summary.hasAlerts)
+        assertFalse(summary.outOfStock)
+        assertTrue(summary.lowStock)
+        assertEquals(1, summary.expiredLots)
+        assertEquals(1, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_normalStateHasNoAlerts() {
+        val product = unitProduct(id = 10)
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 5, expiry = today.plusDays(30))),
+            emptyList(),
+            today
+        )
+        assertFalse(summary.hasAlerts)
+        assertFalse(summary.outOfStock)
+        assertFalse(summary.lowStock)
+        assertEquals(0, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_outOfStockWinsOverLowStock() {
+        val product = unitProduct(id = 10)
+        val alerts = listOf(
+            StockAlert(1, null, 10, ProductType.UNIT, "Arroz", AlertType.LOW_STOCK, AlertSeverity.WARNING, null)
+        )
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 0, expiry = today.plusDays(30))),
+            alerts,
+            today
+        )
+        assertTrue(summary.hasAlerts)
+        assertTrue(summary.outOfStock)
+        assertFalse(summary.lowStock)
+        assertEquals(0, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_countsExpiredByDateEvenWhenOutOfStock() {
+        val product = unitProduct(id = 10)
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 0, expiry = today.minusDays(1))),
+            emptyList(),
+            today
+        )
+        assertTrue(summary.outOfStock)
+        assertEquals(1, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun dateBasedExpiry_ignoresQuantityAndWeightLots() {
+        assertTrue(InventoryRules.isExpired(unitLot(quantity = 0, expiry = today.minusDays(1)), today))
+        assertFalse(InventoryRules.isExpired(unitLot(quantity = 0, expiry = today), today))
+        assertTrue(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today), today))
+        assertTrue(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today.plusDays(5)), today))
+        assertFalse(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today.plusDays(6)), today))
+        assertFalse(InventoryRules.isExpired(weightLot(), today))
+        assertFalse(InventoryRules.isExpiringSoon(weightLot(), today))
+    }
+
     // ---- Search with tildes ----
 
     @Test
@@ -161,6 +242,22 @@ class InventoryRulesTest {
         assertTrue(InventoryRules.matchesSearch(product, "l-0246"))
         assertTrue(InventoryRules.matchesSearch(product, ""))
         assertFalse(InventoryRules.matchesSearch(product, "arroz"))
+    }
+
+    @Test
+    fun lotsMatchingSearch_filtersByProductNameOrBrand() {
+        val rice = unitProduct(id = 10).copy(name = "Arroz Costeño", brand = "Costeño")
+        val coffee = unitProduct(id = 11).copy(name = "Café Molido", brand = "León")
+        val riceLot = unitLot(id = 1, productId = 10)
+        val coffeeLot = unitLot(id = 2, productId = 11)
+        val orphanLot = unitLot(id = 3, productId = 99).copy(codeQR = "LOTE-ESPECIAL")
+        val lots = listOf(riceLot, coffeeLot, orphanLot)
+        val products = listOf(rice, coffee)
+
+        assertEquals(listOf(riceLot), InventoryRules.lotsMatchingSearch(lots, products, "arroz"))
+        assertEquals(listOf(coffeeLot), InventoryRules.lotsMatchingSearch(lots, products, "leon"))
+        assertEquals(listOf(orphanLot), InventoryRules.lotsMatchingSearch(lots, products, "especial"))
+        assertEquals(lots, InventoryRules.lotsMatchingSearch(lots, products, ""))
     }
 
     // ---- UTC conversions in America/Lima ----
@@ -210,6 +307,17 @@ class InventoryRulesTest {
         assertFalse(InventoryRules.isValidExpiry(today, today.plusDays(1), today))
         assertTrue(InventoryRules.isValidExpiry(today, today, today))
         assertTrue(InventoryRules.isValidExpiry(today.plusDays(5), today, today))
+    }
+
+    @Test
+    fun validations_lotEditsAllowPastDatesAndZeroQuantity() {
+        val entry = today.minusDays(30)
+        assertTrue(InventoryRules.isValidExpiry(today.minusDays(1), entry, today, allowPast = true))
+        assertFalse(InventoryRules.isValidExpiry(entry.minusDays(1), entry, today, allowPast = true))
+        assertTrue(InventoryRules.isValidLotQuantity(ProductType.UNIT, "0", allowZero = true))
+        assertTrue(InventoryRules.isValidLotQuantity(ProductType.WEIGHT, "0", allowZero = true))
+        assertFalse(InventoryRules.isValidLotQuantity(ProductType.UNIT, "0"))
+        assertFalse(InventoryRules.isValidLotQuantity(ProductType.WEIGHT, "0"))
     }
 
     @Test

@@ -6,6 +6,9 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
@@ -56,6 +59,12 @@ class ProductRepositoryImpl(private val api: InventoryApi) : ProductRepository {
             ProductType.WEIGHT ->
                 safeApiCallWithBody({ api.updateWeightProduct(command.id, command.toWeightResource()) }) { it.toEntity() }
         }
+
+    override suspend fun delete(command: DeleteProductCommand): Result<Unit> =
+        when (command.type) {
+            ProductType.UNIT -> safeApiCall({ api.deleteUnitProduct(command.id) }) { Unit }
+            ProductType.WEIGHT -> safeApiCall({ api.deleteWeightProduct(command.id) }) { Unit }
+        }
 }
 
 class LotRepositoryImpl(private val api: InventoryApi) : LotRepository {
@@ -84,6 +93,20 @@ class LotRepositoryImpl(private val api: InventoryApi) : LotRepository {
                 safeApiCallWithBody({ api.createUnitLot(command.toUnitResource()) }) { it.toEntity() }
             ProductType.WEIGHT ->
                 safeApiCallWithBody({ api.createWeightLot(command.toWeightResource()) }) { it.toEntity() }
+        }
+
+    override suspend fun update(command: UpdateLotCommand): Result<Lot> =
+        when (command.type) {
+            ProductType.UNIT ->
+                safeApiCallWithBody({ api.updateUnitLot(command.id, command.toUnitResource()) }) { it.toEntity() }
+            ProductType.WEIGHT ->
+                safeApiCallWithBody({ api.updateWeightLot(command.id, command.toWeightResource()) }) { it.toEntity() }
+        }
+
+    override suspend fun delete(command: DeleteLotCommand): Result<Unit> =
+        when (command.type) {
+            ProductType.UNIT -> safeApiCall({ api.deleteUnitLot(command.id) }) { Unit }
+            ProductType.WEIGHT -> safeApiCall({ api.deleteWeightLot(command.id) }) { Unit }
         }
 }
 
