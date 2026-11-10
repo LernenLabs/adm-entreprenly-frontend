@@ -206,6 +206,31 @@ class InventoryRulesTest {
         assertEquals(0, summary.expiringSoonLots)
     }
 
+    @Test
+    fun productAlertSummary_countsExpiredByDateEvenWhenOutOfStock() {
+        val product = unitProduct(id = 10)
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 0, expiry = today.minusDays(1))),
+            emptyList(),
+            today
+        )
+        assertTrue(summary.outOfStock)
+        assertEquals(1, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun dateBasedExpiry_ignoresQuantityAndWeightLots() {
+        assertTrue(InventoryRules.isExpired(unitLot(quantity = 0, expiry = today.minusDays(1)), today))
+        assertFalse(InventoryRules.isExpired(unitLot(quantity = 0, expiry = today), today))
+        assertTrue(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today), today))
+        assertTrue(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today.plusDays(5)), today))
+        assertFalse(InventoryRules.isExpiringSoon(unitLot(quantity = 0, expiry = today.plusDays(6)), today))
+        assertFalse(InventoryRules.isExpired(weightLot(), today))
+        assertFalse(InventoryRules.isExpiringSoon(weightLot(), today))
+    }
+
     // ---- Search with tildes ----
 
     @Test

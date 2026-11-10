@@ -124,6 +124,14 @@ object InventoryRules {
                 (it.productType == null || it.productType == product.type)
         }
 
+    /** Date-based expiry, independent of the remaining quantity. */
+    fun isExpired(lot: Lot, today: LocalDate = todayUtc()): Boolean =
+        lot.expiryDate?.let { instantToLocalDate(it).isBefore(today) } ?: false
+
+    /** Date-based expiring-soon check, independent of the remaining quantity. */
+    fun isExpiringSoon(lot: Lot, today: LocalDate = todayUtc()): Boolean =
+        lot.expiryDate?.let { daysLeft(it, today) in 0..EXPIRING_SOON_DAYS } ?: false
+
     /** All critical states shown together in the product detail (US-12). */
     data class ProductAlertSummary(
         val outOfStock: Boolean,
@@ -137,7 +145,8 @@ object InventoryRules {
 
     /**
      * Groups stock and expiry alerts for one product. Out of stock wins over
-     * low stock; expired and expiring counts come from the product's own lots.
+     * low stock. Expired and expiring counts are date-based, so a lot with zero
+     * quantity and a past expiry counts as both out of stock and expired.
      */
     fun productAlertSummary(
         product: Product,
@@ -149,11 +158,8 @@ object InventoryRules {
         var expired = 0
         var expiring = 0
         for (lot in lotsOfProduct(product, lots)) {
-            when (lotStatus(lot, today)) {
-                LotStatus.EXPIRED -> expired++
-                LotStatus.EXPIRING_SOON -> expiring++
-                else -> Unit
-            }
+            if (isExpired(lot, today)) expired++
+            else if (isExpiringSoon(lot, today)) expiring++
         }
         return ProductAlertSummary(
             outOfStock = outOfStock,

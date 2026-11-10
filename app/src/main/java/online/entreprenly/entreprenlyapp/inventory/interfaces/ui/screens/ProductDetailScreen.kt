@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
-import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.LotStatus
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.DangerPillButton
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryAlertBanner
@@ -331,7 +330,7 @@ private fun ProductDetailContent(
                 } else {
                     lots.forEach { lot ->
                         val pill = lotPill(lot, today)
-                        val expired = InventoryRules.lotStatus(lot, today) == LotStatus.EXPIRED
+                        val expired = InventoryRules.isExpired(lot, today)
                         Surface(
                             onClick = { onLotClick(lot.type.value, lot.id) },
                             shape = RoundedCornerShape(14.dp),
