@@ -64,8 +64,34 @@
     <string name="inventory_detail_out_of_stock_kg">No kilos available. The chatbot no longer offers it to customers.</string>
     <string name="inventory_detail_lots">Associated lots</string>
     <string name="inventory_detail_no_lots">This product has no lots yet.</string>
+    <string name="inventory_detail_alerts">Inventory alerts</string>
+    <plurals name="inventory_detail_expired_title">
+        <item quantity="one">%d expired lot</item>
+        <item quantity="other">%d expired lots</item>
+    </plurals>
+    <plurals name="inventory_detail_expired_message">
+        <item quantity="one">Remove it from sale and update its stock.</item>
+        <item quantity="other">Remove them from sale and update their stock.</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_title">
+        <item quantity="one">%d lot expiring soon</item>
+        <item quantity="other">%d lots expiring soon</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_message">
+        <item quantity="one">Review it before it expires.</item>
+        <item quantity="other">Review them before they expire.</item>
+    </plurals>
     <string name="inventory_detail_edit">Edit</string>
     <string name="inventory_detail_create_lot">+ Create lot</string>
+    <string name="inventory_product_delete">Delete product</string>
+    <string name="inventory_product_delete_title">Delete product?</string>
+    <string name="inventory_product_delete_message">%1$s and its stock will be permanently deleted. This action cannot be undone.</string>
+    <plurals name="inventory_product_delete_cascade">
+        <item quantity="one">Its %d lot will also be deleted, along with its stock.</item>
+        <item quantity="other">Its %d lots will also be deleted, along with their stock.</item>
+    </plurals>
+    <string name="inventory_product_deleted">Product deleted successfully</string>
+    <string name="inventory_product_delete_failed">Could not delete the product. Please try again.</string>
 
     <!-- Inventory: lots tab -->
     <string name="inventory_lots_active">Active</string>
@@ -85,12 +111,19 @@
     <string name="inventory_lots_empty_title">You don\'t have lots yet</string>
     <string name="inventory_lots_empty_message">Register a lot to track expirations.</string>
     <string name="inventory_lots_no_products">Register a product first.</string>
+    <string name="inventory_lots_search">Search lot by product or brand…</string>
+    <string name="inventory_lots_no_results">No lots matched your search</string>
 
     <!-- Inventory: create lot -->
     <string name="inventory_lot_create_title">Create lot</string>
     <string name="inventory_lot_product">Product*</string>
     <string name="inventory_lot_search_product">Search product</string>
     <string name="inventory_lot_select_product">Select a product</string>
+    <string name="inventory_lot_quantity_required">Enter the quantity</string>
+    <string name="inventory_lot_quantity_invalid">Quantity must be greater than 0</string>
+    <string name="inventory_lot_expiry_required">Select the expiry date</string>
+    <string name="inventory_lot_expiry_before_entry">Expiry cannot be before the entry date</string>
+    <string name="inventory_lot_expiry_before_today">Expiry cannot be before today</string>
     <string name="inventory_lot_number">Lot No.</string>
     <string name="inventory_lot_quantity">Quantity*</string>
     <string name="inventory_lot_entry_date">Entry date*</string>
@@ -116,6 +149,18 @@
     </plurals>
     <string name="inventory_lot_expired_title">Expired lot</string>
     <string name="inventory_lot_expired_message">Remove it from sale and update its stock.</string>
+    <string name="inventory_lot_edit">Edit lot</string>
+    <string name="inventory_lot_edit_title">Edit lot</string>
+    <string name="inventory_lot_updated">Lot updated successfully</string>
+    <string name="inventory_lot_update_failed">Could not update the lot</string>
+    <string name="inventory_lot_date_note_edit">Choose the lot dates. Past dates are allowed for existing lots.</string>
+    <string name="inventory_lot_delete">Delete lot</string>
+    <string name="inventory_lot_delete_title">Delete lot?</string>
+    <string name="inventory_lot_delete_message">Lot %1$s will be permanently deleted. This action cannot be undone.</string>
+    <string name="inventory_lot_deleted">Lot deleted successfully</string>
+    <string name="inventory_lot_delete_failed">Could not delete the lot. Please try again.</string>
+    <string name="inventory_delete">Delete</string>
+    <string name="inventory_cancel">Cancel</string>
 
     <!-- Inventory: formats -->
     <string name="inventory_money">S/ %1$.2f</string>

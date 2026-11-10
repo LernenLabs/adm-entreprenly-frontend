@@ -1,8 +1,14 @@
 package online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
@@ -62,18 +68,35 @@ fun lotRowDetail(lot: Lot): String {
     }
 }
 
-/** Lot row inside the product detail: weight lots show the entry date. */
+/**
+ * Lot row inside the product detail: weight lots show the entry date. Expired
+ * lots can highlight the expiry date in the error color (US-12).
+ */
 @Composable
-fun productLotRowDetail(lot: Lot): String {
+fun productLotRowDetail(lot: Lot, highlightExpiry: Boolean = false): AnnotatedString {
     val amount = unitAmount(lot)
         ?: stringResource(R.string.inventory_quantity_kg, InventoryRules.formatKg(lot.quantityKg))
     val expiry = lot.expiryDate
     return if (lot.type == ProductType.UNIT && expiry != null) {
         val date = InventoryRules.formatLotDate(expiry)
-        "${stringResource(R.string.inventory_lot_row_expires, date)} · $amount"
+        val expires = stringResource(R.string.inventory_lot_row_expires, date)
+        buildAnnotatedString {
+            if (highlightExpiry) {
+                withStyle(
+                    SpanStyle(
+                        color = MaterialTheme.colorScheme.error,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) { append(expires) }
+            } else {
+                append(expires)
+            }
+            append(" · $amount")
+        }
     } else {
         val date = InventoryRules.formatLotDate(lot.entryDate)
-        "${stringResource(R.string.inventory_lot_row_entered, date)} · $amount"
+        val entered = stringResource(R.string.inventory_lot_row_entered, date)
+        buildAnnotatedString { append("$entered · $amount") }
     }
 }
 

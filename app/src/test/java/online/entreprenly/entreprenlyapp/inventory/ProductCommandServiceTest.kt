@@ -7,6 +7,9 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
@@ -29,9 +32,11 @@ class ProductCommandServiceTest {
 
     private class FakeProducts(
         var product: Product = Product(ProductType.UNIT, 1, "Arroz", null, null, 6.0, 0.0, null),
-        var fail: Boolean = false
+        var fail: Boolean = false,
+        private val deleteResult: Result<Unit> = Result.Success(Unit)
     ) : ProductRepository {
         var creates = 0
+        var deleted: DeleteProductCommand? = null
         override suspend fun findAll(): Result<List<Product>> = Result.Success(listOf(product))
         override suspend fun findById(type: ProductType, id: Long): Result<Product> = Result.Success(product)
         override suspend fun create(command: CreateProductCommand): Result<Product> {
@@ -39,6 +44,10 @@ class ProductCommandServiceTest {
             return if (fail) Result.Failure(ApplicationError.Validation("bad")) else Result.Success(product)
         }
         override suspend fun update(command: UpdateProductCommand): Result<Product> = Result.Success(product)
+        override suspend fun delete(command: DeleteProductCommand): Result<Unit> {
+            deleted = command
+            return deleteResult
+        }
     }
 
     private class FakeLots(var fail: Boolean = false) : LotRepository {
@@ -53,6 +62,10 @@ class ProductCommandServiceTest {
                 Lot(command.productType, 7, command.productId, null, command.entryDate, command.expiryDate, command.quantityUnits, command.quantityKg)
             )
         }
+        override suspend fun update(command: UpdateLotCommand): Result<Lot> =
+            Result.Failure(ApplicationError.Unexpected("not used"))
+
+        override suspend fun delete(command: DeleteLotCommand): Result<Unit> = Result.Success(Unit)
     }
 
     @Test
@@ -100,5 +113,28 @@ class ProductCommandServiceTest {
         service.handle(CreateProductCommand("Azucar", ProductType.WEIGHT, 4.2, 3.2))
         assertEquals(3.2, lots.created[0].quantityKg, 0.0)
         assertEquals(0, lots.created[0].quantityUnits)
+    }
+
+    @Test
+    fun delete_forwardsTypeAndId() = runBlocking {
+        val products = FakeProducts()
+        val service = ProductCommandServiceImpl(products, FakeLots()) { now }
+
+        val result = service.handle(DeleteProductCommand(ProductType.WEIGHT, 9))
+
+        assertTrue(result is Result.Success)
+        assertEquals(DeleteProductCommand(ProductType.WEIGHT, 9), products.deleted)
+    }
+
+    @Test
+    fun delete_propagatesApiFailure() = runBlocking {
+        val error = ApplicationError.NotFound("Product not found")
+        val products = FakeProducts(deleteResult = Result.Failure(error))
+        val service = ProductCommandServiceImpl(products, FakeLots()) { now }
+
+        val result = service.handle(DeleteProductCommand(ProductType.UNIT, 3))
+
+        assertTrue(result is Result.Failure)
+        assertEquals(error, (result as Result.Failure).error)
     }
 }

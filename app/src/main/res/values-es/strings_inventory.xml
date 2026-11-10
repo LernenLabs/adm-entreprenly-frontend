@@ -66,8 +66,39 @@
     <string name="inventory_detail_out_of_stock_kg">No hay kilos disponibles. El chatbot ya no lo ofrece a los clientes.</string>
     <string name="inventory_detail_lots">Lotes asociados</string>
     <string name="inventory_detail_no_lots">Este producto aún no tiene lotes.</string>
+    <string name="inventory_detail_alerts">Alertas de inventario</string>
+    <plurals name="inventory_detail_expired_title">
+        <item quantity="one">%d lote vencido</item>
+        <item quantity="other">%d lotes vencidos</item>
+        <item quantity="many">%d lotes vencidos</item>
+    </plurals>
+    <plurals name="inventory_detail_expired_message">
+        <item quantity="one">Retíralo de la venta y actualiza su stock.</item>
+        <item quantity="other">Retíralos de la venta y actualiza su stock.</item>
+        <item quantity="many">Retíralos de la venta y actualiza su stock.</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_title">
+        <item quantity="one">%d lote próximo a vencer</item>
+        <item quantity="other">%d lotes próximos a vencer</item>
+        <item quantity="many">%d lotes próximos a vencer</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_message">
+        <item quantity="one">Revísalo antes de que venza.</item>
+        <item quantity="other">Revísalos antes de que venzan.</item>
+        <item quantity="many">Revísalos antes de que venzan.</item>
+    </plurals>
     <string name="inventory_detail_edit">Editar</string>
     <string name="inventory_detail_create_lot">+ Crear lote</string>
+    <string name="inventory_product_delete">Eliminar producto</string>
+    <string name="inventory_product_delete_title">¿Eliminar producto?</string>
+    <string name="inventory_product_delete_message">%1$s y su stock se eliminarán permanentemente. Esta acción no se puede deshacer.</string>
+    <plurals name="inventory_product_delete_cascade">
+        <item quantity="one">También se eliminará su %d lote junto con su stock.</item>
+        <item quantity="other">También se eliminarán sus %d lotes junto con su stock.</item>
+        <item quantity="many">También se eliminarán sus %d lotes junto con su stock.</item>
+    </plurals>
+    <string name="inventory_product_deleted">Producto eliminado correctamente</string>
+    <string name="inventory_product_delete_failed">No se pudo eliminar el producto. Inténtalo de nuevo.</string>
 
     <!-- Inventario: pestaña Lotes -->
     <string name="inventory_lots_active">Activos</string>
@@ -89,12 +120,19 @@
     <string name="inventory_lots_empty_title">Aún no tienes lotes</string>
     <string name="inventory_lots_empty_message">Registra un lote para controlar los vencimientos.</string>
     <string name="inventory_lots_no_products">Primero registra un producto.</string>
+    <string name="inventory_lots_search">Buscar lote por producto o marca…</string>
+    <string name="inventory_lots_no_results">No se encontraron lotes que coincidan con tu búsqueda</string>
 
     <!-- Inventario: crear lote -->
     <string name="inventory_lot_create_title">Crear lote</string>
     <string name="inventory_lot_product">Producto*</string>
     <string name="inventory_lot_search_product">Buscar producto</string>
     <string name="inventory_lot_select_product">Selecciona un producto</string>
+    <string name="inventory_lot_quantity_required">Ingresa la cantidad</string>
+    <string name="inventory_lot_quantity_invalid">La cantidad debe ser mayor a 0</string>
+    <string name="inventory_lot_expiry_required">Selecciona la fecha de vencimiento</string>
+    <string name="inventory_lot_expiry_before_entry">El vencimiento no puede ser anterior a la fecha de ingreso</string>
+    <string name="inventory_lot_expiry_before_today">El vencimiento no puede ser anterior a hoy</string>
     <string name="inventory_lot_number">N° de lote</string>
     <string name="inventory_lot_quantity">Cantidad*</string>
     <string name="inventory_lot_entry_date">Fecha de ingreso*</string>
@@ -121,6 +159,18 @@
     </plurals>
     <string name="inventory_lot_expired_title">Lote vencido</string>
     <string name="inventory_lot_expired_message">Retíralo de la venta y actualiza su stock.</string>
+    <string name="inventory_lot_edit">Editar lote</string>
+    <string name="inventory_lot_edit_title">Editar lote</string>
+    <string name="inventory_lot_updated">Lote actualizado correctamente</string>
+    <string name="inventory_lot_update_failed">No se pudo actualizar el lote</string>
+    <string name="inventory_lot_date_note_edit">Elige las fechas del lote. Se permiten fechas pasadas en lotes existentes.</string>
+    <string name="inventory_lot_delete">Eliminar lote</string>
+    <string name="inventory_lot_delete_title">¿Eliminar lote?</string>
+    <string name="inventory_lot_delete_message">El lote %1$s se eliminará permanentemente. Esta acción no se puede deshacer.</string>
+    <string name="inventory_lot_deleted">Lote eliminado correctamente</string>
+    <string name="inventory_lot_delete_failed">No se pudo eliminar el lote. Inténtalo de nuevo.</string>
+    <string name="inventory_delete">Eliminar</string>
+    <string name="inventory_cancel">Cancelar</string>
 
     <!-- Inventario: formatos -->
     <string name="inventory_money">S/ %1$.2f</string>

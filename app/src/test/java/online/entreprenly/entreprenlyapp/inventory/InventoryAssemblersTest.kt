@@ -3,6 +3,7 @@ package online.entreprenly.entreprenlyapp.inventory
 import java.time.Instant
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.assemblers.toEntity
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.assemblers.toResourceString
@@ -77,6 +78,23 @@ class InventoryAssemblersTest {
 
         val weightLot = CreateLotCommand(ProductType.WEIGHT, 20, null, entry, null, 0, 3.2).toWeightResource()
         assertEquals(3.2, weightLot.quantityKg, 0.0)
+    }
+
+    @Test
+    fun updateLotCommands_serializeFullReplacement() {
+        val entry = Instant.parse("2026-10-01T00:00:00Z")
+        val expiry = Instant.parse("2026-12-01T00:00:00Z")
+        val unit = UpdateLotCommand(ProductType.UNIT, 8, 10, "QR-8", entry, expiry, 12, 0.0)
+            .toUnitResource()
+        assertEquals(10L, unit.productId)
+        assertEquals("QR-8", unit.codeQR)
+        assertEquals(12, unit.quantity)
+        assertEquals("2026-12-01T00:00:00Z", unit.expiryDate)
+
+        val weight = UpdateLotCommand(ProductType.WEIGHT, 9, 20, null, entry, null, 0, 2.5)
+            .toWeightResource()
+        assertEquals(20L, weight.productId)
+        assertEquals(2.5, weight.quantityKg, 0.0)
     }
 
     @Test
