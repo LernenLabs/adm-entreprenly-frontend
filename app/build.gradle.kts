@@ -25,6 +25,15 @@ android {
             // "http://10.0.2.2:8092/" (10.0.2.2 is the host machine's localhost).
             buildConfigField("String", "API_BASE_URL", "\"https://adm-entreprenly-backend.onrender.com/\"")
         }
+        create("av2") {
+            initWith(getByName("debug"))
+            applicationIdSuffix = ".av2"
+            versionNameSuffix = "-av2"
+            matchingFallbacks += "debug"
+            val av2ApiUrl = providers.gradleProperty("av2ApiUrl").orElse("http://127.0.0.1:8092/").get()
+            require(av2ApiUrl in setOf("http://127.0.0.1:8092/", "http://10.0.2.2:8092/"))
+            buildConfigField("String", "API_BASE_URL", "\"$av2ApiUrl\"")
+        }
         release {
             buildConfigField("String", "API_BASE_URL", "\"https://adm-entreprenly-backend.onrender.com/\"")
             optimization {

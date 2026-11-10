@@ -29,12 +29,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import java.io.File
+import java.net.HttpURLConnection
 import java.net.URI
-import javax.net.ssl.HttpsURLConnection
+
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import online.entreprenly.entreprenlyapp.BuildConfig
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.AvatarImage
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
@@ -48,14 +50,17 @@ fun ProfileAvatar(initials: String, url: String?) {
         if (url.isNullOrBlank()) return@produceState
         value = withContext(Dispatchers.IO) {
             runCatching {
-                val address = URI(url)
-                require(address.scheme.equals("https", ignoreCase = true) && address.host != null)
-                val connection = address.toURL().openConnection() as HttpsURLConnection
+                val address = URI(BuildConfig.API_BASE_URL).resolve(url)
+                val https = address.scheme.equals("https", ignoreCase = true)
+                val localAv2 = BuildConfig.BUILD_TYPE == "av2" && address.scheme == "http" &&
+                    address.host in setOf("127.0.0.1", "10.0.2.2")
+                require(address.host != null && (https || localAv2))
+                val connection = address.toURL().openConnection() as HttpURLConnection
                 try {
                     connection.instanceFollowRedirects = false
                     connection.connectTimeout = 5000
                     connection.readTimeout = 5000
-                    if (connection.responseCode != HttpsURLConnection.HTTP_OK) return@runCatching null
+                    if (connection.responseCode != HttpURLConnection.HTTP_OK) return@runCatching null
                     val bytes = connection.inputStream.use(AvatarImage::readBytes)
                     decodeAvatar(bytes).second
                 } finally {
