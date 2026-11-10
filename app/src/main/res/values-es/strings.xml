@@ -23,10 +23,12 @@
     <string name="account_change_password_action">Actualizar contraseña</string>
     <string name="account_password_updated">Contraseña actualizada</string>
     <string name="account_change_email_title">Cambiar correo</string>
-    <string name="account_change_email_hint">Deberás iniciar sesión nuevamente después de cambiarlo.</string>
+    <string name="account_change_email_hint">Tu correo actual sigue activo hasta que confirmes el enlace enviado a la nueva dirección.</string>
     <string name="account_new_email">Nuevo correo</string>
-    <string name="account_change_email_action">Actualizar correo</string>
-    <string name="account_email_updated">Correo actualizado</string>
+    <string name="account_change_email_action">Enviar enlace de confirmación</string>
+    <string name="account_email_link_sent">Enlace enviado. Confírmalo desde tu nuevo correo.</string>
+    <string name="account_confirm_password">Confirmar nueva contraseña</string>
+    <string name="account_password_mismatch">Las contraseñas nuevas no coinciden.</string>
     <string name="account_sign_out">Cerrar sesión</string>
 
 
