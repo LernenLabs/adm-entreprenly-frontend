@@ -95,4 +95,24 @@
     <!-- Modules not available yet -->
     <string name="module_coming_soon_title">%1$s is coming soon</string>
     <string name="module_coming_soon_message">This module is not available in the app yet.</string>
+    <string name="profile_avatar_title">Profile photo</string>
+    <string name="profile_avatar_gallery">Choose from gallery</string>
+    <string name="profile_avatar_camera">Take a photo</string>
+    <string name="profile_avatar_upload">Save photo</string>
+    <string name="profile_avatar_saved">Profile photo updated.</string>
+    <string name="profile_avatar_reading">Opening photo…</string>
+    <string name="profile_avatar_size">Choose a photo of 5 MB or less.</string>
+    <string name="profile_avatar_format">Choose a valid JPG, PNG or WebP image.</string>
+    <string name="profile_avatar_access">The photo or camera could not be opened. Check access in Settings or choose a different source.</string>
+    <string name="profile_phone_verify">Verify phone number</string>
+    <string name="profile_phone_send">Send code</string>
+    <string name="profile_phone_resend">Resend code</string>
+    <string name="profile_phone_code">Verification code</string>
+    <string name="profile_phone_code_sent">Code sent.</string>
+    <string name="profile_phone_destination">Enter the code sent to %1$s.</string>
+    <string name="profile_phone_code_invalid">Enter the six digits of the code.</string>
+    <string name="profile_phone_invalid">Enter 7 to 15 digits with an optional + at the start.</string>
+    <string name="profile_phone_verified">Phone number verified.</string>
+    <string name="profile_phone_close">Close</string>
+    <string name="profile_operation_unavailable">This service is currently unavailable. Try again later.</string>
 </resources>

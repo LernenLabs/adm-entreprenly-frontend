@@ -21,6 +21,6 @@ interface IamApi {
     @PUT("api/v1/users/me/password")
     suspend fun changePassword(@Body resource: ChangePasswordResource): Response<Unit>
 
-    @PUT("api/v1/users/me/email")
+    @POST("api/v1/users/me/email-change-requests")
     suspend fun changeEmail(@Body resource: ChangeEmailResource): Response<Unit>
 }

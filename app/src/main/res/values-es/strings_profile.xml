@@ -95,4 +95,24 @@
     <!-- Módulos aún no disponibles -->
     <string name="module_coming_soon_title">%1$s estará disponible pronto</string>
     <string name="module_coming_soon_message">Este módulo aún no está disponible en la app.</string>
+    <string name="profile_avatar_title">Foto de perfil</string>
+    <string name="profile_avatar_gallery">Elegir de la galería</string>
+    <string name="profile_avatar_camera">Tomar una foto</string>
+    <string name="profile_avatar_upload">Guardar foto</string>
+    <string name="profile_avatar_saved">Foto de perfil actualizada.</string>
+    <string name="profile_avatar_reading">Abriendo foto…</string>
+    <string name="profile_avatar_size">Elige una foto de 5 MB o menos.</string>
+    <string name="profile_avatar_format">Elige una imagen JPG, PNG o WebP válida.</string>
+    <string name="profile_avatar_access">No se pudo abrir la foto o la cámara. Revisa el acceso en Ajustes o elige otro origen.</string>
+    <string name="profile_phone_verify">Verificar teléfono</string>
+    <string name="profile_phone_send">Enviar código</string>
+    <string name="profile_phone_resend">Reenviar código</string>
+    <string name="profile_phone_code">Código de verificación</string>
+    <string name="profile_phone_code_sent">Código enviado.</string>
+    <string name="profile_phone_destination">Ingresa el código enviado a %1$s.</string>
+    <string name="profile_phone_code_invalid">Ingresa los seis dígitos del código.</string>
+    <string name="profile_phone_invalid">Ingresa entre 7 y 15 dígitos. Puedes empezar con +.</string>
+    <string name="profile_phone_verified">Teléfono verificado.</string>
+    <string name="profile_phone_close">Cerrar</string>
+    <string name="profile_operation_unavailable">Este servicio no está disponible por el momento. Intenta más tarde.</string>
 </resources>
