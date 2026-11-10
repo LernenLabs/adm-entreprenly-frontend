@@ -5,6 +5,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Produ
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
@@ -15,6 +16,7 @@ interface ProductRepository {
     suspend fun findById(type: ProductType, id: Long): Result<Product>
     suspend fun create(command: CreateProductCommand): Result<Product>
     suspend fun update(command: UpdateProductCommand): Result<Product>
+    suspend fun delete(command: DeleteProductCommand): Result<Unit>
 }
 
 interface LotRepository {

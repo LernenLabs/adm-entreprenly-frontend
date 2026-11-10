@@ -68,6 +68,16 @@
     <string name="inventory_detail_no_lots">Este producto aún no tiene lotes.</string>
     <string name="inventory_detail_edit">Editar</string>
     <string name="inventory_detail_create_lot">+ Crear lote</string>
+    <string name="inventory_product_delete">Eliminar producto</string>
+    <string name="inventory_product_delete_title">¿Eliminar producto?</string>
+    <string name="inventory_product_delete_message">%1$s se eliminará permanentemente. Esta acción no se puede deshacer.</string>
+    <plurals name="inventory_product_delete_cascade">
+        <item quantity="one">También se eliminará su %d lote.</item>
+        <item quantity="other">También se eliminarán sus %d lotes.</item>
+        <item quantity="many">También se eliminarán sus %d lotes.</item>
+    </plurals>
+    <string name="inventory_product_deleted">Producto eliminado correctamente</string>
+    <string name="inventory_product_delete_failed">No se pudo eliminar el producto</string>
 
     <!-- Inventario: pestaña Lotes -->
     <string name="inventory_lots_active">Activos</string>

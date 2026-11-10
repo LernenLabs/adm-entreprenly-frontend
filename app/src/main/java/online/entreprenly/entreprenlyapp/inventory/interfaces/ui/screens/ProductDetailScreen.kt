@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -18,11 +19,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -40,6 +46,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -47,6 +54,7 @@ import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.DangerPillButton
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryAlertBanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryBannerKind
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryError
@@ -62,8 +70,10 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.prod
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.remainingText
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryState
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.SecondaryPillButton
 
@@ -82,14 +92,23 @@ fun ProductDetailScreen(
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.state.collectAsState()
+    val deleteForm by viewModel.productDeleteForm.collectAsState()
     var showEdit by rememberSaveable { mutableStateOf(false) }
     var showCreateLot by rememberSaveable { mutableStateOf(false) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     val snackbar = remember { SnackbarHostState() }
     val noticeText = (state as? InventoryState.Ready)?.notice?.asString()
     LaunchedEffect(noticeText) {
         if (noticeText != null) {
             snackbar.showSnackbar(noticeText)
             viewModel.consumeNotice()
+        }
+    }
+    LaunchedEffect(type, id) { viewModel.clearProductDeleteForm() }
+    LaunchedEffect(deleteForm.success) {
+        if (deleteForm.success != null) {
+            viewModel.clearProductDeleteForm()
+            onBack()
         }
     }
 
@@ -109,12 +128,16 @@ fun ProductDetailScreen(
             is InventoryState.Ready -> {
                 val product = s.product(type, id)
                 if (product == null) {
-                    InventoryError(
-                        message = UiText.Res(R.string.inventory_not_available),
-                        onRetry = viewModel::refresh,
-                        retryText = stringResource(R.string.inventory_retry),
-                        modifier = Modifier.padding(padding)
-                    )
+                    if (deleteForm.success != null) {
+                        InventoryLoading(Modifier.padding(padding))
+                    } else {
+                        InventoryError(
+                            message = UiText.Res(R.string.inventory_not_available),
+                            onRetry = viewModel::refresh,
+                            retryText = stringResource(R.string.inventory_retry),
+                            modifier = Modifier.padding(padding)
+                        )
+                    }
                 } else {
                     ProductDetailContent(
                         product = product,
@@ -124,6 +147,7 @@ fun ProductDetailScreen(
                         onLotClick = onLotClick,
                         onEdit = { showEdit = true },
                         onCreateLot = { showCreateLot = true },
+                        onDelete = { showDeleteDialog = true },
                         modifier = Modifier.padding(padding)
                     )
                 }
@@ -170,6 +194,15 @@ fun ProductDetailScreen(
             )
         }
     }
+    if (showDeleteDialog && current != null) {
+        DeleteProductDialog(
+            product = current,
+            lotCount = ready?.lotsOf(current)?.size ?: 0,
+            form = deleteForm,
+            onDismiss = { if (!deleteForm.loading) showDeleteDialog = false },
+            onConfirm = { viewModel.deleteProduct(current.type, current.id) }
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,6 +215,7 @@ private fun ProductDetailContent(
     onLotClick: (String, Long) -> Unit,
     onEdit: () -> Unit,
     onCreateLot: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val stock = state.stockOf(product)
@@ -297,10 +331,76 @@ private fun ProductDetailContent(
                         onClick = onCreateLot
                     )
                 }
-                // Extension point: delete product (out of scope).
+                DangerPillButton(
+                    text = stringResource(R.string.inventory_product_delete),
+                    onClick = onDelete
+                )
             }
         }
     }
+}
+
+@Composable
+private fun DeleteProductDialog(
+    product: Product,
+    lotCount: Int,
+    form: FormState,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.inventory_product_delete_title)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(stringResource(R.string.inventory_product_delete_message, product.name))
+                if (lotCount > 0) {
+                    Text(
+                        pluralStringResource(
+                            R.plurals.inventory_product_delete_cascade,
+                            lotCount,
+                            lotCount
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+                val error = form.error
+                val errorTitle = form.errorTitle
+                if (errorTitle != null || error != null) {
+                    ErrorBanner(
+                        title = errorTitle?.asString() ?: error?.asString().orEmpty(),
+                        message = if (errorTitle != null) error?.asString() else null
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = onConfirm,
+                enabled = !form.loading,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                )
+            ) {
+                if (form.loading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onError
+                    )
+                } else {
+                    Text(stringResource(R.string.inventory_delete))
+                }
+            }
+        },
+        dismissButton = {
+            OutlinedButton(onClick = onDismiss, enabled = !form.loading) {
+                Text(stringResource(R.string.inventory_cancel))
+            }
+        }
+    )
 }
 
 @Composable

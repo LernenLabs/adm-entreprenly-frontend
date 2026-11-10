@@ -19,6 +19,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Produ
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteLotCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
@@ -79,6 +80,9 @@ class InventoryViewModel(
     private val _lotDeleteForm = MutableStateFlow(FormState())
     val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
 
+    private val _productDeleteForm = MutableStateFlow(FormState())
+    val productDeleteForm: StateFlow<FormState> = _productDeleteForm.asStateFlow()
+
     init {
         refresh()
     }
@@ -109,6 +113,10 @@ class InventoryViewModel(
 
     fun clearLotDeleteForm() {
         _lotDeleteForm.value = FormState()
+    }
+
+    fun clearProductDeleteForm() {
+        _productDeleteForm.value = FormState()
     }
 
     fun createProduct(command: CreateProductCommand) {
@@ -169,6 +177,30 @@ class InventoryViewModel(
                     )
                 }
                 is Result.Failure -> _lotForm.value = FormState(error = UiText.Raw(r.error.message))
+            }
+        }
+    }
+
+    fun deleteProduct(type: ProductType, id: Long) {
+        if (_productDeleteForm.value.loading) return
+        _productDeleteForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            when (val r = productCommandService.handle(DeleteProductCommand(type, id))) {
+                is Result.Success -> {
+                    _state.value = load(
+                        highlightProduct = null,
+                        highlightLot = null,
+                        notice = UiText.Res(R.string.inventory_product_deleted),
+                        keepContent = true
+                    )
+                    _productDeleteForm.value = FormState(
+                        success = UiText.Res(R.string.inventory_product_deleted)
+                    )
+                }
+                is Result.Failure -> _productDeleteForm.value = FormState(
+                    errorTitle = UiText.Res(R.string.inventory_product_delete_failed),
+                    error = UiText.Raw(r.error.message)
+                )
             }
         }
     }

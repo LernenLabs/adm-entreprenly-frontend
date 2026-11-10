@@ -39,6 +39,9 @@ interface InventoryApi {
         @Body resource: UpdateUnitProductResource
     ): Response<UnitProductResource>
 
+    @DELETE("api/v1/inventory-unit-products/{id}")
+    suspend fun deleteUnitProduct(@Path("id") id: Long): Response<Unit>
+
     // ---- Weight products ----
 
     @POST("api/v1/inventory-weight-products")
@@ -55,6 +58,9 @@ interface InventoryApi {
         @Path("id") id: Long,
         @Body resource: UpdateWeightProductResource
     ): Response<WeightProductResource>
+
+    @DELETE("api/v1/inventory-weight-products/{id}")
+    suspend fun deleteWeightProduct(@Path("id") id: Long): Response<Unit>
 
     // ---- Unit lots ----
 

@@ -66,6 +66,15 @@
     <string name="inventory_detail_no_lots">This product has no lots yet.</string>
     <string name="inventory_detail_edit">Edit</string>
     <string name="inventory_detail_create_lot">+ Create lot</string>
+    <string name="inventory_product_delete">Delete product</string>
+    <string name="inventory_product_delete_title">Delete product?</string>
+    <string name="inventory_product_delete_message">%1$s will be permanently deleted. This action cannot be undone.</string>
+    <plurals name="inventory_product_delete_cascade">
+        <item quantity="one">Its %d lot will also be deleted.</item>
+        <item quantity="other">Its %d lots will also be deleted.</item>
+    </plurals>
+    <string name="inventory_product_deleted">Product deleted successfully</string>
+    <string name="inventory_product_delete_failed">Could not delete the product</string>
 
     <!-- Inventory: lots tab -->
     <string name="inventory_lots_active">Active</string>
