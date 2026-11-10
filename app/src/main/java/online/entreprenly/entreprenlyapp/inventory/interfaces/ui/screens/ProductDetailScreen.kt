@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.LotStatus
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.DangerPillButton
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryAlertBanner
@@ -218,10 +219,11 @@ private fun ProductDetailContent(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val today = InventoryRules.todayUtc()
     val stock = state.stockOf(product)
-    val outOfStock = stock <= 0.0
-    val lowStock = !outOfStock && InventoryRules.isLowStock(state.alerts, product)
-    val lots = InventoryRules.sortLots(state.lotsOf(product))
+    val alerts = InventoryRules.productAlertSummary(product, state.lots, state.alerts, today)
+    val outOfStock = alerts.outOfStock
+    val lots = InventoryRules.sortLots(state.lotsOf(product), today)
 
     Column(modifier.fillMaxSize()) {
         DetailHeader(name = product.name, subtitle = measureLabel(product.type), onBack = onBack)
@@ -258,8 +260,15 @@ private fun ProductDetailContent(
                         }
                     }
                 }
-                when {
-                    outOfStock -> InventoryAlertBanner(
+                if (alerts.hasAlerts) {
+                    Text(
+                        stringResource(R.string.inventory_detail_alerts),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                if (alerts.outOfStock) {
+                    InventoryAlertBanner(
                         title = stringResource(R.string.inventory_detail_out_of_stock),
                         message = stringResource(
                             if (product.type == ProductType.UNIT) {
@@ -270,10 +279,42 @@ private fun ProductDetailContent(
                         ),
                         kind = InventoryBannerKind.ERROR
                     )
-                    lowStock -> InventoryAlertBanner(
+                }
+                if (alerts.lowStock) {
+                    InventoryAlertBanner(
                         title = stringResource(R.string.inventory_detail_low_stock),
                         message = remainingText(product, stock),
                         kind = InventoryBannerKind.ERROR
+                    )
+                }
+                if (alerts.expiredLots > 0) {
+                    InventoryAlertBanner(
+                        title = pluralStringResource(
+                            R.plurals.inventory_detail_expired_title,
+                            alerts.expiredLots,
+                            alerts.expiredLots
+                        ),
+                        message = pluralStringResource(
+                            R.plurals.inventory_detail_expired_message,
+                            alerts.expiredLots,
+                            alerts.expiredLots
+                        ),
+                        kind = InventoryBannerKind.ERROR
+                    )
+                }
+                if (alerts.expiringSoonLots > 0) {
+                    InventoryAlertBanner(
+                        title = pluralStringResource(
+                            R.plurals.inventory_detail_expiring_title,
+                            alerts.expiringSoonLots,
+                            alerts.expiringSoonLots
+                        ),
+                        message = pluralStringResource(
+                            R.plurals.inventory_detail_expiring_message,
+                            alerts.expiringSoonLots,
+                            alerts.expiringSoonLots
+                        ),
+                        kind = InventoryBannerKind.WARNING
                     )
                 }
                 Text(
@@ -289,7 +330,8 @@ private fun ProductDetailContent(
                     )
                 } else {
                     lots.forEach { lot ->
-                        val pill = lotPill(lot)
+                        val pill = lotPill(lot, today)
+                        val expired = InventoryRules.lotStatus(lot, today) == LotStatus.EXPIRED
                         Surface(
                             onClick = { onLotClick(lot.type.value, lot.id) },
                             shape = RoundedCornerShape(14.dp),
@@ -308,10 +350,15 @@ private fun ProductDetailContent(
                                     Text(
                                         lot.label,
                                         style = MaterialTheme.typography.bodyLarge,
-                                        fontWeight = FontWeight.Bold
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (expired) {
+                                            MaterialTheme.colorScheme.error
+                                        } else {
+                                            MaterialTheme.colorScheme.onSurface
+                                        }
                                     )
                                     Text(
-                                        productLotRowDetail(lot),
+                                        productLotRowDetail(lot, highlightExpiry = expired),
                                         style = MaterialTheme.typography.bodyMedium,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )

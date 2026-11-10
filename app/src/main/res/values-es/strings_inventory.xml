@@ -66,6 +66,27 @@
     <string name="inventory_detail_out_of_stock_kg">No hay kilos disponibles. El chatbot ya no lo ofrece a los clientes.</string>
     <string name="inventory_detail_lots">Lotes asociados</string>
     <string name="inventory_detail_no_lots">Este producto aún no tiene lotes.</string>
+    <string name="inventory_detail_alerts">Alertas de inventario</string>
+    <plurals name="inventory_detail_expired_title">
+        <item quantity="one">%d lote vencido</item>
+        <item quantity="other">%d lotes vencidos</item>
+        <item quantity="many">%d lotes vencidos</item>
+    </plurals>
+    <plurals name="inventory_detail_expired_message">
+        <item quantity="one">Retíralo de la venta y actualiza su stock.</item>
+        <item quantity="other">Retíralos de la venta y actualiza su stock.</item>
+        <item quantity="many">Retíralos de la venta y actualiza su stock.</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_title">
+        <item quantity="one">%d lote próximo a vencer</item>
+        <item quantity="other">%d lotes próximos a vencer</item>
+        <item quantity="many">%d lotes próximos a vencer</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_message">
+        <item quantity="one">Revísalo antes de que venza.</item>
+        <item quantity="other">Revísalos antes de que venzan.</item>
+        <item quantity="many">Revísalos antes de que venzan.</item>
+    </plurals>
     <string name="inventory_detail_edit">Editar</string>
     <string name="inventory_detail_create_lot">+ Crear lote</string>
     <string name="inventory_product_delete">Eliminar producto</string>

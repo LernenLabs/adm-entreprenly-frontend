@@ -124,6 +124,45 @@ object InventoryRules {
                 (it.productType == null || it.productType == product.type)
         }
 
+    /** All critical states shown together in the product detail (US-12). */
+    data class ProductAlertSummary(
+        val outOfStock: Boolean,
+        val lowStock: Boolean,
+        val expiredLots: Int,
+        val expiringSoonLots: Int
+    ) {
+        val hasAlerts: Boolean
+            get() = outOfStock || lowStock || expiredLots > 0 || expiringSoonLots > 0
+    }
+
+    /**
+     * Groups stock and expiry alerts for one product. Out of stock wins over
+     * low stock; expired and expiring counts come from the product's own lots.
+     */
+    fun productAlertSummary(
+        product: Product,
+        lots: List<Lot>,
+        alerts: List<StockAlert>,
+        today: LocalDate = todayUtc()
+    ): ProductAlertSummary {
+        val outOfStock = isOutOfStock(product, lots)
+        var expired = 0
+        var expiring = 0
+        for (lot in lotsOfProduct(product, lots)) {
+            when (lotStatus(lot, today)) {
+                LotStatus.EXPIRED -> expired++
+                LotStatus.EXPIRING_SOON -> expiring++
+                else -> Unit
+            }
+        }
+        return ProductAlertSummary(
+            outOfStock = outOfStock,
+            lowStock = !outOfStock && isLowStock(alerts, product),
+            expiredLots = expired,
+            expiringSoonLots = expiring
+        )
+    }
+
     // ---- Search ----
 
     fun normalizeSearch(raw: String): String =

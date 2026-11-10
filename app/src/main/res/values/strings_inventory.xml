@@ -64,6 +64,23 @@
     <string name="inventory_detail_out_of_stock_kg">No kilos available. The chatbot no longer offers it to customers.</string>
     <string name="inventory_detail_lots">Associated lots</string>
     <string name="inventory_detail_no_lots">This product has no lots yet.</string>
+    <string name="inventory_detail_alerts">Inventory alerts</string>
+    <plurals name="inventory_detail_expired_title">
+        <item quantity="one">%d expired lot</item>
+        <item quantity="other">%d expired lots</item>
+    </plurals>
+    <plurals name="inventory_detail_expired_message">
+        <item quantity="one">Remove it from sale and update its stock.</item>
+        <item quantity="other">Remove them from sale and update their stock.</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_title">
+        <item quantity="one">%d lot expiring soon</item>
+        <item quantity="other">%d lots expiring soon</item>
+    </plurals>
+    <plurals name="inventory_detail_expiring_message">
+        <item quantity="one">Review it before it expires.</item>
+        <item quantity="other">Review them before they expire.</item>
+    </plurals>
     <string name="inventory_detail_edit">Edit</string>
     <string name="inventory_detail_create_lot">+ Create lot</string>
     <string name="inventory_product_delete">Delete product</string>

@@ -150,6 +150,62 @@ class InventoryRulesTest {
         assertFalse(InventoryRules.isLowStock(alerts, unitProduct(id = 11)))
     }
 
+    @Test
+    fun productAlertSummary_groupsLowStockExpiredAndExpiring() {
+        val product = unitProduct(id = 10)
+        val alerts = listOf(
+            StockAlert(1, null, 10, ProductType.UNIT, "Arroz", AlertType.LOW_STOCK, AlertSeverity.WARNING, null)
+        )
+        val lots = listOf(
+            unitLot(id = 1, productId = 10, quantity = 2, expiry = today.minusDays(1)),
+            unitLot(id = 2, productId = 10, quantity = 2, expiry = today.plusDays(2)),
+            unitLot(id = 3, productId = 99, quantity = 2, expiry = today.minusDays(3))
+        )
+
+        val summary = InventoryRules.productAlertSummary(product, lots, alerts, today)
+
+        assertTrue(summary.hasAlerts)
+        assertFalse(summary.outOfStock)
+        assertTrue(summary.lowStock)
+        assertEquals(1, summary.expiredLots)
+        assertEquals(1, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_normalStateHasNoAlerts() {
+        val product = unitProduct(id = 10)
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 5, expiry = today.plusDays(30))),
+            emptyList(),
+            today
+        )
+        assertFalse(summary.hasAlerts)
+        assertFalse(summary.outOfStock)
+        assertFalse(summary.lowStock)
+        assertEquals(0, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_outOfStockWinsOverLowStock() {
+        val product = unitProduct(id = 10)
+        val alerts = listOf(
+            StockAlert(1, null, 10, ProductType.UNIT, "Arroz", AlertType.LOW_STOCK, AlertSeverity.WARNING, null)
+        )
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(unitLot(id = 1, productId = 10, quantity = 0, expiry = today.plusDays(30))),
+            alerts,
+            today
+        )
+        assertTrue(summary.hasAlerts)
+        assertTrue(summary.outOfStock)
+        assertFalse(summary.lowStock)
+        assertEquals(0, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
     // ---- Search with tildes ----
 
     @Test
