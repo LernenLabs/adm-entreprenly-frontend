@@ -20,6 +20,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -37,6 +38,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.Inve
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryBannerKind
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryEmpty
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.LotCard
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SearchField
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.lotPill
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.lotRowDetail
 
@@ -68,11 +70,12 @@ fun LotsTab(
     }
 
     var filter by rememberSaveable { mutableIntStateOf(0) }
+    var query by rememberSaveable { mutableStateOf("") }
     val today = InventoryRules.todayUtc()
     val statuses = lots.associateWith { InventoryRules.lotStatus(it, today) }
     val counters = InventoryRules.lotCounters(lots, today)
-
-    val filtered = lots.filter {
+    val searched = InventoryRules.lotsMatchingSearch(lots, products, query)
+    val filtered = searched.filter {
         when (LotFilter.entries[filter]) {
             LotFilter.ALL -> true
             LotFilter.EXPIRING -> statuses.getValue(it) == LotStatus.EXPIRING_SOON
@@ -145,10 +148,16 @@ fun LotsTab(
                 onSelect = { filter = it },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+            SearchField(
+                value = query,
+                onChange = { query = it },
+                placeholder = stringResource(R.string.inventory_lots_search),
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+            )
             if (visible.isEmpty()) {
                 InventoryEmpty(
                     icon = Icons.Outlined.Layers,
-                    title = stringResource(R.string.inventory_no_results),
+                    title = stringResource(R.string.inventory_lots_no_results),
                     message = null,
                     actionText = null,
                     onAction = null

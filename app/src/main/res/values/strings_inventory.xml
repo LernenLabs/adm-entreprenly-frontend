@@ -94,6 +94,8 @@
     <string name="inventory_lots_empty_title">You don\'t have lots yet</string>
     <string name="inventory_lots_empty_message">Register a lot to track expirations.</string>
     <string name="inventory_lots_no_products">Register a product first.</string>
+    <string name="inventory_lots_search">Search lot by product or brand…</string>
+    <string name="inventory_lots_no_results">No lots matched your search</string>
 
     <!-- Inventory: create lot -->
     <string name="inventory_lot_create_title">Create lot</string>

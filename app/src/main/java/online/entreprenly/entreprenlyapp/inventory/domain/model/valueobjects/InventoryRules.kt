@@ -139,6 +139,20 @@ object InventoryRules {
         return haystacks.any { it.contains(q) }
     }
 
+    /**
+     * Lots whose product matches [query] by name, brand or codeQR. Lots without
+     * a matching product in [products] fall back to their own label.
+     */
+    fun lotsMatchingSearch(lots: List<Lot>, products: List<Product>, query: String): List<Lot> {
+        if (query.isBlank()) return lots
+        val productsByKey = products.associateBy { it.type to it.id }
+        return lots.filter { lot ->
+            val product = productsByKey[lot.type to lot.productId]
+            product?.let { matchesSearch(it, query) }
+                ?: lot.label.contains(query.trim(), ignoreCase = true)
+        }
+    }
+
     // ---- Text helpers ----
 
     /** Two words -> first letter of each; one word -> first two letters; uppercase. */

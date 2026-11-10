@@ -163,6 +163,22 @@ class InventoryRulesTest {
         assertFalse(InventoryRules.matchesSearch(product, "arroz"))
     }
 
+    @Test
+    fun lotsMatchingSearch_filtersByProductNameOrBrand() {
+        val rice = unitProduct(id = 10).copy(name = "Arroz Costeño", brand = "Costeño")
+        val coffee = unitProduct(id = 11).copy(name = "Café Molido", brand = "León")
+        val riceLot = unitLot(id = 1, productId = 10)
+        val coffeeLot = unitLot(id = 2, productId = 11)
+        val orphanLot = unitLot(id = 3, productId = 99).copy(codeQR = "LOTE-ESPECIAL")
+        val lots = listOf(riceLot, coffeeLot, orphanLot)
+        val products = listOf(rice, coffee)
+
+        assertEquals(listOf(riceLot), InventoryRules.lotsMatchingSearch(lots, products, "arroz"))
+        assertEquals(listOf(coffeeLot), InventoryRules.lotsMatchingSearch(lots, products, "leon"))
+        assertEquals(listOf(orphanLot), InventoryRules.lotsMatchingSearch(lots, products, "especial"))
+        assertEquals(lots, InventoryRules.lotsMatchingSearch(lots, products, ""))
+    }
+
     // ---- UTC conversions in America/Lima ----
 
     @Test

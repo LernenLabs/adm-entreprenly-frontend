@@ -99,6 +99,8 @@
     <string name="inventory_lots_empty_title">Aún no tienes lotes</string>
     <string name="inventory_lots_empty_message">Registra un lote para controlar los vencimientos.</string>
     <string name="inventory_lots_no_products">Primero registra un producto.</string>
+    <string name="inventory_lots_search">Buscar lote por producto o marca…</string>
+    <string name="inventory_lots_no_results">No se encontraron lotes que coincidan con tu búsqueda</string>
 
     <!-- Inventario: crear lote -->
     <string name="inventory_lot_create_title">Crear lote</string>
