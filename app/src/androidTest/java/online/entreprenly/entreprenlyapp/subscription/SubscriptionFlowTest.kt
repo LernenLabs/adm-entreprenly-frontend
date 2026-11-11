@@ -25,6 +25,11 @@ import java.time.Instant
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.runBlocking
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.acl.AccessValidationResource
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.acl.SubscriptionAccessApi
+import online.entreprenly.entreprenlyapp.chatbot.infrastructure.acl.SubscriptionAccessFacadeImpl
+import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.iam.application.queryservices.SessionQueryService
 import online.entreprenly.entreprenlyapp.iam.domain.model.queries.GetCurrentSessionQuery
 import online.entreprenly.entreprenlyapp.iam.domain.model.valueobjects.AuthSession
@@ -139,6 +144,27 @@ class SubscriptionFlowTest {
         compose.onNodeWithText(label("Payment declined")).assertIsDisplayed()
         compose.onNodeWithText(label("Visa •••• 1111")).assertIsDisplayed()
         capture("08-declined")
+
+        compose.runOnUiThread { viewModel.showPanel() }
+        compose.waitForIdle()
+        compose.onNodeWithText(localizedContext.getString(R.string.subscription_free_description)).assertIsDisplayed()
+        compose.onNodeWithText(localizedContext.getString(R.string.subscription_whatsapp)).assertDoesNotExist()
+        check(viewModel.state.value.dashboard?.planCode == "plan-free")
+        check(!viewModel.state.value.hasControl)
+        checkChatbotAccess(server, expected = false)
+        capture("activation-declined-panel-reopened")
+
+        click("Upgrade plan")
+        click("Choose plan")
+        click("Continue")
+        click("Continue")
+        fill(0, "4111111111111111")
+        fill(1, "0829")
+        fill(2, "123")
+        fill(3, "LUIS QUISPE")
+        click("Continue to payment")
+        click("Pay and activate")
+        compose.onNodeWithText(label("Payment declined")).assertIsDisplayed()
         click("Pay and activate")
         compose.onNodeWithText(label("Check payment status")).assertIsDisplayed()
         compose.onAllNodesWithText(label("Payment under verification")).filter(hasClickAction()).onFirst().assertIsNotEnabled()
@@ -149,7 +175,16 @@ class SubscriptionFlowTest {
         capture("10-activated")
         click("Go to Subscription")
         compose.onNodeWithText(label("Active")).assertIsDisplayed()
-        capture("11-active")
+        click("Payment history")
+        compose.onNodeWithText(label("Payment approved")).assertIsDisplayed()
+        compose.runOnUiThread { viewModel.showPanel() }
+        compose.waitForIdle()
+        compose.onNodeWithText("Plan Control").assertIsDisplayed()
+        compose.onNodeWithText(localizedContext.getString(R.string.subscription_whatsapp)).assertIsDisplayed()
+        compose.onNodeWithText(localizedContext.getString(R.string.subscription_iot_device)).assertIsDisplayed()
+        check(viewModel.state.value.hasControl)
+        checkChatbotAccess(server, expected = true)
+        capture("activation-approved-panel-reopened")
         val writesBeforeCancellation = server.savedDashboardCount
         val expiration = requireNotNull(viewModel.state.value.dashboard?.endDate)
         val activeSubscription = requireNotNull(viewModel.state.value.subscription)
@@ -192,10 +227,16 @@ class SubscriptionFlowTest {
         capture("14-history")
     }
 
+    private val sessions = object : SessionQueryService {
+        override fun handle(query: GetCurrentSessionQuery) = flowOf(AuthSession(7, "test@example.com", "test-token"))
+    }
+
+    private fun checkChatbotAccess(server: SubscriptionTestServer, expected: Boolean) = runBlocking {
+        val facade = SubscriptionAccessFacadeImpl(server, sessions)
+        check(facade.hasChatbotAccess() == Result.Success(expected))
+    }
+
     private fun showSubscription(server: SubscriptionTestServer): SubscriptionViewModel {
-        val sessions = object : SessionQueryService {
-            override fun handle(query: GetCurrentSessionQuery) = flowOf(AuthSession(7, "test@example.com", "test-token"))
-        }
         val repository = SubscriptionRepositoryImpl(server.api)
         lateinit var viewModel: SubscriptionViewModel
         compose.runOnUiThread {
@@ -276,7 +317,7 @@ class SubscriptionFlowTest {
     }
 }
 
-private class SubscriptionTestServer {
+private class SubscriptionTestServer : SubscriptionAccessApi {
     private val end = Instant.now().plusSeconds(30 * 86400L).toString()
     private val dashboardDate = DateTimeFormatter.ofPattern("dd/MM/uuuu").withZone(ZoneOffset.UTC)
     private val free = DashboardPlanResource("plan-free", "Plan Free", null, 0.0, 0.0, "free", null, null, false, null, null, emptyList())
@@ -287,6 +328,12 @@ private class SubscriptionTestServer {
     val billingSetup get() = requireNotNull(dashboard.billingSetup)
     private var subscription: SubscriptionResource? = null
     private var payments = emptyList<PaymentResource>()
+
+    override suspend fun validateAccess(userId: Long, feature: String): Response<AccessValidationResource> {
+        check(userId == 7L && feature == "chatbot")
+        val hasAccess = subscription?.let { it.planId == 2L && it.status == "ACTIVE" } == true
+        return Response.success(AccessValidationResource(userId, feature, hasAccess))
+    }
 
     fun approve() {
         subscription = subscription!!.copy(status = "ACTIVE", currentPeriodEnd = end)
