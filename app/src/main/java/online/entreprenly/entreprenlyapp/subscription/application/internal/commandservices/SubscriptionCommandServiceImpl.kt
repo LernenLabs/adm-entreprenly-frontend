@@ -9,10 +9,14 @@ import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.PayS
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.ReactivateSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.RenewSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SaveBillingCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SavePaymentMethodCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SetPrimaryPaymentMethodCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.repositories.SubscriptionRepository
 
 class SubscriptionCommandServiceImpl(private val repository: SubscriptionRepository) : SubscriptionCommandService {
     override suspend fun handle(command: SaveBillingCommand) = if (command.billing.invalidFields().isNotEmpty()) Result.Failure(ApplicationError.Validation("Invalid billing details")) else repository.saveBilling(command.userId, command.billing, command.method)
+    override suspend fun handle(command: SavePaymentMethodCommand) = repository.savePaymentMethod(command.userId, command.method)
+    override suspend fun handle(command: SetPrimaryPaymentMethodCommand) = repository.setPrimaryPaymentMethod(command.userId, command.methodId)
     override suspend fun handle(command: CreateSubscriptionCommand) = repository.create(command.userId, command.planId, command.token)
     override suspend fun handle(command: PaySubscriptionCommand) = repository.pay(command.id, command.token)
     override suspend fun handle(command: RenewSubscriptionCommand) = repository.renew(command.id, command.token)

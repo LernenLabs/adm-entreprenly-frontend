@@ -80,4 +80,10 @@
     <string name="subscription_card_number_error">Ingresa un número de tarjeta válido de 16 dígitos</string>
     <string name="subscription_cancelling">Estamos cancelando tu plan actual</string>
     <string name="subscription_cancelling_description">Espera mientras programamos la cancelación.</string>
+    <string name="subscription_payment_method">Método de pago</string>
+    <string name="subscription_add_payment_method">Agregar método de pago</string>
+    <string name="subscription_save_payment_method">Guardar método de pago</string>
+    <string name="subscription_payment_methods">Métodos de pago</string>
+    <string name="subscription_primary_method">Principal</string>
+    <string name="subscription_set_primary_method">Hacer principal</string>
 </resources>

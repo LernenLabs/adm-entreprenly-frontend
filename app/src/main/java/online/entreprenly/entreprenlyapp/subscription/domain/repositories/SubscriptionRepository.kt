@@ -12,6 +12,8 @@ interface SubscriptionRepository {
     suspend fun plans(): Result<List<SubscriptionPlan>>
     suspend fun dashboard(userId: Long): Result<SubscriptionDashboard>
     suspend fun saveBilling(userId: Long, billing: BillingDetails, method: PaymentMethod? = null): Result<SubscriptionDashboard>
+    suspend fun savePaymentMethod(userId: Long, method: PaymentMethod): Result<SubscriptionDashboard>
+    suspend fun setPrimaryPaymentMethod(userId: Long, methodId: String): Result<SubscriptionDashboard>
     suspend fun active(userId: Long): Result<Subscription?>
     suspend fun get(id: Long): Result<Subscription>
     suspend fun create(userId: Long, planId: Long, token: String): Result<Subscription>

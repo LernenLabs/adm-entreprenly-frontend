@@ -4,6 +4,8 @@ import online.entreprenly.entreprenlyapp.subscription.domain.model.valueobjects.
 import online.entreprenly.entreprenlyapp.subscription.domain.model.valueobjects.PaymentMethod
 
 data class SaveBillingCommand(val userId: Long, val billing: BillingDetails, val method: PaymentMethod? = null)
+data class SavePaymentMethodCommand(val userId: Long, val method: PaymentMethod)
+data class SetPrimaryPaymentMethodCommand(val userId: Long, val methodId: String)
 data class CreateSubscriptionCommand(val userId: Long, val planId: Long, val token: String)
 data class PaySubscriptionCommand(val id: Long, val token: String)
 data class RenewSubscriptionCommand(val id: Long, val token: String)
