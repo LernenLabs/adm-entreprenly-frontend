@@ -145,8 +145,8 @@ object InventoryRules {
 
     /**
      * Groups stock and expiry alerts for one product. Out of stock wins over
-     * low stock. Expired and expiring counts are date-based, so a lot with zero
-     * quantity and a past expiry counts as both out of stock and expired.
+     * low stock, and an empty lot is out of stock even if its date has passed,
+     * so only lots with remaining quantity count as expired or expiring soon.
      */
     fun productAlertSummary(
         product: Product,
@@ -158,8 +158,11 @@ object InventoryRules {
         var expired = 0
         var expiring = 0
         for (lot in lotsOfProduct(product, lots)) {
-            if (isExpired(lot, today)) expired++
-            else if (isExpiringSoon(lot, today)) expiring++
+            when (lotStatus(lot, today)) {
+                LotStatus.EXPIRED -> expired++
+                LotStatus.EXPIRING_SOON -> expiring++
+                else -> Unit
+            }
         }
         return ProductAlertSummary(
             outOfStock = outOfStock,

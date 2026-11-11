@@ -330,7 +330,7 @@ private fun ProductDetailContent(
                 } else {
                     lots.forEach { lot ->
                         val pill = lotPill(lot, today)
-                        val expired = InventoryRules.isExpired(lot, today)
+                        val expired = !lot.isEmpty && InventoryRules.isExpired(lot, today)
                         Surface(
                             onClick = { onLotClick(lot.type.value, lot.id) },
                             shape = RoundedCornerShape(14.dp),

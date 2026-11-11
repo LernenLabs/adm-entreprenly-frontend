@@ -207,7 +207,7 @@ class InventoryRulesTest {
     }
 
     @Test
-    fun productAlertSummary_countsExpiredByDateEvenWhenOutOfStock() {
+    fun productAlertSummary_outOfStockWinsOverExpired() {
         val product = unitProduct(id = 10)
         val summary = InventoryRules.productAlertSummary(
             product,
@@ -216,6 +216,23 @@ class InventoryRulesTest {
             today
         )
         assertTrue(summary.outOfStock)
+        assertEquals(0, summary.expiredLots)
+        assertEquals(0, summary.expiringSoonLots)
+    }
+
+    @Test
+    fun productAlertSummary_emptyExpiredLotIsNotCountedButStockedExpiredLotIs() {
+        val product = unitProduct(id = 10)
+        val summary = InventoryRules.productAlertSummary(
+            product,
+            listOf(
+                unitLot(id = 1, productId = 10, quantity = 0, expiry = today.minusDays(1)),
+                unitLot(id = 2, productId = 10, quantity = 3, expiry = today.minusDays(2))
+            ),
+            emptyList(),
+            today
+        )
+        assertFalse(summary.outOfStock)
         assertEquals(1, summary.expiredLots)
         assertEquals(0, summary.expiringSoonLots)
     }
