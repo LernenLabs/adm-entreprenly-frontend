@@ -10,9 +10,13 @@ import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.PayS
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.ReactivateSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.RenewSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SaveBillingCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SavePaymentMethodCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SetPrimaryPaymentMethodCommand
 
 interface SubscriptionCommandService {
     suspend fun handle(command: SaveBillingCommand): Result<SubscriptionDashboard>
+    suspend fun handle(command: SavePaymentMethodCommand): Result<SubscriptionDashboard>
+    suspend fun handle(command: SetPrimaryPaymentMethodCommand): Result<SubscriptionDashboard>
     suspend fun handle(command: CreateSubscriptionCommand): Result<Subscription>
     suspend fun handle(command: PaySubscriptionCommand): Result<SubscriptionPayment>
     suspend fun handle(command: RenewSubscriptionCommand): Result<Subscription>

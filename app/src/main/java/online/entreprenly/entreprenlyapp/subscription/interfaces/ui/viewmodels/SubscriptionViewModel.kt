@@ -29,6 +29,8 @@ import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.PayS
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.ReactivateSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.RenewSubscriptionCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SaveBillingCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SavePaymentMethodCommand
+import online.entreprenly.entreprenlyapp.subscription.domain.model.commands.SetPrimaryPaymentMethodCommand
 import online.entreprenly.entreprenlyapp.subscription.domain.model.queries.GetActiveSubscriptionQuery
 import online.entreprenly.entreprenlyapp.subscription.domain.model.queries.GetSubscriptionDashboardQuery
 import online.entreprenly.entreprenlyapp.subscription.domain.model.queries.GetSubscriptionPaymentsQuery
@@ -39,7 +41,7 @@ import online.entreprenly.entreprenlyapp.subscription.domain.model.valueobjects.
 import online.entreprenly.entreprenlyapp.subscription.domain.model.valueobjects.PaymentStatus
 import online.entreprenly.entreprenlyapp.subscription.domain.model.valueobjects.SubscriptionStatus
 
-enum class SubscriptionPage { PANEL, PLANS, BILLING, PAYMENT, SUMMARY, ACTIVATED, HISTORY }
+enum class SubscriptionPage { PANEL, PLANS, BILLING, PAYMENT, MANAGE_PAYMENT, SUMMARY, ACTIVATED, HISTORY }
 data class SubscriptionUiState(
     val loading: Boolean = true, val busy: Boolean = false,
     val cancelling: Boolean = false,
@@ -149,7 +151,44 @@ class SubscriptionViewModel(
             }
         }
     }
+    fun showPaymentMethod() {
+        val s = state.value
+        if (s.page != SubscriptionPage.PANEL || s.loading || s.busy || s.verifying || s.dashboard == null) return
+        _state.update { it.copy(page = SubscriptionPage.MANAGE_PAYMENT, error = null) }
+    }
+
+    fun setPrimaryPaymentMethod(methodId: String) {
+        if (state.value.page != SubscriptionPage.PANEL || state.value.method?.id == methodId) return
+        perform { id ->
+            when (val result = commands.handle(SetPrimaryPaymentMethodCommand(id, methodId))) {
+                is Result.Success -> _state.update {
+                    it.copy(dashboard = result.value, method = result.value.methods.firstOrNull { saved -> saved.isDefault })
+                }
+                is Result.Failure -> fail(result.error)
+            }
+        }
+    }
+
     fun saveMethod(method: PaymentMethod) {
+        if (state.value.page == SubscriptionPage.MANAGE_PAYMENT) {
+            perform { id ->
+                when (val result = commands.handle(SavePaymentMethodCommand(id, method))) {
+                    is Result.Success -> {
+                        val dashboard = result.value
+                        _state.update {
+                            it.copy(
+                                dashboard = dashboard,
+                                method = dashboard.methods.firstOrNull { saved -> saved.isDefault }
+                                    ?: dashboard.methods.firstOrNull(),
+                                page = SubscriptionPage.PANEL
+                            )
+                        }
+                    }
+                    is Result.Failure -> fail(result.error)
+                }
+            }
+            return
+        }
         perform { id ->
             when (val result = commands.handle(SaveBillingCommand(id, state.value.billing, method))) {
                 is Result.Success -> {
@@ -260,7 +299,7 @@ class SubscriptionViewModel(
         if (s.busy || s.verifying) return true
         val page = when (s.page) {
             SubscriptionPage.PANEL -> return false
-            SubscriptionPage.PLANS, SubscriptionPage.ACTIVATED, SubscriptionPage.HISTORY -> SubscriptionPage.PANEL
+            SubscriptionPage.PLANS, SubscriptionPage.ACTIVATED, SubscriptionPage.HISTORY, SubscriptionPage.MANAGE_PAYMENT -> SubscriptionPage.PANEL
             SubscriptionPage.BILLING -> SubscriptionPage.PLANS
             SubscriptionPage.PAYMENT -> if (s.renewing) SubscriptionPage.PANEL else SubscriptionPage.BILLING
             SubscriptionPage.SUMMARY -> SubscriptionPage.PAYMENT

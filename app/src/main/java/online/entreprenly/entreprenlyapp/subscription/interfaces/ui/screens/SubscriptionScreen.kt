@@ -26,6 +26,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -82,7 +83,7 @@ private fun SubscriptionContent(viewModel: SubscriptionViewModel, onBack: () -> 
     var card by remember { mutableStateOf(CardDetails()) }
     var invalidCardFields by remember { mutableStateOf(emptySet<String>()) }
     LaunchedEffect(state.page) {
-        if (state.page != SubscriptionPage.PAYMENT) {
+        if (state.page != SubscriptionPage.PAYMENT && state.page != SubscriptionPage.MANAGE_PAYMENT) {
             card = CardDetails()
             invalidCardFields = emptySet()
         }
@@ -94,6 +95,7 @@ private fun SubscriptionContent(viewModel: SubscriptionViewModel, onBack: () -> 
             AppTopBar(stringResource(when (state.page) {
                 SubscriptionPage.PLANS -> R.string.subscription_plans
                 SubscriptionPage.BILLING, SubscriptionPage.PAYMENT, SubscriptionPage.SUMMARY -> R.string.subscription_checkout
+                SubscriptionPage.MANAGE_PAYMENT -> R.string.subscription_payment_method
                 SubscriptionPage.HISTORY -> R.string.subscription_history
                 else -> R.string.more_subscription
             }), onBack = back, subtitle = when (state.page) {
@@ -160,9 +162,37 @@ private fun SubscriptionContent(viewModel: SubscriptionViewModel, onBack: () -> 
                             }
                             plan?.let { Text(subscriptionMoney(it.amount, it.currency) + stringResource(R.string.subscription_per_month), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold) }
                             state.dashboard?.endDate?.let { Text(stringResource(R.string.subscription_expires, it), style = MaterialTheme.typography.bodySmall) }
-                            state.method?.let { Text(stringResource(R.string.subscription_masked_card, it.cardBrand, it.lastFour), style = MaterialTheme.typography.bodySmall) }
                         }
                     }
+                    state.dashboard?.methods?.takeIf { it.isNotEmpty() }?.let { methods ->
+                        AppCard {
+                            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                Text(stringResource(R.string.subscription_payment_methods), fontWeight = FontWeight.Bold)
+                                methods.forEach { method ->
+                                    Row(
+                                        Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(stringResource(R.string.subscription_masked_card, method.cardBrand, method.lastFour))
+                                        if (method.id == state.method?.id) {
+                                            SubscriptionBadge(stringResource(R.string.subscription_primary_method))
+                                        } else {
+                                            TextButton(
+                                                onClick = { viewModel.setPrimaryPaymentMethod(method.id) },
+                                                enabled = !state.busy
+                                            ) { Text(stringResource(R.string.subscription_set_primary_method)) }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    SecondaryPillButton(
+                        stringResource(R.string.subscription_add_payment_method),
+                        viewModel::showPaymentMethod,
+                        enabled = !state.busy && state.dashboard != null
+                    )
                     if (state.hasControl) {
                         SubscriptionFeaturesCard(onWhatsApp, viewModel::showHistory)
                     } else Text(stringResource(R.string.subscription_free_description))
@@ -173,7 +203,7 @@ private fun SubscriptionContent(viewModel: SubscriptionViewModel, onBack: () -> 
                     if (state.controlPlan == null) Text(stringResource(R.string.subscription_unavailable))
                 }
                 SubscriptionPage.BILLING -> BillingDetailsForm(state.billing, state.invalidFields, !state.busy, viewModel::updateBilling)
-                SubscriptionPage.PAYMENT -> CardDetailsForm(card, invalidCardFields, !state.busy) {
+                SubscriptionPage.PAYMENT, SubscriptionPage.MANAGE_PAYMENT -> CardDetailsForm(card, invalidCardFields, !state.busy) {
                     card = it
                     invalidCardFields = emptySet()
                 }
@@ -232,7 +262,8 @@ private fun SubscriptionContent(viewModel: SubscriptionViewModel, onBack: () -> 
                     } else PrimaryPillButton(stringResource(R.string.subscription_upgrade), viewModel::showPlans, enabled = !state.busy)
                     SubscriptionPage.PLANS -> PrimaryPillButton(stringResource(R.string.subscription_continue), viewModel::start, enabled = !state.busy && state.selectedPlan != null)
                     SubscriptionPage.BILLING -> PrimaryPillButton(stringResource(R.string.subscription_continue), viewModel::saveBilling, enabled = !state.busy)
-                    SubscriptionPage.PAYMENT -> PrimaryPillButton(stringResource(R.string.subscription_continue_payment), {
+                    SubscriptionPage.PAYMENT, SubscriptionPage.MANAGE_PAYMENT -> PrimaryPillButton(
+                        stringResource(if (state.page == SubscriptionPage.MANAGE_PAYMENT) R.string.subscription_save_payment_method else R.string.subscription_continue_payment), {
                         invalidCardFields = card.invalidFields()
                         if (invalidCardFields.isEmpty()) viewModel.saveMethod(card.maskedMethod("fake-method-" + UUID.randomUUID()))
                     }, enabled = !state.busy)
