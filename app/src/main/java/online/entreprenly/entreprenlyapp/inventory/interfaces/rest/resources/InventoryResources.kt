@@ -13,7 +13,8 @@ data class UnitProductResource(
     val productType: String?,
     val price: Double,
     val weightGrams: Double,
-    val brand: String?
+    val brand: String?,
+    val imageUrl: String? = null
 )
 
 data class WeightProductResource(
@@ -22,7 +23,8 @@ data class WeightProductResource(
     val description: String?,
     val codeQR: String?,
     val productType: String?,
-    val pricePerKg: Double
+    val pricePerKg: Double,
+    val imageUrl: String? = null
 )
 
 data class UnitLotResource(
@@ -64,7 +66,8 @@ data class CreateUnitProductResource(
     val codeQR: String?,
     val price: Double,
     val weightGrams: Double,
-    val brand: String?
+    val brand: String?,
+    val imageUrl: String? = null
 )
 
 data class UpdateUnitProductResource(
@@ -73,21 +76,24 @@ data class UpdateUnitProductResource(
     val codeQR: String?,
     val price: Double,
     val weightGrams: Double,
-    val brand: String?
+    val brand: String?,
+    val imageUrl: String? = null
 )
 
 data class CreateWeightProductResource(
     val name: String,
     val description: String?,
     val codeQR: String?,
-    val pricePerKg: Double
+    val pricePerKg: Double,
+    val imageUrl: String? = null
 )
 
 data class UpdateWeightProductResource(
     val name: String,
     val description: String?,
     val codeQR: String?,
-    val pricePerKg: Double
+    val pricePerKg: Double,
+    val imageUrl: String? = null
 )
 
 data class CreateUnitLotResource(

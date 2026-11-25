@@ -169,9 +169,10 @@ fun LotsTab(
                     modifier = Modifier.fillMaxSize()
                 ) {
                     items(visible, key = { it.key }) { lot ->
-                        val productName = products.firstOrNull {
+                        val lotProduct = products.firstOrNull {
                             it.type == lot.type && it.id == lot.productId
-                        }?.name ?: lot.label
+                        }
+                        val productName = lotProduct?.name ?: lot.label
                         val pill = lotPill(lot, today)
                         val cardModifier = if (lot.key == recentlyAdded) {
                             Modifier.border(2.dp, MaterialTheme.colorScheme.primary, RoundedCornerShape(14.dp))
@@ -181,6 +182,7 @@ fun LotsTab(
                         Box(cardModifier) {
                             LotCard(
                                 productName = productName,
+                                imageUrl = lotProduct?.imageUrl,
                                 detail = lotRowDetail(lot),
                                 pillText = pill.text,
                                 pillKind = pill.kind,

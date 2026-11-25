@@ -2,28 +2,20 @@ package online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -38,7 +30,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -62,6 +53,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.Inve
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText as SharedUiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopBar
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 
@@ -92,7 +84,11 @@ fun LotDetailScreen(
         }
     }
 
-    Scaffold(modifier = modifier, containerColor = MaterialTheme.colorScheme.background) { padding ->
+    Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
+    ) { padding ->
         when (val s = state) {
             InventoryState.Loading -> InventoryLoading(Modifier.padding(padding))
             is InventoryState.Error -> InventoryError(
@@ -183,7 +179,7 @@ private fun LotDetailContent(
     val pill = lotPill(lot, today)
 
     Column(modifier.fillMaxSize()) {
-        LotDetailHeader(title = lot.label, subtitle = productName, onBack = onBack)
+        AppTopBar(title = lot.label, onBack = onBack, subtitle = productName)
         PullToRefreshBox(
             isRefreshing = refreshing,
             onRefresh = viewModel::refresh,
@@ -353,43 +349,3 @@ private fun LotDetailRow(label: String, value: @Composable () -> Unit, modifier:
     }
 }
 
-@Composable
-private fun LotDetailHeader(title: String, subtitle: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        Row(
-            Modifier
-                .fillMaxWidth()
-                .height(72.dp)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.nav_back),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-            Column(Modifier.weight(1f)) {
-                Text(
-                    title,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    maxLines = 1
-                )
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    maxLines = 1
-                )
-            }
-        }
-    }
-}

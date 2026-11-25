@@ -3,29 +3,21 @@ package online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
@@ -61,6 +53,8 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.Inve
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryLoading
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.LotStatusPill
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.ProductAvatar
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.ProductPhoto
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.ProductThumbnailSize
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SheetHeader
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.formatPrice
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.formatStock
@@ -73,6 +67,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.Inve
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopBar
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.SecondaryPillButton
@@ -115,7 +110,8 @@ fun ProductDetailScreen(
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbar) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         when (val s = state) {
             InventoryState.Loading -> InventoryLoading(Modifier.padding(padding))
@@ -225,7 +221,7 @@ private fun ProductDetailContent(
     val lots = InventoryRules.sortLots(state.lotsOf(product), today)
 
     Column(modifier.fillMaxSize()) {
-        DetailHeader(name = product.name, subtitle = measureLabel(product.type), onBack = onBack)
+        AppTopBar(title = product.name, onBack = onBack, subtitle = measureLabel(product.type))
         PullToRefreshBox(
             isRefreshing = state.refreshing,
             onRefresh = viewModel::refresh,
@@ -238,6 +234,7 @@ private fun ProductDetailContent(
                     .padding(16.dp),
                 verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
+                ProductPhoto(product.imageUrl)
                 AppCard {
                     Row(
                         Modifier
@@ -246,7 +243,7 @@ private fun ProductDetailContent(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        ProductAvatar(product.name, size = 56.dp)
+                        if (product.imageUrl.isNullOrBlank()) ProductAvatar(product.name, size = ProductThumbnailSize)
                         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             DetailRow(
                                 label = stringResource(R.string.inventory_detail_price),
@@ -259,6 +256,7 @@ private fun ProductDetailContent(
                         }
                     }
                 }
+                ProductInfoCard(product)
                 if (alerts.hasAlerts) {
                     Text(
                         stringResource(R.string.inventory_detail_alerts),
@@ -449,42 +447,30 @@ private fun DeleteProductDialog(
     )
 }
 
+/** Description, brand and QR code of the product; hidden when none is set. */
 @Composable
-private fun DetailHeader(name: String, subtitle: String, onBack: () -> Unit, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .windowInsetsPadding(WindowInsets.statusBars)
-    ) {
-        Row(
+private fun ProductInfoCard(product: Product, modifier: Modifier = Modifier) {
+    val description = product.description?.takeIf { it.isNotBlank() }
+    val brand = product.brand?.takeIf { it.isNotBlank() }
+    val codeQR = product.codeQR?.takeIf { it.isNotBlank() }
+    if (description == null && brand == null && codeQR == null) return
+    AppCard(modifier) {
+        Column(
             Modifier
                 .fillMaxWidth()
-                .height(72.dp)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            IconButton(onClick = onBack) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.nav_back),
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-            Column(Modifier.weight(1f)) {
+            if (description != null) {
                 Text(
-                    name,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    maxLines = 1
+                    stringResource(R.string.inventory_detail_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Text(
-                    subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                Text(description, style = MaterialTheme.typography.bodyLarge)
             }
+            if (brand != null) DetailRow(stringResource(R.string.inventory_detail_brand), brand)
+            if (codeQR != null) DetailRow(stringResource(R.string.inventory_detail_code_qr), codeQR)
         }
     }
 }
