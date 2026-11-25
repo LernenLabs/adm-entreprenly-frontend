@@ -5,14 +5,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AddPhotoAlternate
 import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +26,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
@@ -35,10 +40,13 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.Inv
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryTextField
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.ProductPhoto
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.isUploadedProductImage
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.rememberGalleryPhotoPicker
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.rememberQrScanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SegmentedControl
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 
 /**
@@ -73,12 +81,25 @@ fun ProductFormSheet(
     }
     var imageUrl by rememberSaveable(initial?.key) { mutableStateOf(initial?.imageUrl.orEmpty()) }
     val scanCode = rememberQrScanner { codeQR = it }
+    val form by viewModel.productForm.collectAsState()
+    val photoUpload by viewModel.photoUpload.collectAsState()
+    LaunchedEffect(initial?.key) { viewModel.clearPhotoUpload() }
+    LaunchedEffect(photoUpload.imageUrl) {
+        photoUpload.imageUrl?.let {
+            imageUrl = it
+            viewModel.clearPhotoUpload()
+        }
+    }
+    val pickPhoto = rememberGalleryPhotoPicker(
+        onPicked = viewModel::uploadProductPhoto,
+        onError = { viewModel.reportPhotoError(UiText.Res(R.string.inventory_photo_read_failed)) }
+    )
+    val busy = form.loading || photoUpload.loading
     var nameTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
     var priceTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
     var stockTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
     var submitted by rememberSaveable(initial?.key) { mutableStateOf(false) }
 
-    val form by viewModel.productForm.collectAsState()
     LaunchedEffect(initial?.key) { viewModel.clearProductForm() }
     LaunchedEffect(form.success) {
         if (form.success != null) {
@@ -105,7 +126,7 @@ fun ProductFormSheet(
     }
 
     val imageUrlError = imageUrl.trim().let {
-        it.isNotEmpty() && !it.startsWith("https://") && !it.startsWith("http://")
+        it.isNotEmpty() && !it.startsWith("https://") && !it.startsWith("http://") && !isUploadedProductImage(it)
     }.takeIf { it }?.let { stringResource(R.string.inventory_form_image_url_invalid) }
 
     fun showNameError() = (nameTouched || submitted) && nameError != null
@@ -222,16 +243,48 @@ fun ProductFormSheet(
                 }
             }
         )
-        InventoryTextField(
-            label = stringResource(R.string.inventory_form_image_url),
-            value = imageUrl,
-            onChange = { imageUrl = it },
-            placeholder = stringResource(R.string.inventory_form_image_url_hint),
-            keyboardType = KeyboardType.Uri,
-            enabled = !form.loading,
-            isError = imageUrlError != null,
-            errorText = imageUrlError
-        )
+        // A photo can be a pasted link or one uploaded from the gallery; both end up in imageUrl.
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.Bottom,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            InventoryTextField(
+                label = stringResource(R.string.inventory_form_image_url),
+                value = imageUrl,
+                onChange = { imageUrl = it },
+                placeholder = stringResource(R.string.inventory_form_image_url_hint),
+                keyboardType = KeyboardType.Uri,
+                enabled = !busy,
+                isError = imageUrlError != null,
+                modifier = Modifier.weight(1f)
+            )
+            OutlinedButton(
+                onClick = pickPhoto,
+                enabled = !busy,
+                modifier = Modifier.height(56.dp)
+            ) {
+                if (photoUpload.loading) {
+                    CircularProgressIndicator(Modifier.size(18.dp), strokeWidth = 2.dp)
+                } else {
+                    Icon(Icons.Outlined.AddPhotoAlternate, contentDescription = null, modifier = Modifier.size(18.dp))
+                }
+                Text(
+                    stringResource(R.string.inventory_form_upload_photo),
+                    modifier = Modifier.padding(start = 6.dp)
+                )
+            }
+        }
+        imageUrlError?.let {
+            Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
+        photoUpload.error?.let {
+            Text(
+                stringResource(R.string.inventory_photo_upload_failed, it.asString()),
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
+        }
         if (imageUrlError == null) ProductPhoto(imageUrl)
         form.error?.let { ErrorBanner(title = it.asString(), message = null) }
         PrimaryPillButton(
@@ -274,7 +327,7 @@ fun ProductFormSheet(
                     )
                 }
             },
-            enabled = valid && !form.loading
+            enabled = valid && !busy
         )
         if (form.loading) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {

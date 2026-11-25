@@ -4,6 +4,7 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Cre
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateUnitProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateWeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateWeightProductResource
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.ProductImageResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.StockAlertResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UnitProductResource
@@ -13,12 +14,15 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Upd
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightProductResource
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
 import retrofit2.http.PUT
+import retrofit2.http.Part
 import retrofit2.http.Path
 
 /** Backend inventory endpoints. Routes are relative, without a leading slash. */
@@ -103,6 +107,13 @@ interface InventoryApi {
 
     @DELETE("api/v1/inventory-weight-lots/{id}")
     suspend fun deleteWeightLot(@Path("id") id: Long): Response<Unit>
+
+    // ---- Product photos ----
+
+    /** Uploads a photo from the device; the returned imageUrl goes into the product. */
+    @Multipart
+    @POST("api/v1/inventory-product-images")
+    suspend fun uploadProductImage(@Part image: MultipartBody.Part): Response<ProductImageResource>
 
     // ---- Stock alerts ----
 

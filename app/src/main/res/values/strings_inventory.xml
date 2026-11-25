@@ -191,4 +191,7 @@
     <string name="inventory_scan_prompt">Point the camera at the product or lot QR code</string>
     <string name="inventory_scan_not_found">No product or lot uses the code %1$s</string>
     <string name="inventory_scan_create">Create</string>
+    <string name="inventory_form_upload_photo">Upload photo</string>
+    <string name="inventory_photo_read_failed">That photo could not be read. Choose another one.</string>
+    <string name="inventory_photo_upload_failed">The photo could not be uploaded: %1$s</string>
 </resources>

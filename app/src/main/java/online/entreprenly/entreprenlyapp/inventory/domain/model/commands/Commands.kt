@@ -61,6 +61,12 @@ data class DeleteLotCommand(
     val id: Long
 )
 
+/** Uploads a product photo. [mimeType] is image/jpeg, image/png or image/webp. */
+class UploadProductImageCommand(
+    val bytes: ByteArray,
+    val mimeType: String
+)
+
 /** Deletes a product and its lots. Identity is (type, id), matching the backend routes. */
 data class DeleteProductCommand(
     val type: ProductType,
