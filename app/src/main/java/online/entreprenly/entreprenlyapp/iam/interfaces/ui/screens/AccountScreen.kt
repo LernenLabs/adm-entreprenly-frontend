@@ -11,6 +11,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -35,8 +37,16 @@ fun AccountScreen(
 ) {
     val passwordForm by viewModel.passwordForm.collectAsState()
     val emailForm by viewModel.emailForm.collectAsState()
-    var currentPassword by rememberSaveable { mutableStateOf("") }
-    var newPassword by rememberSaveable { mutableStateOf("") }
+    var currentPassword by remember { mutableStateOf("") }
+    var newPassword by remember { mutableStateOf("") }
+    var confirmation by remember { mutableStateOf("") }
+    LaunchedEffect(passwordForm.success) {
+        if (passwordForm.success != null) {
+            currentPassword = ""
+            newPassword = ""
+            confirmation = ""
+        }
+    }
     var newEmail by rememberSaveable { mutableStateOf("") }
 
     Column(modifier.fillMaxSize()) {
@@ -51,17 +61,22 @@ fun AccountScreen(
         Text(stringResource(R.string.account_change_password_title), style = MaterialTheme.typography.titleMedium)
         PasswordField(currentPassword, { currentPassword = it }, label = stringResource(R.string.account_current_password))
         PasswordField(newPassword, { newPassword = it }, label = stringResource(R.string.account_new_password))
+        PasswordField(confirmation, { confirmation = it }, label = stringResource(R.string.account_confirm_password))
         FormSubmit(
             passwordForm,
             stringResource(R.string.account_change_password_action),
-            { viewModel.changePassword(currentPassword, newPassword) }
+            { viewModel.changePassword(currentPassword, newPassword, confirmation) }
         )
 
         HorizontalDivider()
         Text(stringResource(R.string.account_change_email_title), style = MaterialTheme.typography.titleMedium)
         Text(stringResource(R.string.account_change_email_hint), style = MaterialTheme.typography.bodySmall)
         EmailField(newEmail, { newEmail = it }, label = stringResource(R.string.account_new_email))
-        FormSubmit(emailForm, stringResource(R.string.account_change_email_action), { viewModel.changeEmail(newEmail) })
+        FormSubmit(
+            emailForm,
+            stringResource(R.string.account_change_email_action),
+            { viewModel.changeEmail(newEmail) }
+        )
 
     }
     }

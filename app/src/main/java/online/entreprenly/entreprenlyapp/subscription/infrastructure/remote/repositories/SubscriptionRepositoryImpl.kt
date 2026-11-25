@@ -20,14 +20,38 @@ import online.entreprenly.entreprenlyapp.subscription.interfaces.rest.resources.
 class SubscriptionRepositoryImpl(private val api: SubscriptionApi) : SubscriptionRepository {
     override suspend fun plans() = safeApiCallWithBody({ api.plans() }) { it.map(PlanResource::toDomain) }
     override suspend fun dashboard(userId: Long) = safeApiCallWithBody({ api.dashboard(userId) }) { it.toDomain() }
-    override suspend fun saveBilling(userId: Long, billing: BillingDetails, method: PaymentMethod?): Result<SubscriptionDashboard> {
+    override suspend fun saveBilling(userId: Long, billing: BillingDetails, method: PaymentMethod?) =
+        saveSetup(userId, billing, method, primaryId = method?.id)
+
+    override suspend fun savePaymentMethod(userId: Long, method: PaymentMethod) =
+        saveSetup(userId, null, method)
+
+    override suspend fun setPrimaryPaymentMethod(userId: Long, methodId: String) =
+        saveSetup(userId, null, null, primaryId = methodId)
+
+    private suspend fun saveSetup(
+        userId: Long,
+        billing: BillingDetails?,
+        method: PaymentMethod?,
+        primaryId: String? = null
+    ): Result<SubscriptionDashboard> {
         val current = safeApiCallWithBody({ api.dashboard(userId) }) { it }
         if (current is Result.Failure) return current
         val resource = (current as Result.Success).value
         val setup = resource.billingSetup ?: return Result.Failure(ApplicationError.Unexpected("Missing billing setup"))
-        val fiscal = DashboardFiscalDataResource(if (billing.documentNumber.length == 8) "DNI" else "RUC", billing.documentNumber, billing.businessName, billing.receiptEmail, billing.fiscalAddress)
-        val methods = if (method == null) setup.paymentMethods else listOf(DashboardPaymentMethodResource(method.id, method.cardBrand, method.lastFour, method.holderName, method.expiryMonth, method.expiryYear, true))
-        val updated = resource.copy(currentPlan = null, billingSetup = setup.copy(fiscalData = fiscal, hasFiscalData = true, paymentMethods = methods, hasPaymentMethod = !methods.isNullOrEmpty()))
+        val fiscal = billing?.let {
+            DashboardFiscalDataResource(if (it.documentNumber.length == 8) "DNI" else "RUC", it.documentNumber, it.businessName, it.receiptEmail, it.fiscalAddress)
+        } ?: setup.fiscalData
+        val saved = setup.paymentMethods.orEmpty()
+        val methods = if (method == null) saved else saved + DashboardPaymentMethodResource(
+            method.id, method.cardBrand, method.lastFour, method.holderName, method.expiryMonth, method.expiryYear, false
+        )
+        if (primaryId != null && methods.none { it.id == primaryId }) {
+            return Result.Failure(ApplicationError.Validation("Payment method not found"))
+        }
+        val selectedId = primaryId ?: methods.firstOrNull { it.isDefault == true }?.id ?: methods.firstOrNull()?.id
+        val updatedMethods = methods.map { it.copy(isDefault = selectedId != null && it.id == selectedId) }
+        val updated = resource.copy(currentPlan = null, billingSetup = setup.copy(fiscalData = fiscal, hasFiscalData = if (billing != null) true else setup.hasFiscalData, paymentMethods = updatedMethods, hasPaymentMethod = updatedMethods.isNotEmpty()))
         return safeApiCallWithBody({ api.saveDashboard(userId, updated) }) { it.toDomain() }
     }
     override suspend fun active(userId: Long): Result<Subscription?> = when (val result = safeApiCallWithBody({ api.active(userId) }) { it.toDomain() }) {

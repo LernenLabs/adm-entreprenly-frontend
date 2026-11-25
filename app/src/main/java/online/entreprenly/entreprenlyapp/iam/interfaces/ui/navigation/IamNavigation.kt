@@ -13,6 +13,7 @@ import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignInScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignUpScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.WelcomeScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountViewModel
+import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.PasswordResetViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignInViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignUpViewModel
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
@@ -30,8 +31,12 @@ fun NavGraphBuilder.iamGraph(navController: NavController, container: AppContain
         val vm: SignInViewModel = viewModel(factory = viewModelFactory {
             initializer { SignInViewModel(container.userCommandService) }
         })
+        val reset: PasswordResetViewModel = viewModel(factory = viewModelFactory {
+            initializer { PasswordResetViewModel(container.userCommandService) }
+        })
         SignInScreen(
             vm,
+            reset,
             onBack = { navController.popBackStack() },
             onGoToSignUp = { navController.navigate(Routes.SIGN_UP) { launchSingleTop = true } }
         )

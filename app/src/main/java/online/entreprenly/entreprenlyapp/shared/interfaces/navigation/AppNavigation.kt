@@ -1,6 +1,7 @@
 package online.entreprenly.entreprenlyapp.shared.interfaces.navigation
 
 import android.content.res.Configuration
+import android.view.ContextThemeWrapper
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -85,7 +86,7 @@ fun AppRoot(container: AppContainer) {
 
 /** Overrides the resources locale for everything inside [content]; null keeps the device language. */
 @Composable
-private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit) {
+internal fun WithLanguage(languageCode: String?, content: @Composable () -> Unit) {
     val base = LocalContext.current
     val systemConfiguration = LocalConfiguration.current
     val languageConfiguration = remember(systemConfiguration, languageCode) {
@@ -97,7 +98,10 @@ private fun WithLanguage(languageCode: String?, content: @Composable () -> Unit)
         if (languageCode == null) {
             base
         } else {
-            base.createConfigurationContext(languageConfiguration)
+            // Keep the Activity in the context chain for photo and permission launchers.
+            ContextThemeWrapper(base, 0).apply {
+                applyOverrideConfiguration(languageConfiguration)
+            }
         }
     }
     // Dialogs and bottom sheets are separate windows that rebuild these locals from the activity,

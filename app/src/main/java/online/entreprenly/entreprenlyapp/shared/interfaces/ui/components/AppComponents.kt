@@ -181,9 +181,15 @@ fun PrimaryPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Mo
 
 /** Full-width pill button with a surface background and a hairline border. */
 @Composable
-fun SecondaryPillButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SecondaryPillButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
+) {
     OutlinedButton(
         onClick = onClick,
+        enabled = enabled,
         shape = ButtonShape,
         border = BorderStroke(1.dp, MaterialTheme.extraColors.border),
         colors = ButtonDefaults.outlinedButtonColors(

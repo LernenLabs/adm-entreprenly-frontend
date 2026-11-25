@@ -9,12 +9,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.profile.domain.model.aggregates.Profile
 import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.AppTheme
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.components.PhoneVerificationDialog
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.components.ProfileHeaderCard
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.components.ProfileStateGate
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileViewModel
@@ -38,6 +42,7 @@ fun ProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val updated by viewModel.profileUpdated.collectAsState()
+    var showPhoneVerification by rememberSaveable { mutableStateOf(false) }
 
     Column(modifier.fillMaxSize()) {
         AppTopBar(stringResource(R.string.profile_title), onBack)
@@ -57,7 +62,11 @@ fun ProfileScreen(
                 NavigationCard(stringResource(R.string.profile_email_title), email, onClick = onChangeEmail)
                 NavigationCard(
                     stringResource(R.string.profile_phone_title),
-                    profile.phone?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_phone_empty)
+                    profile.phone?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_phone_empty),
+                    onClick = {
+                        viewModel.resetPhoneVerification()
+                        showPhoneVerification = true
+                    }
                 )
                 NavigationCard(
                     stringResource(R.string.profile_edit_title),
@@ -77,6 +86,12 @@ fun ProfileScreen(
                     stringResource(R.string.profile_notifications_sub),
                     onClick = onNotifications
                 )
+            }
+            if (showPhoneVerification) {
+                PhoneVerificationDialog(viewModel, profile.phone.orEmpty()) {
+                    showPhoneVerification = false
+                    viewModel.resetPhoneVerification()
+                }
             }
         }
     }

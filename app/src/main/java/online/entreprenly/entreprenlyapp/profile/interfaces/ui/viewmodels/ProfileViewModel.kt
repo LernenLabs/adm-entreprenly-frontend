@@ -22,11 +22,19 @@ import online.entreprenly.entreprenlyapp.profile.domain.model.commands.UpdatePre
 import online.entreprenly.entreprenlyapp.profile.domain.model.commands.UpdateProfileCommand
 import online.entreprenly.entreprenlyapp.profile.domain.model.queries.GetLocalPreferencesQuery
 import online.entreprenly.entreprenlyapp.profile.domain.model.queries.GetProfileByUserIdQuery
+import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.AvatarImage
+import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.PhoneNumber
 import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.Preferences
 import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
+
+data class PhoneVerificationState(
+    val sentTo: PhoneNumber? = null,
+    val verified: Boolean = false,
+    val form: FormState = FormState()
+)
 
 sealed interface ProfileUiState {
     data object Loading : ProfileUiState
@@ -61,6 +69,12 @@ class ProfileViewModel(
     private val _editForm = MutableStateFlow(FormState())
     val editForm: StateFlow<FormState> = _editForm.asStateFlow()
 
+    private val _avatarForm = MutableStateFlow(FormState())
+    val avatarForm: StateFlow<FormState> = _avatarForm.asStateFlow()
+
+    private val _phoneVerification = MutableStateFlow(PhoneVerificationState())
+    val phoneVerification: StateFlow<PhoneVerificationState> = _phoneVerification.asStateFlow()
+
     private val _preferencesError = MutableStateFlow<UiText?>(null)
     val preferencesError: StateFlow<UiText?> = _preferencesError.asStateFlow()
 
@@ -78,10 +92,14 @@ class ProfileViewModel(
                 if (session == null) {
                     userId = null
                     planName = null
+                    _avatarForm.value = FormState()
+                    _phoneVerification.value = PhoneVerificationState()
                     _uiState.value = ProfileUiState.Loading
                 } else if (session.userId != userId) {
                     userId = session.userId
                     planName = null
+                    _avatarForm.value = FormState()
+                    _phoneVerification.value = PhoneVerificationState()
                     load()
                 }
             }
@@ -123,12 +141,13 @@ class ProfileViewModel(
     }
 
     fun resetEditForm() {
-        _editForm.value = FormState()
+        if (!_editForm.value.loading) _editForm.value = FormState()
     }
 
     /** US-63: update first name, last name and biography keeping the stored phone and avatar. */
     fun updateProfile(firstName: String, lastName: String, biography: String, onSuccess: () -> Unit) {
         val current = (uiState.value as? ProfileUiState.Loaded)?.profile ?: return
+        if (_editForm.value.loading || _avatarForm.value.loading) return
         if (firstName.isBlank()) {
             _editForm.value = FormState(error = UiText.Res(R.string.edit_first_name_required))
             return
@@ -156,6 +175,87 @@ class ProfileViewModel(
                 }
             }
         }
+    }
+
+    fun resetAvatarForm() {
+        if (!_avatarForm.value.loading) _avatarForm.value = FormState()
+    }
+
+    fun uploadAvatar(image: AvatarImage) {
+        val current = (uiState.value as? ProfileUiState.Loaded)?.profile ?: return
+        val accountId = userId ?: return
+        if (_avatarForm.value.loading || _editForm.value.loading) return
+        _avatarForm.value = FormState(loading = true)
+        viewModelScope.launch {
+            val result = profileCommandService.uploadAvatar(current.id, image)
+            if (userId != accountId) return@launch
+            _avatarForm.value = when (result) {
+                is Result.Success -> {
+                    _uiState.value = loaded(result.value)
+                    FormState(success = UiText.Res(R.string.profile_avatar_saved))
+                }
+                is Result.Failure -> FormState(error = profileOperationError(result.error))
+            }
+        }
+    }
+
+    fun resetPhoneVerification() {
+        if (!_phoneVerification.value.form.loading) _phoneVerification.value = PhoneVerificationState()
+    }
+
+    fun requestPhoneVerification(input: String) {
+        val current = (uiState.value as? ProfileUiState.Loaded)?.profile ?: return
+        val accountId = userId ?: return
+        val state = _phoneVerification.value
+        if (state.form.loading) return
+        val phone = PhoneNumber.parse(input)
+        if (phone == null) {
+            _phoneVerification.value = state.copy(form = FormState(error = UiText.Res(R.string.profile_phone_invalid)))
+            return
+        }
+
+        _phoneVerification.value = state.copy(form = FormState(loading = true))
+        viewModelScope.launch {
+            val result = profileCommandService.requestPhoneVerification(current.id, phone)
+            if (userId != accountId) return@launch
+            _phoneVerification.value = when (result) {
+                is Result.Success -> PhoneVerificationState(
+                    sentTo = phone,
+                    form = FormState(success = UiText.Res(R.string.profile_phone_code_sent))
+                )
+                is Result.Failure -> state.copy(form = FormState(error = profileOperationError(result.error)))
+            }
+        }
+    }
+
+    fun confirmPhoneVerification(code: String) {
+        val current = (uiState.value as? ProfileUiState.Loaded)?.profile ?: return
+        val accountId = userId ?: return
+        val state = _phoneVerification.value
+        val phone = state.sentTo ?: return
+        if (state.form.loading || state.verified) return
+        if (code.length != 6 || code.any { it !in '0'..'9' }) {
+            _phoneVerification.value = state.copy(form = FormState(error = UiText.Res(R.string.profile_phone_code_invalid)))
+            return
+        }
+
+        _phoneVerification.value = state.copy(form = FormState(loading = true))
+        viewModelScope.launch {
+            val result = profileCommandService.confirmPhoneVerification(current.id, phone, code)
+            if (userId != accountId) return@launch
+            _phoneVerification.value = when (result) {
+                is Result.Success -> {
+                    _uiState.value = loaded(result.value)
+                    PhoneVerificationState(verified = true)
+                }
+                is Result.Failure -> state.copy(form = FormState(error = profileOperationError(result.error)))
+            }
+        }
+    }
+
+    private fun profileOperationError(error: ApplicationError): UiText = when (error) {
+        is ApplicationError.NotFound -> UiText.Res(R.string.profile_operation_unavailable)
+        else -> UiText.Raw(error.message)
     }
 
     /** US-67: the new preferences apply on the device immediately and are then sent to the backend. */
