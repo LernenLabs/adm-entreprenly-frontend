@@ -30,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.google.zxing.DecodeHintType
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import java.io.ByteArrayOutputStream
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import online.entreprenly.entreprenlyapp.BuildConfig
 import online.entreprenly.entreprenlyapp.R
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.scanner.InventoryCaptureActivity
 
 /**
  * Turns a product imageUrl into an address Coil can load: external links stay as they are and
@@ -129,15 +131,12 @@ fun rememberQrScanner(onScanned: (String) -> Unit): () -> Unit {
         {
             launcher.launch(
                 ScanOptions()
-                    // QR codes plus the barcodes printed on packages.
-                    .setDesiredBarcodeFormats(
-                        ScanOptions.QR_CODE,
-                        ScanOptions.EAN_13,
-                        ScanOptions.EAN_8,
-                        ScanOptions.UPC_A,
-                        ScanOptions.UPC_E,
-                        ScanOptions.CODE_128
-                    )
+                    .setDesiredBarcodeFormats(InventoryScanFormats)
+                    // Our scanner screen also reads barcodes held sideways.
+                    .setCaptureActivity(InventoryCaptureActivity::class.java)
+                    // Spend more effort per frame: needed for thin package barcodes that are
+                    // slightly blurred or tilted, which QR codes tolerate much better.
+                    .addExtra(DecodeHintType.TRY_HARDER.name, true)
                     .setPrompt(prompt)
                     .setBeepEnabled(true)
                     .setOrientationLocked(false)

@@ -32,6 +32,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.delay
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
@@ -87,6 +88,12 @@ fun ProductFormSheet(
     // Data suggested for a scanned package barcode only fills the fields the seller left blank.
     val lookup by viewModel.barcodeLookup.collectAsState()
     val lookupApplies = !editing && lookup.barcode != null && lookup.barcode == codeQR.trim()
+    // A barcode typed by hand is looked up too, once the seller stops typing.
+    LaunchedEffect(codeQR) {
+        if (editing || !InventoryRules.isBarcode(codeQR)) return@LaunchedEffect
+        delay(600)
+        viewModel.lookupBarcode(codeQR)
+    }
     LaunchedEffect(lookup.product) {
         val found = lookup.product ?: return@LaunchedEffect
         if (editing || found.barcode != codeQR.trim()) return@LaunchedEffect
