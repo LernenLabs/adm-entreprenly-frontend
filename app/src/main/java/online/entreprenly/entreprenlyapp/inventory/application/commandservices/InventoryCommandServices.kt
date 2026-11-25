@@ -8,6 +8,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 
 /**
@@ -19,6 +20,11 @@ data class CreateProductResult(
     val product: Product,
     val initialStockFailed: Boolean
 )
+
+/** Uploads product photos chosen from the gallery. */
+interface ProductImageCommandService {
+    suspend fun handle(command: UploadProductImageCommand): Result<String>
+}
 
 interface ProductCommandService {
     suspend fun handle(command: CreateProductCommand): Result<CreateProductResult>

@@ -8,9 +8,15 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+
+/** Stores product photos and returns the imageUrl to save in the product. */
+interface ProductImageRepository {
+    suspend fun upload(command: UploadProductImageCommand): Result<String>
+}
 
 interface ProductRepository {
     suspend fun findAll(): Result<List<Product>>
