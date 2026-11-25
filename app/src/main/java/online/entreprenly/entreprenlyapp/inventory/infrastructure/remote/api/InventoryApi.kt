@@ -1,5 +1,7 @@
 package online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api
 
+import okhttp3.MultipartBody
+import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.BarcodeLookupResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateUnitLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateUnitProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.CreateWeightLotResource
@@ -14,7 +16,6 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.Upd
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.UpdateWeightProductResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightLotResource
 import online.entreprenly.entreprenlyapp.inventory.interfaces.rest.resources.WeightProductResource
-import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -107,6 +108,11 @@ interface InventoryApi {
 
     @DELETE("api/v1/inventory-weight-lots/{id}")
     suspend fun deleteWeightLot(@Path("id") id: Long): Response<Unit>
+
+    // ---- Barcode lookups ----
+
+    @GET("api/v1/inventory-barcode-lookups/{barcode}")
+    suspend fun lookupBarcode(@Path("barcode") barcode: String): Response<BarcodeLookupResource>
 
     // ---- Product photos ----
 

@@ -9,9 +9,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
-import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductImageCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.BarcodeLookupQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
@@ -28,8 +29,11 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAl
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllProductsQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetStockAlertsQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.LookupBarcodeQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.BarcodeProduct
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
+import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationError
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.FormState
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
@@ -59,6 +63,18 @@ sealed interface InventoryState {
     }
 }
 
+/**
+ * Lookup of suggested data for a scanned package barcode. [product] is set when the database
+ * knows the barcode; [notFound] when it does not.
+ */
+data class BarcodeLookupState(
+    val barcode: String? = null,
+    val loading: Boolean = false,
+    val product: BarcodeProduct? = null,
+    val notFound: Boolean = false,
+    val failed: Boolean = false
+)
+
 /** Progress of a gallery photo upload; [imageUrl] is set once the backend stored it. */
 data class PhotoUploadState(
     val loading: Boolean = false,
@@ -76,7 +92,8 @@ class InventoryViewModel(
     private val stockAlertQueryService: StockAlertQueryService,
     private val productCommandService: ProductCommandService,
     private val lotCommandService: LotCommandService,
-    private val productImageCommandService: ProductImageCommandService
+    private val productImageCommandService: ProductImageCommandService,
+    private val barcodeLookupQueryService: BarcodeLookupQueryService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<InventoryState>(InventoryState.Loading)
@@ -93,6 +110,9 @@ class InventoryViewModel(
 
     private val _lotDeleteForm = MutableStateFlow(FormState())
     val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
+
+    private val _barcodeLookup = MutableStateFlow(BarcodeLookupState())
+    val barcodeLookup: StateFlow<BarcodeLookupState> = _barcodeLookup.asStateFlow()
 
     private val _photoUpload = MutableStateFlow(PhotoUploadState())
     val photoUpload: StateFlow<PhotoUploadState> = _photoUpload.asStateFlow()
@@ -138,6 +158,31 @@ class InventoryViewModel(
 
     fun clearProductDeleteForm() {
         _productDeleteForm.value = FormState()
+    }
+
+    /** Looks up suggested product data for a scanned barcode; ignores codes that are not barcodes. */
+    fun lookupBarcode(barcode: String) {
+        val code = barcode.trim()
+        if (!InventoryRules.isBarcode(code)) return
+        val current = _barcodeLookup.value
+        if (current.barcode == code && (current.loading || current.product != null)) return
+        _barcodeLookup.value = BarcodeLookupState(barcode = code, loading = true)
+        viewModelScope.launch {
+            val result = barcodeLookupQueryService.handle(LookupBarcodeQuery(code))
+            if (_barcodeLookup.value.barcode != code) return@launch
+            _barcodeLookup.value = when (result) {
+                is Result.Success -> BarcodeLookupState(barcode = code, product = result.value)
+                is Result.Failure -> if (result.error is ApplicationError.NotFound) {
+                    BarcodeLookupState(barcode = code, notFound = true)
+                } else {
+                    BarcodeLookupState(barcode = code, failed = true)
+                }
+            }
+        }
+    }
+
+    fun clearBarcodeLookup() {
+        _barcodeLookup.value = BarcodeLookupState()
     }
 
     fun clearPhotoUpload() {

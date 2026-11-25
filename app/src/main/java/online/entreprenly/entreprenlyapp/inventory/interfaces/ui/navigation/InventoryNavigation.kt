@@ -90,7 +90,8 @@ fun inventoryViewModel(
                 container.stockAlertQueryService,
                 container.productCommandService,
                 container.lotCommandService,
-                container.productImageCommandService
+                container.productImageCommandService,
+                container.barcodeLookupQueryService
             )
         }
     })

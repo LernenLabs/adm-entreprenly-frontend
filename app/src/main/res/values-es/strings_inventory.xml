@@ -190,7 +190,7 @@
     <string name="inventory_form_description_hint">Ej. Arroz grano largo, bolsa de 5 kg</string>
     <string name="inventory_form_brand">Marca</string>
     <string name="inventory_form_brand_hint">Ej. Costeño</string>
-    <string name="inventory_form_code_qr">Código QR</string>
+    <string name="inventory_form_code_qr">Código QR o de barras</string>
     <string name="inventory_form_code_qr_hint">Escanea o escribe el código</string>
     <string name="inventory_form_image_url">URL de la foto</string>
     <string name="inventory_form_image_url_hint">https://…</string>
@@ -198,11 +198,15 @@
     <string name="inventory_detail_description">Descripción</string>
     <string name="inventory_detail_brand">Marca</string>
     <string name="inventory_detail_code_qr">Código QR</string>
-    <string name="inventory_scan_qr">Escanear código QR</string>
-    <string name="inventory_scan_prompt">Apunta la cámara al código QR del producto o del lote</string>
+    <string name="inventory_scan_qr">Escanear QR o código de barras</string>
+    <string name="inventory_scan_prompt">Apunta la cámara al código QR o al código de barras del empaque</string>
     <string name="inventory_scan_not_found">Ningún producto ni lote usa el código %1$s</string>
     <string name="inventory_scan_create">Crear</string>
     <string name="inventory_form_upload_photo">Subir foto</string>
     <string name="inventory_photo_read_failed">No se pudo leer esa foto. Elige otra.</string>
     <string name="inventory_photo_upload_failed">No se pudo subir la foto: %1$s</string>
+    <string name="inventory_barcode_searching">Buscando este código de barras…</string>
+    <string name="inventory_barcode_found">Datos completados desde Open Food Facts. Revisa el nombre y agrega precio y stock.</string>
+    <string name="inventory_barcode_not_found">No encontramos datos para este código de barras. Completa el producto tú.</string>
+    <string name="inventory_barcode_failed">No se pudo buscar el código de barras ahora. Completa el producto tú.</string>
 </resources>

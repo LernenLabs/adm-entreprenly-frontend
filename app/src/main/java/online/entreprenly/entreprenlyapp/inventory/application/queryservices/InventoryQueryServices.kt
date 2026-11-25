@@ -8,6 +8,8 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllPr
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetLotQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetProductQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetStockAlertsQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.LookupBarcodeQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.BarcodeProduct
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 
 interface ProductQueryService {
@@ -18,6 +20,10 @@ interface ProductQueryService {
 interface LotQueryService {
     suspend fun handle(query: GetAllLotsQuery): Result<List<Lot>>
     suspend fun handle(query: GetLotQuery): Result<Lot>
+}
+
+interface BarcodeLookupQueryService {
+    suspend fun handle(query: LookupBarcodeQuery): Result<BarcodeProduct>
 }
 
 interface StockAlertQueryService {

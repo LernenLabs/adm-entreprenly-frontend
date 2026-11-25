@@ -179,7 +179,7 @@
     <string name="inventory_form_description_hint">E.g. Long grain rice, 5 kg bag</string>
     <string name="inventory_form_brand">Brand</string>
     <string name="inventory_form_brand_hint">E.g. Costeño</string>
-    <string name="inventory_form_code_qr">QR code</string>
+    <string name="inventory_form_code_qr">QR or barcode</string>
     <string name="inventory_form_code_qr_hint">Scan or type the code</string>
     <string name="inventory_form_image_url">Photo URL</string>
     <string name="inventory_form_image_url_hint">https://…</string>
@@ -187,11 +187,15 @@
     <string name="inventory_detail_description">Description</string>
     <string name="inventory_detail_brand">Brand</string>
     <string name="inventory_detail_code_qr">QR code</string>
-    <string name="inventory_scan_qr">Scan QR code</string>
-    <string name="inventory_scan_prompt">Point the camera at the product or lot QR code</string>
+    <string name="inventory_scan_qr">Scan QR or barcode</string>
+    <string name="inventory_scan_prompt">Point the camera at the QR code or the barcode on the package</string>
     <string name="inventory_scan_not_found">No product or lot uses the code %1$s</string>
     <string name="inventory_scan_create">Create</string>
     <string name="inventory_form_upload_photo">Upload photo</string>
     <string name="inventory_photo_read_failed">That photo could not be read. Choose another one.</string>
     <string name="inventory_photo_upload_failed">The photo could not be uploaded: %1$s</string>
+    <string name="inventory_barcode_searching">Looking up this barcode…</string>
+    <string name="inventory_barcode_found">Filled in from Open Food Facts. Check the name and add the price and stock.</string>
+    <string name="inventory_barcode_not_found">No data found for this barcode. Fill in the product yourself.</string>
+    <string name="inventory_barcode_failed">The barcode could not be looked up right now. Fill in the product yourself.</string>
 </resources>

@@ -46,6 +46,16 @@ data class WeightLotResource(
     val quantityKg: Double
 )
 
+/** Product data suggested for a package barcode. */
+data class BarcodeLookupResource(
+    val barcode: String,
+    val name: String?,
+    val brand: String?,
+    val description: String?,
+    val imageUrl: String?,
+    val source: String?
+)
+
 /** Path of an uploaded photo, relative to the API base URL. */
 data class ProductImageResource(
     val imageUrl: String,

@@ -178,6 +178,11 @@ object InventoryRules {
         Normalizer.normalize(raw.lowercase(Locale.ROOT), Normalizer.Form.NFD)
             .replace("\\p{Mn}+".toRegex(), "")
 
+    private val barcodePattern = Regex("""^(\d{8}|\d{12,14})$""")
+
+    /** True for package barcodes (EAN-8, UPC-A, EAN-13, GTIN-14) that can be looked up. */
+    fun isBarcode(code: String): Boolean = barcodePattern.matches(code.trim())
+
     /** Accent- and case-insensitive "contains" over name, brand and codeQR. */
     fun matchesSearch(product: Product, query: String): Boolean {
         val q = normalizeSearch(query.trim())
