@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryError
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryLoading
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SegmentedControl
@@ -49,7 +50,8 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopB
 
 /**
  * Inventory root: orange header with the QR scanner, Productos|Lotes control, tab content and FAB.
- * A scanned code opens the product or lot that uses it, or offers to create a product with it.
+ * A scanned code opens the product or lot that uses it. An unknown package barcode opens the new
+ * product form pre-filled from its barcode; any other unknown code offers to create a product with it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -76,6 +78,12 @@ fun InventoryScreen(
         when {
             product != null -> onProductClick(product)
             lot != null -> onLotClick(lot.type.value, lot.id)
+            InventoryRules.isBarcode(code) -> {
+                viewModel.lookupBarcode(code)
+                scannedCode = code
+                tab = 0
+                showAddProduct = true
+            }
             else -> scope.launch {
                 val result = snackbar.showSnackbar(
                     message = context.getString(R.string.inventory_scan_not_found, code),
@@ -196,19 +204,19 @@ fun InventoryScreen(
 
     if (showAddProduct) {
         ModalBottomSheet(
-            onDismissRequest = { showAddProduct = false; scannedCode = null },
+            onDismissRequest = { showAddProduct = false; scannedCode = null; viewModel.clearBarcodeLookup() },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
             SheetHeader(
                 title = stringResource(R.string.inventory_form_add_title),
-                onClose = { showAddProduct = false; scannedCode = null },
+                onClose = { showAddProduct = false; scannedCode = null; viewModel.clearBarcodeLookup() },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             ProductFormSheet(
                 viewModel = viewModel,
                 initial = null,
                 initialCodeQR = scannedCode,
-                onClose = { showAddProduct = false; scannedCode = null }
+                onClose = { showAddProduct = false; scannedCode = null; viewModel.clearBarcodeLookup() }
             )
         }
     }

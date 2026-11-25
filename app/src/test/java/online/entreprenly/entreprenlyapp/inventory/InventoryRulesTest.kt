@@ -357,4 +357,14 @@ class InventoryRulesTest {
         assertEquals("weight/1", weightProduct(id = 1).key)
         assertEquals("unit/2", unitLot(id = 2).key)
     }
+
+    @Test
+    fun isBarcode_acceptsPackageBarcodesOnly() {
+        assertTrue(InventoryRules.isBarcode("7750236173896"))
+        assertTrue(InventoryRules.isBarcode(" 40822938 "))
+        assertTrue(InventoryRules.isBarcode("012345678905"))
+        assertFalse(InventoryRules.isBarcode("QR-UP-0004"))
+        assertFalse(InventoryRules.isBarcode("12345"))
+        assertFalse(InventoryRules.isBarcode("1234567890"))
+    }
 }

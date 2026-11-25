@@ -10,12 +10,18 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.BarcodeProduct
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 
 /** Stores product photos and returns the imageUrl to save in the product. */
 interface ProductImageRepository {
     suspend fun upload(command: UploadProductImageCommand): Result<String>
+}
+
+/** Finds suggested data for a package barcode; NotFound when the barcode is unknown. */
+interface BarcodeLookupRepository {
+    suspend fun lookup(barcode: String): Result<BarcodeProduct>
 }
 
 interface ProductRepository {

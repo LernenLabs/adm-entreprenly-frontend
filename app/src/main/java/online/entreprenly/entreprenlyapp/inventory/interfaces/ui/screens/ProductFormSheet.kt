@@ -80,7 +80,22 @@ fun ProductFormSheet(
         mutableStateOf(initial?.codeQR ?: initialCodeQR.orEmpty())
     }
     var imageUrl by rememberSaveable(initial?.key) { mutableStateOf(initial?.imageUrl.orEmpty()) }
-    val scanCode = rememberQrScanner { codeQR = it }
+    val scanCode = rememberQrScanner { scanned ->
+        codeQR = scanned
+        if (!editing) viewModel.lookupBarcode(scanned)
+    }
+    // Data suggested for a scanned package barcode only fills the fields the seller left blank.
+    val lookup by viewModel.barcodeLookup.collectAsState()
+    val lookupApplies = !editing && lookup.barcode != null && lookup.barcode == codeQR.trim()
+    LaunchedEffect(lookup.product) {
+        val found = lookup.product ?: return@LaunchedEffect
+        if (editing || found.barcode != codeQR.trim()) return@LaunchedEffect
+        if (name.isBlank()) found.name?.let { name = it }
+        if (brand.isBlank()) found.brand?.let { brand = it }
+        if (description.isBlank()) found.description?.let { description = it }
+        if (imageUrl.isBlank()) found.imageUrl?.let { imageUrl = it }
+        typeIndex = 0
+    }
     val form by viewModel.productForm.collectAsState()
     val photoUpload by viewModel.photoUpload.collectAsState()
     LaunchedEffect(initial?.key) { viewModel.clearPhotoUpload() }
@@ -243,6 +258,22 @@ fun ProductFormSheet(
                 }
             }
         )
+        if (lookupApplies) {
+            val (message, isError) = when {
+                lookup.loading -> stringResource(R.string.inventory_barcode_searching) to false
+                lookup.product != null -> stringResource(R.string.inventory_barcode_found) to false
+                lookup.notFound -> stringResource(R.string.inventory_barcode_not_found) to false
+                else -> stringResource(R.string.inventory_barcode_failed) to true
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                if (lookup.loading) CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                Text(
+                    message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
         // A photo can be a pasted link or one uploaded from the gallery; both end up in imageUrl.
         Row(
             horizontalArrangement = Arrangement.spacedBy(8.dp),

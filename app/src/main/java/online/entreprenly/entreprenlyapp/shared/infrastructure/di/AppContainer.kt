@@ -7,12 +7,6 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.BuildConfig
-import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
-import online.entreprenly.entreprenlyapp.subscription.application.internal.queryservices.SubscriptionQueryServiceImpl
-import online.entreprenly.entreprenlyapp.subscription.application.commandservices.SubscriptionCommandService
-import online.entreprenly.entreprenlyapp.subscription.application.queryservices.SubscriptionQueryService
-import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.api.SubscriptionApi
-import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.repositories.SubscriptionRepositoryImpl
 import online.entreprenly.entreprenlyapp.chatbot.application.acl.SubscriptionAccessFacade
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatMessageCommandService
 import online.entreprenly.entreprenlyapp.chatbot.application.commandservices.ChatOrderCommandService
@@ -47,13 +41,16 @@ import online.entreprenly.entreprenlyapp.inventory.application.commandservices.P
 import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.LotCommandServiceImpl
 import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.ProductCommandServiceImpl
 import online.entreprenly.entreprenlyapp.inventory.application.internal.commandservices.ProductImageCommandServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.BarcodeLookupQueryServiceImpl
 import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.LotQueryServiceImpl
 import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.ProductQueryServiceImpl
 import online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices.StockAlertQueryServiceImpl
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.BarcodeLookupQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.InventoryApi
+import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.BarcodeLookupRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.LotRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductImageRepositoryImpl
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories.ProductRepositoryImpl
@@ -69,6 +66,12 @@ import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.api.Profi
 import online.entreprenly.entreprenlyapp.profile.infrastructure.remote.repositories.ProfileRepositoryImpl
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.RetrofitFactory
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.WarmUpApi
+import online.entreprenly.entreprenlyapp.subscription.application.commandservices.SubscriptionCommandService
+import online.entreprenly.entreprenlyapp.subscription.application.internal.commandservices.SubscriptionCommandServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.internal.queryservices.SubscriptionQueryServiceImpl
+import online.entreprenly.entreprenlyapp.subscription.application.queryservices.SubscriptionQueryService
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.api.SubscriptionApi
+import online.entreprenly.entreprenlyapp.subscription.infrastructure.remote.repositories.SubscriptionRepositoryImpl
 
 /** Composition root manual (sin framework de DI). Un solo contenedor por proceso. */
 class AppContainer(context: Context) {
@@ -139,6 +142,8 @@ class AppContainer(context: Context) {
     val productQueryService: ProductQueryService = ProductQueryServiceImpl(productRepository)
     val lotQueryService: LotQueryService = LotQueryServiceImpl(lotRepository)
     val stockAlertQueryService: StockAlertQueryService = StockAlertQueryServiceImpl(stockAlertRepository)
+    val barcodeLookupQueryService: BarcodeLookupQueryService =
+        BarcodeLookupQueryServiceImpl(BarcodeLookupRepositoryImpl(inventoryApi))
     val productCommandService: ProductCommandService =
         ProductCommandServiceImpl(productRepository, lotRepository)
     val productImageCommandService: ProductImageCommandService =

@@ -11,3 +11,6 @@ data object GetAllLotsQuery
 data class GetLotQuery(val type: ProductType, val id: Long)
 
 data object GetStockAlertsQuery
+
+/** Looks up suggested product data for a package barcode. */
+data class LookupBarcodeQuery(val barcode: String)
