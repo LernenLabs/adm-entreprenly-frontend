@@ -3,12 +3,20 @@ package online.entreprenly.entreprenlyapp.inventory.domain.model.commands
 import java.time.Instant
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 
-/** Creates a product; initialStock is in units (UNIT) or kg (WEIGHT). */
+/**
+ * Creates a product; initialStock is in units (UNIT) or kg (WEIGHT).
+ * brand and weightGrams only apply to UNIT products.
+ */
 data class CreateProductCommand(
     val name: String,
     val type: ProductType,
     val price: Double,
-    val initialStock: Double
+    val initialStock: Double,
+    val description: String? = null,
+    val codeQR: String? = null,
+    val brand: String? = null,
+    val weightGrams: Double = 0.0,
+    val imageUrl: String? = null
 )
 
 /** Full-replacement update: hidden fields must be re-sent (backend PUT semantics). */
@@ -20,7 +28,8 @@ data class UpdateProductCommand(
     val description: String?,
     val codeQR: String?,
     val weightGrams: Double,
-    val brand: String?
+    val brand: String?,
+    val imageUrl: String? = null
 )
 
 /** Creates a lot for an existing product. */

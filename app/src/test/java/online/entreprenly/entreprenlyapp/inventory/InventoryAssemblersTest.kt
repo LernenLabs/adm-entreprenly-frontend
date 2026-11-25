@@ -3,6 +3,7 @@ package online.entreprenly.entreprenlyapp.inventory
 import java.time.Instant
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.assemblers.toEntity
@@ -78,6 +79,25 @@ class InventoryAssemblersTest {
 
         val weightLot = CreateLotCommand(ProductType.WEIGHT, 20, null, entry, null, 0, 3.2).toWeightResource()
         assertEquals(3.2, weightLot.quantityKg, 0.0)
+    }
+
+    @Test
+    fun productCommands_sendPhotoAndOptionalTextTrimmedOrNull() {
+        val created = CreateProductCommand(
+            name = "Inca Kola", type = ProductType.UNIT, price = 3.5, initialStock = 6.0,
+            description = "  ", codeQR = " QR-1 ", brand = "Inca Kola", weightGrams = 500.0,
+            imageUrl = " https://example.com/inca.jpg "
+        ).toUnitResource()
+        assertNull(created.description)
+        assertEquals("QR-1", created.codeQR)
+        assertEquals(500.0, created.weightGrams, 0.0)
+        assertEquals("https://example.com/inca.jpg", created.imageUrl)
+
+        val updated = UpdateProductCommand(
+            ProductType.WEIGHT, 3, "Limón", 6.0, "Jugoso", null, 0.0, null, ""
+        ).toWeightResource()
+        assertEquals("Jugoso", updated.description)
+        assertNull(updated.imageUrl)
     }
 
     @Test

@@ -1,27 +1,24 @@
 package online.entreprenly.entreprenlyapp.inventory.interfaces.ui.screens
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -35,8 +32,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
@@ -45,10 +42,15 @@ import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.Inve
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryLoading
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SegmentedControl
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SheetHeader
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.rememberQrScanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryState
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopBar
 
-/** Inventory root: orange header, Productos|Lotes control, tab content and FAB. */
+/**
+ * Inventory root: orange header with the QR scanner, Productos|Lotes control, tab content and FAB.
+ * A scanned code opens the product or lot that uses it, or offers to create a product with it.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun InventoryScreen(
@@ -64,6 +66,30 @@ fun InventoryScreen(
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val noProductsMessage = stringResource(R.string.inventory_lots_no_products)
+    var scannedCode by rememberSaveable { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
+    val createLabel = stringResource(R.string.inventory_scan_create)
+    val scan = rememberQrScanner { code ->
+        val ready = state as? InventoryState.Ready ?: return@rememberQrScanner
+        val product = ready.products.firstOrNull { it.codeQR.equals(code, ignoreCase = true) }
+        val lot = ready.lots.firstOrNull { it.codeQR.equals(code, ignoreCase = true) }
+        when {
+            product != null -> onProductClick(product)
+            lot != null -> onLotClick(lot.type.value, lot.id)
+            else -> scope.launch {
+                val result = snackbar.showSnackbar(
+                    message = context.getString(R.string.inventory_scan_not_found, code),
+                    actionLabel = createLabel,
+                    withDismissAction = true
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    scannedCode = code
+                    tab = 0
+                    showAddProduct = true
+                }
+            }
+        }
+    }
 
     val notice = (state as? InventoryState.Ready)?.notice
     val noticeText = notice?.asString()
@@ -74,13 +100,26 @@ fun InventoryScreen(
         }
     }
 
+    // The app scaffold already handles the bottom bar; this header draws behind the status bar.
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbar) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = MaterialTheme.colorScheme.background,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0)
     ) { padding ->
         Column(Modifier.fillMaxSize().padding(padding)) {
-            InventoryHeader()
+            AppTopBar(
+                title = stringResource(R.string.inventory_title),
+                actions = {
+                    IconButton(onClick = scan) {
+                        Icon(
+                            Icons.Outlined.QrCodeScanner,
+                            contentDescription = stringResource(R.string.inventory_scan_qr),
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
+                    }
+                }
+            )
             val tabOptions = listOf(
                 stringResource(R.string.inventory_products),
                 stringResource(R.string.inventory_lots)
@@ -147,7 +186,7 @@ fun InventoryScreen(
                     },
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(16.dp)
+                    modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp)
                 ) {
                     Icon(Icons.Filled.Add, contentDescription = null)
                 }
@@ -157,18 +196,19 @@ fun InventoryScreen(
 
     if (showAddProduct) {
         ModalBottomSheet(
-            onDismissRequest = { showAddProduct = false },
+            onDismissRequest = { showAddProduct = false; scannedCode = null },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         ) {
             SheetHeader(
                 title = stringResource(R.string.inventory_form_add_title),
-                onClose = { showAddProduct = false },
+                onClose = { showAddProduct = false; scannedCode = null },
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
             ProductFormSheet(
                 viewModel = viewModel,
                 initial = null,
-                onClose = { showAddProduct = false }
+                initialCodeQR = scannedCode,
+                onClose = { showAddProduct = false; scannedCode = null }
             )
         }
     }
@@ -190,24 +230,5 @@ fun InventoryScreen(
                 onClose = { showCreateLot = false }
             )
         }
-    }
-}
-
-@Composable
-private fun InventoryHeader(modifier: Modifier = Modifier) {
-    Row(
-        modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primary)
-            .windowInsetsPadding(WindowInsets.statusBars)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            stringResource(R.string.inventory_title),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = MaterialTheme.colorScheme.onPrimary
-        )
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.outlined.ErrorOutline
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
@@ -40,12 +41,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppCard
@@ -125,10 +128,11 @@ fun LotStatusPill(text: String, kind: LotPillKind, modifier: Modifier = Modifier
     )
 }
 
-/** Product row: avatar, bold name, muted subtitle and a stock pill. */
+/** Product row: photo (or initials), bold name, muted subtitle and a stock pill. */
 @Composable
 fun ProductCard(
     name: String,
+    imageUrl: String?,
     subtitle: String,
     stockText: String,
     stockKind: StockPillKind,
@@ -145,7 +149,7 @@ fun ProductCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ProductAvatar(name)
+            ProductThumbnail(name, imageUrl)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     name,
@@ -168,10 +172,11 @@ fun ProductCard(
     }
 }
 
-/** Lot row: product avatar, bold product name, detail line and status pill. */
+/** Lot row: product photo (or initials), bold product name, detail line and status pill. */
 @Composable
 fun LotCard(
     productName: String,
+    imageUrl: String?,
     detail: String,
     pillText: String,
     pillKind: LotPillKind,
@@ -186,7 +191,7 @@ fun LotCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            ProductAvatar(productName, size = 48.dp)
+            ProductThumbnail(productName, imageUrl)
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(
                     productName,
@@ -367,7 +372,8 @@ fun SearchField(
     value: String,
     onChange: (String) -> Unit,
     placeholder: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onScan: (() -> Unit)? = null
 ) {
     OutlinedTextField(
         value = value,
@@ -375,6 +381,17 @@ fun SearchField(
         singleLine = true,
         placeholder = { Text(placeholder) },
         leadingIcon = { Icon(Icons.Filled.Search, contentDescription = null, tint = MaterialTheme.extraColors.muted) },
+        trailingIcon = onScan?.let { scan ->
+            {
+                IconButton(onClick = scan) {
+                    Icon(
+                        Icons.Outlined.QrCodeScanner,
+                        contentDescription = stringResource(R.string.inventory_scan_qr),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        },
         shape = RoundedCornerShape(12.dp),
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -397,7 +414,9 @@ fun InventoryTextField(
     enabled: Boolean = true,
     isError: Boolean = false,
     errorText: String? = null,
-    suffix: String? = null
+    suffix: String? = null,
+    singleLine: Boolean = true,
+    trailing: (@Composable () -> Unit)? = null
 ) {
     val extra = MaterialTheme.extraColors
     Column(modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -405,7 +424,8 @@ fun InventoryTextField(
         OutlinedTextField(
             value = value,
             onValueChange = onChange,
-            singleLine = true,
+            singleLine = singleLine,
+            minLines = if (singleLine) 1 else 2,
             enabled = enabled,
             isError = isError,
             placeholder = placeholder?.let { { Text(it) } },
@@ -421,9 +441,12 @@ fun InventoryTextField(
                 unfocusedBorderColor = extra.border,
                 errorBorderColor = MaterialTheme.colorScheme.error
             ),
-            trailingIcon = if (isError) {
-                { Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) }
-            } else null,
+            trailingIcon = when {
+                isError -> {
+                    { Icon(Icons.Outlined.ErrorOutline, contentDescription = null, tint = MaterialTheme.colorScheme.error) }
+                }
+                else -> trailing
+            },
             modifier = Modifier.fillMaxWidth()
         )
         if (errorText != null) {

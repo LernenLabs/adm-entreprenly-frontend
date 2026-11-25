@@ -8,6 +8,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.Pro
  *
  * price holds the unit price for UNIT products and the price per kg for
  * WEIGHT products. weightGrams and brand only apply to UNIT products.
+ * imageUrl is the public URL of the product photo, when it has one.
  */
 data class Product(
     val type: ProductType,
@@ -17,7 +18,8 @@ data class Product(
     val codeQR: String?,
     val price: Double,
     val weightGrams: Double,
-    val brand: String?
+    val brand: String?,
+    val imageUrl: String? = null
 ) {
     val key: String get() = "${type.value}/$id"
 }
