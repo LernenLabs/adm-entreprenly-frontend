@@ -167,6 +167,7 @@ private fun ProductCardRow(
 ) {
     ProductCard(
         name = product.name,
+        imageUrl = product.imageUrl,
         subtitle = productSubtitle(product),
         stockText = pillText,
         stockKind = pillKind,

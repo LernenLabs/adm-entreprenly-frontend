@@ -183,4 +183,23 @@
     <string name="inventory_quantity_kg">%1$s kg</string>
     <string name="inventory_measure_unit">Unidad</string>
     <string name="inventory_measure_weight">Peso (kg)</string>
+
+    <!-- Inventario: fotos, detalles y escaneo QR -->
+    <string name="inventory_photo_description">Foto del producto</string>
+    <string name="inventory_form_description">Descripción</string>
+    <string name="inventory_form_description_hint">Ej. Arroz grano largo, bolsa de 5 kg</string>
+    <string name="inventory_form_brand">Marca</string>
+    <string name="inventory_form_brand_hint">Ej. Costeño</string>
+    <string name="inventory_form_code_qr">Código QR</string>
+    <string name="inventory_form_code_qr_hint">Escanea o escribe el código</string>
+    <string name="inventory_form_image_url">URL de la foto</string>
+    <string name="inventory_form_image_url_hint">https://…</string>
+    <string name="inventory_form_image_url_invalid">Ingresa un enlace que empiece con http:// o https://</string>
+    <string name="inventory_detail_description">Descripción</string>
+    <string name="inventory_detail_brand">Marca</string>
+    <string name="inventory_detail_code_qr">Código QR</string>
+    <string name="inventory_scan_qr">Escanear código QR</string>
+    <string name="inventory_scan_prompt">Apunta la cámara al código QR del producto o del lote</string>
+    <string name="inventory_scan_not_found">Ningún producto ni lote usa el código %1$s</string>
+    <string name="inventory_scan_create">Crear</string>
 </resources>

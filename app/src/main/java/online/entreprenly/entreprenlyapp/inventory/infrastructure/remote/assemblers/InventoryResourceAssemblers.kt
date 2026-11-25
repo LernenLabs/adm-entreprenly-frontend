@@ -45,7 +45,8 @@ fun UnitProductResource.toEntity() = Product(
     codeQR = codeQR,
     price = price,
     weightGrams = weightGrams,
-    brand = brand
+    brand = brand,
+    imageUrl = imageUrl
 )
 
 fun WeightProductResource.toEntity() = Product(
@@ -56,41 +57,49 @@ fun WeightProductResource.toEntity() = Product(
     codeQR = codeQR,
     price = pricePerKg,
     weightGrams = 0.0,
-    brand = null
+    brand = null,
+    imageUrl = imageUrl
 )
 
 // ---- Products: command -> resource ----
 
+/** Blank optional text is sent as null so the backend never stores empty strings. */
+private fun String?.orNullIfBlank(): String? = this?.trim()?.takeIf { it.isNotEmpty() }
+
 fun CreateProductCommand.toUnitResource() = CreateUnitProductResource(
     name = name.trim(),
-    description = null,
-    codeQR = null,
+    description = description.orNullIfBlank(),
+    codeQR = codeQR.orNullIfBlank(),
     price = price,
-    weightGrams = 0.0,
-    brand = null
+    weightGrams = weightGrams,
+    brand = brand.orNullIfBlank(),
+    imageUrl = imageUrl.orNullIfBlank()
 )
 
 fun CreateProductCommand.toWeightResource() = CreateWeightProductResource(
     name = name.trim(),
-    description = null,
-    codeQR = null,
-    pricePerKg = price
+    description = description.orNullIfBlank(),
+    codeQR = codeQR.orNullIfBlank(),
+    pricePerKg = price,
+    imageUrl = imageUrl.orNullIfBlank()
 )
 
 fun UpdateProductCommand.toUnitResource() = UpdateUnitProductResource(
     name = name.trim(),
-    description = description,
-    codeQR = codeQR,
+    description = description.orNullIfBlank(),
+    codeQR = codeQR.orNullIfBlank(),
     price = price,
     weightGrams = weightGrams,
-    brand = brand
+    brand = brand.orNullIfBlank(),
+    imageUrl = imageUrl.orNullIfBlank()
 )
 
 fun UpdateProductCommand.toWeightResource() = UpdateWeightProductResource(
     name = name.trim(),
-    description = description,
-    codeQR = codeQR,
-    pricePerKg = price
+    description = description.orNullIfBlank(),
+    codeQR = codeQR.orNullIfBlank(),
+    pricePerKg = price,
+    imageUrl = imageUrl.orNullIfBlank()
 )
 
 // ---- Lots: resource -> domain ----

@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +34,8 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateP
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.InventoryRules
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryTextField
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.ProductPhoto
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.rememberQrScanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.SegmentedControl
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
@@ -38,7 +44,9 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.Primary
 /**
  * Add / edit product sheet content. In edit mode ([initial] != null) the
  * measure type and stock are read-only: stock is managed through lots, and
- * hidden fields are re-sent so the backend PUT never wipes them.
+ * fields the form does not show (weightGrams) are re-sent so the backend PUT
+ * never wipes them. [initialCodeQR] pre-fills the QR code of a new product,
+ * e.g. after scanning a code that is not registered yet.
  */
 @Composable
 fun ProductFormSheet(
@@ -46,7 +54,8 @@ fun ProductFormSheet(
     initial: Product?,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
-    currentStockText: String = ""
+    currentStockText: String = "",
+    initialCodeQR: String? = null
 ) {
     val editing = initial != null
     var name by rememberSaveable(initial?.key) { mutableStateOf(initial?.name.orEmpty()) }
@@ -57,6 +66,13 @@ fun ProductFormSheet(
         mutableStateOf(if (initial == null) "" else trimPrice(initial.price))
     }
     var stock by rememberSaveable(initial?.key) { mutableStateOf("") }
+    var description by rememberSaveable(initial?.key) { mutableStateOf(initial?.description.orEmpty()) }
+    var brand by rememberSaveable(initial?.key) { mutableStateOf(initial?.brand.orEmpty()) }
+    var codeQR by rememberSaveable(initial?.key) {
+        mutableStateOf(initial?.codeQR ?: initialCodeQR.orEmpty())
+    }
+    var imageUrl by rememberSaveable(initial?.key) { mutableStateOf(initial?.imageUrl.orEmpty()) }
+    val scanCode = rememberQrScanner { codeQR = it }
     var nameTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
     var priceTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
     var stockTouched by rememberSaveable(initial?.key) { mutableStateOf(false) }
@@ -88,11 +104,16 @@ fun ProductFormSheet(
         stringResource(R.string.inventory_form_required)
     }
 
+    val imageUrlError = imageUrl.trim().let {
+        it.isNotEmpty() && !it.startsWith("https://") && !it.startsWith("http://")
+    }.takeIf { it }?.let { stringResource(R.string.inventory_form_image_url_invalid) }
+
     fun showNameError() = (nameTouched || submitted) && nameError != null
     fun showPriceError() = (priceTouched || submitted) && priceError != null
     fun showStockError() = (stockTouched || submitted) && stockError != null && !editing
 
-    val valid = nameError == null && priceError == null && (editing || stockError == null)
+    val valid = nameError == null && priceError == null && imageUrlError == null &&
+        (editing || stockError == null)
 
     Column(
         modifier
@@ -168,6 +189,50 @@ fun ProductFormSheet(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        if (type == ProductType.UNIT) {
+            InventoryTextField(
+                label = stringResource(R.string.inventory_form_brand),
+                value = brand,
+                onChange = { brand = it },
+                placeholder = stringResource(R.string.inventory_form_brand_hint),
+                enabled = !form.loading
+            )
+        }
+        InventoryTextField(
+            label = stringResource(R.string.inventory_form_description),
+            value = description,
+            onChange = { description = it },
+            placeholder = stringResource(R.string.inventory_form_description_hint),
+            enabled = !form.loading,
+            singleLine = false
+        )
+        InventoryTextField(
+            label = stringResource(R.string.inventory_form_code_qr),
+            value = codeQR,
+            onChange = { codeQR = it },
+            placeholder = stringResource(R.string.inventory_form_code_qr_hint),
+            enabled = !form.loading,
+            trailing = {
+                IconButton(onClick = scanCode, enabled = !form.loading) {
+                    Icon(
+                        Icons.Outlined.QrCodeScanner,
+                        contentDescription = stringResource(R.string.inventory_scan_qr),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        )
+        InventoryTextField(
+            label = stringResource(R.string.inventory_form_image_url),
+            value = imageUrl,
+            onChange = { imageUrl = it },
+            placeholder = stringResource(R.string.inventory_form_image_url_hint),
+            keyboardType = KeyboardType.Uri,
+            enabled = !form.loading,
+            isError = imageUrlError != null,
+            errorText = imageUrlError
+        )
+        if (imageUrlError == null) ProductPhoto(imageUrl)
         form.error?.let { ErrorBanner(title = it.asString(), message = null) }
         PrimaryPillButton(
             text = stringResource(
@@ -187,10 +252,11 @@ fun ProductFormSheet(
                             id = current.id,
                             name = name.trim(),
                             price = priceValue!!,
-                            description = current.description,
-                            codeQR = current.codeQR,
+                            description = description,
+                            codeQR = codeQR,
                             weightGrams = current.weightGrams,
-                            brand = current.brand
+                            brand = if (current.type == ProductType.UNIT) brand else null,
+                            imageUrl = imageUrl
                         )
                     )
                 } else {
@@ -199,7 +265,11 @@ fun ProductFormSheet(
                             name = name.trim(),
                             type = type,
                             price = priceValue!!,
-                            initialStock = stockValue ?: 0.0
+                            initialStock = stockValue ?: 0.0,
+                            description = description,
+                            codeQR = codeQR,
+                            brand = if (type == ProductType.UNIT) brand else null,
+                            imageUrl = imageUrl
                         )
                     )
                 }

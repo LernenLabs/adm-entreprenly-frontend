@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.extraColors
@@ -36,9 +38,18 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.extraColors
 private val CardShape = RoundedCornerShape(14.dp)
 private val ButtonShape = RoundedCornerShape(28.dp)
 
-/** Orange top bar used by every inner screen (title plus optional back arrow). */
+/**
+ * Orange top bar used by every inner screen: title, optional back arrow, optional subtitle and
+ * optional trailing [actions]. The orange reaches the top edge, behind the status bar.
+ */
 @Composable
-fun AppTopBar(title: String, onBack: (() -> Unit)? = null, modifier: Modifier = Modifier, subtitle: String? = null) {
+fun AppTopBar(
+    title: String,
+    onBack: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    subtitle: String? = null,
+    actions: @Composable RowScope.() -> Unit = {}
+) {
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -60,17 +71,26 @@ fun AppTopBar(title: String, onBack: (() -> Unit)? = null, modifier: Modifier = 
             } else {
                 Box(Modifier.padding(start = 8.dp))
             }
-            Column {
+            Column(Modifier.weight(1f)) {
                 Text(
                     title,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.ExtraBold,
-                    color = MaterialTheme.colorScheme.onPrimary
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 subtitle?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimary)
+                    Text(
+                        it,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
+            actions()
         }
     }
 }

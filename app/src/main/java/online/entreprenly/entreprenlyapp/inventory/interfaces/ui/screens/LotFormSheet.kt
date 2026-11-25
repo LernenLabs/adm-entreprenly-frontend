@@ -11,9 +11,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.QrCodeScanner
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
@@ -46,6 +50,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.Inv
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.InventoryTextField
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.measureLabel
+import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.components.rememberQrScanner
 import online.entreprenly.entreprenlyapp.inventory.interfaces.ui.viewmodels.InventoryViewModel
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.ErrorBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
@@ -75,6 +80,7 @@ fun LotFormSheet(
     var selectorTouched by rememberSaveable { mutableStateOf(false) }
     var expanded by rememberSaveable { mutableStateOf(false) }
     var codeQR by rememberSaveable(initial?.key) { mutableStateOf(initial?.codeQR.orEmpty()) }
+    val scanCode = rememberQrScanner { codeQR = it }
     var quantity by rememberSaveable(initial?.key) {
         mutableStateOf(
             initial?.let {
@@ -220,6 +226,15 @@ fun LotFormSheet(
                 value = codeQR,
                 onChange = { codeQR = it },
                 enabled = !form.loading,
+                trailing = {
+                    IconButton(onClick = scanCode, enabled = !form.loading) {
+                        Icon(
+                            Icons.Outlined.QrCodeScanner,
+                            contentDescription = stringResource(R.string.inventory_scan_qr),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                },
                 modifier = Modifier.weight(1f)
             )
             InventoryTextField(
