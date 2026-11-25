@@ -1,10 +1,10 @@
 package online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories
 
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.toRequestBody
-import kotlinx.coroutines.coroutineScope
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
@@ -15,7 +15,9 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.BarcodeProduct
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
+import online.entreprenly.entreprenlyapp.inventory.domain.repositories.BarcodeLookupRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductImageRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductRepository
@@ -28,6 +30,13 @@ import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationEr
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCall
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCallWithBody
+
+class BarcodeLookupRepositoryImpl(private val api: InventoryApi) : BarcodeLookupRepository {
+    override suspend fun lookup(barcode: String): Result<BarcodeProduct> =
+        safeApiCallWithBody({ api.lookupBarcode(barcode) }) {
+            BarcodeProduct(it.barcode, it.name, it.brand, it.description, it.imageUrl)
+        }
+}
 
 class ProductImageRepositoryImpl(private val api: InventoryApi) : ProductImageRepository {
     override suspend fun upload(command: UploadProductImageCommand): Result<String> {

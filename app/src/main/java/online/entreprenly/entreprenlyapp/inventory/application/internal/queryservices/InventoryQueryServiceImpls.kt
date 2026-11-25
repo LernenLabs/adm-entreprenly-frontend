@@ -1,5 +1,6 @@
 package online.entreprenly.entreprenlyapp.inventory.application.internal.queryservices
 
+import online.entreprenly.entreprenlyapp.inventory.application.queryservices.BarcodeLookupQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
@@ -11,10 +12,20 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllPr
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetLotQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetProductQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetStockAlertsQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.LookupBarcodeQuery
+import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.BarcodeProduct
+import online.entreprenly.entreprenlyapp.inventory.domain.repositories.BarcodeLookupRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.StockAlertRepository
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+
+class BarcodeLookupQueryServiceImpl(
+    private val barcodeLookupRepository: BarcodeLookupRepository
+) : BarcodeLookupQueryService {
+    override suspend fun handle(query: LookupBarcodeQuery): Result<BarcodeProduct> =
+        barcodeLookupRepository.lookup(query.barcode.trim())
+}
 
 class ProductQueryServiceImpl(
     private val productRepository: ProductRepository

@@ -114,7 +114,7 @@ fun ProductPhoto(imageUrl: String?, modifier: Modifier = Modifier) {
 }
 
 /**
- * Returns a function that opens the camera QR scanner. [onScanned] receives the trimmed
+ * Returns a function that opens the camera scanner for QR codes and package barcodes. [onScanned] receives the trimmed
  * content of the code; a cancelled or empty scan is ignored. The scanner screen asks for the
  * camera permission itself.
  */
@@ -129,7 +129,15 @@ fun rememberQrScanner(onScanned: (String) -> Unit): () -> Unit {
         {
             launcher.launch(
                 ScanOptions()
-                    .setDesiredBarcodeFormats(ScanOptions.QR_CODE)
+                    // QR codes plus the barcodes printed on packages.
+                    .setDesiredBarcodeFormats(
+                        ScanOptions.QR_CODE,
+                        ScanOptions.EAN_13,
+                        ScanOptions.EAN_8,
+                        ScanOptions.UPC_A,
+                        ScanOptions.UPC_E,
+                        ScanOptions.CODE_128
+                    )
                     .setPrompt(prompt)
                     .setBeepEnabled(true)
                     .setOrientationLocked(false)
