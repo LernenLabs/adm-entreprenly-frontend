@@ -46,6 +46,13 @@ data class WeightLotResource(
     val quantityKg: Double
 )
 
+/** Path of an uploaded photo, relative to the API base URL. */
+data class ProductImageResource(
+    val imageUrl: String,
+    val mimeType: String?,
+    val sizeBytes: Long
+)
+
 data class StockAlertResource(
     val id: Long,
     val lotId: Long?,

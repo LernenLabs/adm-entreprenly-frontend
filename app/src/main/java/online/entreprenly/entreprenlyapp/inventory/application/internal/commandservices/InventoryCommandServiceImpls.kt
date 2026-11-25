@@ -4,6 +4,7 @@ import java.time.Instant
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.CreateProductResult
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductImageCommandService
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.CreateLotCommand
@@ -12,10 +13,19 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
+import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductImageRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductRepository
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
+
+class ProductImageCommandServiceImpl(
+    private val productImageRepository: ProductImageRepository
+) : ProductImageCommandService {
+    override suspend fun handle(command: UploadProductImageCommand): Result<String> =
+        productImageRepository.upload(command)
+}
 
 class ProductCommandServiceImpl(
     private val productRepository: ProductRepository,

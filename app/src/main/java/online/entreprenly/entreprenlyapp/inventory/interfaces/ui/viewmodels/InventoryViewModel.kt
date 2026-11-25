@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductCommandService
 import online.entreprenly.entreprenlyapp.inventory.application.commandservices.LotCommandService
+import online.entreprenly.entreprenlyapp.inventory.application.commandservices.ProductImageCommandService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.LotQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.ProductQueryService
 import online.entreprenly.entreprenlyapp.inventory.application.queryservices.StockAlertQueryService
@@ -22,6 +23,7 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllLotsQuery
 import online.entreprenly.entreprenlyapp.inventory.domain.model.queries.GetAllProductsQuery
@@ -57,6 +59,13 @@ sealed interface InventoryState {
     }
 }
 
+/** Progress of a gallery photo upload; [imageUrl] is set once the backend stored it. */
+data class PhotoUploadState(
+    val loading: Boolean = false,
+    val imageUrl: String? = null,
+    val error: UiText? = null
+)
+
 /**
  * Loads unit + weight products and lots in parallel. Alerts degrade to an
  * empty list when they fail; products or lots failures surface an error.
@@ -66,7 +75,8 @@ class InventoryViewModel(
     private val lotQueryService: LotQueryService,
     private val stockAlertQueryService: StockAlertQueryService,
     private val productCommandService: ProductCommandService,
-    private val lotCommandService: LotCommandService
+    private val lotCommandService: LotCommandService,
+    private val productImageCommandService: ProductImageCommandService
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<InventoryState>(InventoryState.Loading)
@@ -83,6 +93,9 @@ class InventoryViewModel(
 
     private val _lotDeleteForm = MutableStateFlow(FormState())
     val lotDeleteForm: StateFlow<FormState> = _lotDeleteForm.asStateFlow()
+
+    private val _photoUpload = MutableStateFlow(PhotoUploadState())
+    val photoUpload: StateFlow<PhotoUploadState> = _photoUpload.asStateFlow()
 
     private val _productDeleteForm = MutableStateFlow(FormState())
     val productDeleteForm: StateFlow<FormState> = _productDeleteForm.asStateFlow()
@@ -125,6 +138,27 @@ class InventoryViewModel(
 
     fun clearProductDeleteForm() {
         _productDeleteForm.value = FormState()
+    }
+
+    fun clearPhotoUpload() {
+        _photoUpload.value = PhotoUploadState()
+    }
+
+    /** Uploads a gallery photo; the form reads [photoUpload] to put the returned URL in the product. */
+    fun uploadProductPhoto(bytes: ByteArray, mimeType: String) {
+        if (_photoUpload.value.loading) return
+        _photoUpload.value = PhotoUploadState(loading = true)
+        viewModelScope.launch {
+            _photoUpload.value = when (val r = productImageCommandService.handle(UploadProductImageCommand(bytes, mimeType))) {
+                is Result.Success -> PhotoUploadState(imageUrl = r.value)
+                is Result.Failure -> PhotoUploadState(error = UiText.Raw(r.error.message))
+            }
+        }
+    }
+
+    /** Reports a photo that could not be read from the gallery. */
+    fun reportPhotoError(message: UiText) {
+        _photoUpload.value = PhotoUploadState(error = message)
     }
 
     fun createProduct(command: CreateProductCommand) {

@@ -1,6 +1,9 @@
 package online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.repositories
 
 import kotlinx.coroutines.async
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.MultipartBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import kotlinx.coroutines.coroutineScope
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Lot
 import online.entreprenly.entreprenlyapp.inventory.domain.model.aggregates.Product
@@ -10,9 +13,11 @@ import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteL
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.DeleteProductCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateLotCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UpdateProductCommand
+import online.entreprenly.entreprenlyapp.inventory.domain.model.commands.UploadProductImageCommand
 import online.entreprenly.entreprenlyapp.inventory.domain.model.entities.StockAlert
 import online.entreprenly.entreprenlyapp.inventory.domain.model.valueobjects.ProductType
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.LotRepository
+import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductImageRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.ProductRepository
 import online.entreprenly.entreprenlyapp.inventory.domain.repositories.StockAlertRepository
 import online.entreprenly.entreprenlyapp.inventory.infrastructure.remote.api.InventoryApi
@@ -23,6 +28,15 @@ import online.entreprenly.entreprenlyapp.shared.application.result.ApplicationEr
 import online.entreprenly.entreprenlyapp.shared.application.result.Result
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCall
 import online.entreprenly.entreprenlyapp.shared.infrastructure.remote.configuration.safeApiCallWithBody
+
+class ProductImageRepositoryImpl(private val api: InventoryApi) : ProductImageRepository {
+    override suspend fun upload(command: UploadProductImageCommand): Result<String> {
+        val extension = command.mimeType.substringAfter('/').replace("jpeg", "jpg")
+        val body = command.bytes.toRequestBody(command.mimeType.toMediaType())
+        val part = MultipartBody.Part.createFormData("image", "product.$extension", body)
+        return safeApiCallWithBody({ api.uploadProductImage(part) }) { it.imageUrl }
+    }
+}
 
 class ProductRepositoryImpl(private val api: InventoryApi) : ProductRepository {
 
