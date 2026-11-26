@@ -14,7 +14,9 @@ data class Profile(
     val role: String?,
     val plan: String?,
     val preferences: Preferences,
-    val notificationSettings: NotificationSettings
+    val notificationSettings: NotificationSettings,
+    val phoneVerified: Boolean = false,
+    val emailVerified: Boolean = false
 ) {
     val fullName: String get() = "$firstName $lastName".trim()
 

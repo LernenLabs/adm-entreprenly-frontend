@@ -13,13 +13,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,12 +66,6 @@ fun NotificationsScreen(
     val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
         permissionGranted = areNotificationsEnabled(context)
     }
-    // Ask once when the screen opens (Android 13+); re-check when returning from system Settings.
-    LaunchedEffect(Unit) {
-        if (!permissionGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-        }
-    }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { permissionGranted = areNotificationsEnabled(context) }
     DisposableEffect(Unit) { onDispose { viewModel.resetNotificationsForm() } }
 
@@ -81,56 +76,41 @@ fun NotificationsScreen(
             val saved = form.success != null
 
             Column(Modifier.fillMaxSize().padding(14.dp)) {
-                Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    if (saved) {
-                        MessageBanner(
-                            stringResource(R.string.notif_saved_title),
-                            form.success!!.asString(),
-                            BannerKind.SUCCESS
-                        )
-                    }
-                    Text(
-                        stringResource(R.string.notif_intro),
-                        color = MaterialTheme.extraColors.muted,
-                        style = MaterialTheme.typography.bodyMedium
+                Column(
+                    Modifier.weight(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    NotificationToggleCard(
+                        stringResource(R.string.notif_push_title),
+                        stringResource(R.string.notif_push_sub),
+                        checked = permissionGranted,
+                        enabled = !form.loading,
+                        onToggle = { enable ->
+                            if (enable && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                                android.content.pm.PackageManager.PERMISSION_GRANTED
+                            ) {
+                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            } else {
+                                openAppNotificationSettings(context)
+                            }
+                        }
                     )
-                    if (permissionGranted) {
-                        MessageBanner(
-                            stringResource(R.string.notif_permission_on_title),
-                            stringResource(R.string.notif_permission_on_message),
-                            BannerKind.SUCCESS
-                        )
-                    } else {
+                    NotificationToggleCard(
+                        stringResource(R.string.notif_stock_title),
+                        stringResource(R.string.notif_stock_sub),
+                        checked = stockAlerts && permissionGranted,
+                        enabled = permissionGranted && !saved,
+                        onToggle = { stockAlerts = it }
+                    )
+                    if (saved) {
+                        MessageBanner(stringResource(R.string.notif_saved_title), form.success!!.asString(), BannerKind.SUCCESS)
+                    } else if (!permissionGranted) {
                         MessageBanner(
                             stringResource(R.string.notif_permission_off_title),
                             stringResource(R.string.notif_permission_off_message),
                             BannerKind.WARNING
                         )
-                    }
-                    AppCard {
-                        Row(
-                            Modifier.fillMaxWidth().padding(14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Column(Modifier.weight(1f)) {
-                                Text(stringResource(R.string.notif_stock_title), fontWeight = FontWeight.Bold)
-                                Text(
-                                    stringResource(R.string.notif_stock_sub),
-                                    color = MaterialTheme.extraColors.muted,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                            Switch(
-                                checked = stockAlerts && permissionGranted,
-                                onCheckedChange = { stockAlerts = it },
-                                enabled = permissionGranted && !saved,
-                                colors = SwitchDefaults.colors(
-                                    checkedTrackColor = MaterialTheme.colorScheme.primary,
-                                    checkedThumbColor = MaterialTheme.colorScheme.surface
-                                )
-                            )
-                        }
                     }
                     form.error?.let { Text(it.asString(), color = MaterialTheme.colorScheme.error) }
                     Text(
@@ -157,6 +137,37 @@ fun NotificationsScreen(
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun NotificationToggleCard(
+    title: String,
+    subtitle: String,
+    checked: Boolean,
+    enabled: Boolean,
+    onToggle: (Boolean) -> Unit
+) {
+    AppCard {
+        Row(
+            Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(title, fontWeight = FontWeight.Bold)
+                Text(subtitle, color = MaterialTheme.extraColors.muted, style = MaterialTheme.typography.bodySmall)
+            }
+            Switch(
+                checked = checked,
+                onCheckedChange = onToggle,
+                enabled = enabled,
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = MaterialTheme.colorScheme.primary,
+                    checkedThumbColor = MaterialTheme.colorScheme.surface
+                )
+            )
         }
     }
 }

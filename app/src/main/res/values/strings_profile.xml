@@ -71,9 +71,6 @@
 
     <!-- Notifications -->
     <string name="notif_title">Notifications</string>
-    <string name="notif_intro">Choose which alerts you want to receive on your device.</string>
-    <string name="notif_permission_on_title">Device permission: enabled</string>
-    <string name="notif_permission_on_message">Entreprenly can send you push notifications.</string>
     <string name="notif_permission_off_title">Permission disabled</string>
     <string name="notif_permission_off_message">Turn on notifications in Settings to receive alerts.</string>
     <string name="notif_stock_title">Stock and expirations</string>
@@ -119,7 +116,12 @@
     <string name="profile_phone_done">Done</string>
     <string name="profile_phone_code_invalid">Enter the six digits of the code.</string>
     <string name="profile_phone_invalid">Enter a 9-digit Peruvian mobile number or use + and the country code.</string>
-    <string name="profile_phone_verified">Phone number verified.</string>
+    <string name="profile_phone_verified">Phone number verified</string>
+    <string name="profile_contact_verified">Verified</string>
+    <string name="profile_contact_pending">Pending verification</string>
+    <string name="profile_phone_error_title">Verification could not be completed</string>
+    <string name="notif_push_title">Push notifications</string>
+    <string name="notif_push_sub">Receive alerts on this device</string>
     <string name="profile_phone_close">Close</string>
     <string name="profile_operation_unavailable">This service is currently unavailable. Try again later.</string>
 </resources>

@@ -71,9 +71,6 @@
 
     <!-- Notificaciones -->
     <string name="notif_title">Notificaciones</string>
-    <string name="notif_intro">Elige qué alertas quieres recibir en tu dispositivo.</string>
-    <string name="notif_permission_on_title">Permiso del dispositivo: activado</string>
-    <string name="notif_permission_on_message">Entreprenly puede enviarte notificaciones push.</string>
     <string name="notif_permission_off_title">Permiso desactivado</string>
     <string name="notif_permission_off_message">Activa las notificaciones desde Ajustes para recibir avisos push.</string>
     <string name="notif_stock_title">Stock y vencimientos</string>
@@ -119,7 +116,12 @@
     <string name="profile_phone_done">Listo</string>
     <string name="profile_phone_code_invalid">Ingresa los seis dígitos del código.</string>
     <string name="profile_phone_invalid">Ingresa un celular peruano de 9 dígitos o usa + seguido del código de país.</string>
-    <string name="profile_phone_verified">Teléfono verificado.</string>
+    <string name="profile_phone_verified">Número verificado</string>
+    <string name="profile_contact_verified">Verificado</string>
+    <string name="profile_contact_pending">Pendiente de verificar</string>
+    <string name="profile_phone_error_title">No se pudo completar la verificación</string>
+    <string name="notif_push_title">Notificaciones push</string>
+    <string name="notif_push_sub">Recibir alertas en este celular</string>
     <string name="profile_phone_close">Cerrar</string>
     <string name="profile_operation_unavailable">Este servicio no está disponible por el momento. Intenta más tarde.</string>
 </resources>

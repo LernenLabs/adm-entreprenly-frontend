@@ -170,7 +170,7 @@ fun AppNavigation(
             startDestination = if (signedIn != null) Routes.HOME else Routes.WELCOME,
             modifier = Modifier.padding(innerPadding)
         ) {
-            iamGraph(navController, container, signedIn?.session?.email.orEmpty())
+            iamGraph(navController, container, signedIn?.session?.email.orEmpty(), profileViewModel)
             composable(Routes.HOME) {
                 val homeViewModel: HomeViewModel = viewModel(factory = viewModelFactory {
                     initializer {

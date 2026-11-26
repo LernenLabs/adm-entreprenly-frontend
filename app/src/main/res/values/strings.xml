@@ -33,6 +33,7 @@
     <string name="account_change_email_action">Send confirmation link</string>
     <string name="account_email_link_sent">Link sent. Confirm it from your new inbox.</string>
     <string name="account_confirm_password">Confirm new password</string>
+    <string name="account_verify_current_email">Verify current email</string>
     <string name="account_resend_email_action">Resend confirmation link</string>
     <string name="account_new_password_requirements">Use at least 8 characters and no more than 72 bytes for the new password.</string>
     <string name="account_password_mismatch">The new passwords do not match.</string>
