@@ -12,8 +12,10 @@ class ProfileInputTest {
     @Test
     fun phoneAcceptsInternationalPrefixAndRejectsInvalidCharacters() {
         assertEquals("+51987654321", PhoneNumber.parse(" +51987654321 ")?.value)
+        assertEquals("+51999000123", PhoneNumber.parse("+51 999 000 123")?.value)
         assertEquals("987654321", PhoneNumber.parse("987654321")?.value)
         assertNull(PhoneNumber.parse("123456"))
+        assertNull(PhoneNumber.parse("9990001"))
         assertNull(PhoneNumber.parse("51987654abc"))
         assertNull(PhoneNumber.parse("51+987654321"))
         assertNull(PhoneNumber.parse("1234567890123456"))

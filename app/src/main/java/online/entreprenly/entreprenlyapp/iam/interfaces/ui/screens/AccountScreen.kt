@@ -48,6 +48,7 @@ fun AccountScreen(
         }
     }
     var newEmail by rememberSaveable { mutableStateOf("") }
+    var submittedEmail by rememberSaveable { mutableStateOf("") }
 
     Column(modifier.fillMaxSize()) {
     AppTopBar(stringResource(R.string.account_title), onBack)
@@ -74,8 +75,14 @@ fun AccountScreen(
         EmailField(newEmail, { newEmail = it }, label = stringResource(R.string.account_new_email))
         FormSubmit(
             emailForm,
-            stringResource(R.string.account_change_email_action),
-            { viewModel.changeEmail(newEmail) }
+            stringResource(
+                if (emailForm.success != null && newEmail == submittedEmail) R.string.account_resend_email_action
+                else R.string.account_change_email_action
+            ),
+            {
+                submittedEmail = newEmail
+                viewModel.changeEmail(newEmail)
+            }
         )
 
     }
