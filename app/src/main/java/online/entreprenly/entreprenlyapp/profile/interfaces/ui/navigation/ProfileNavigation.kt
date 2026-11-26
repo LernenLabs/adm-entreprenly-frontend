@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.EditProfileScreen
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.MoreScreen
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.NotificationsScreen
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.PhoneVerificationScreen
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.PreferencesScreen
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens.ProfileScreen
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileViewModel
@@ -41,8 +42,15 @@ fun NavGraphBuilder.profileGraph(
             onPreferences = { navController.navigate(Routes.PREFERENCES) },
             onNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
             onChangeEmail = { navController.navigate(Routes.ACCOUNT) },
+            onVerifyPhone = {
+                viewModel.resetPhoneVerification()
+                navController.navigate(Routes.PROFILE_PHONE)
+            },
             onSignIn = signIn
         )
+    }
+    composable(Routes.PROFILE_PHONE) {
+        PhoneVerificationScreen(viewModel, onBack = { navController.popBackStack() }, onSignIn = signIn)
     }
     composable(Routes.PROFILE_EDIT) {
         EditProfileScreen(

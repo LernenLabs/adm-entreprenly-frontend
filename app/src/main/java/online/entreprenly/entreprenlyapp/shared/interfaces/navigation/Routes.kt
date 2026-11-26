@@ -18,6 +18,7 @@ object Routes {
     // Profile
     const val PROFILE = "profile"
     const val PROFILE_EDIT = "profile/edit"
+    const val PROFILE_PHONE = "profile/phone"
     const val PREFERENCES = "preferences"
     const val NOTIFICATIONS = "notifications"
 
