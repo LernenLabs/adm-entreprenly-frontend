@@ -1,6 +1,5 @@
 package online.entreprenly.entreprenlyapp.shared.interfaces.ui.screens
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -278,19 +277,14 @@ private fun EmptyCard(icon: ImageVector, title: String, message: String?, onClic
 
 @Composable
 private fun AlertCard(alert: HomeAlert) {
-    val extra = MaterialTheme.extraColors
-    val (fg, bg) = when (alert.kind) {
-        HomeAlertKind.WARNING -> extra.warning to extra.warningBackground
-        HomeAlertKind.ERROR -> MaterialTheme.colorScheme.error to extra.errorBackground
-    }
-    Surface(shape = RoundedCornerShape(10.dp), color = bg, border = BorderStroke(1.dp, fg.copy(alpha = 0.3f)), modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(12.dp)) {
-            Text(stringResource(alert.title), color = fg, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
-            if (alert.detail.isNotBlank()) {
-                Text(alert.detail, color = fg, style = MaterialTheme.typography.bodySmall)
-            }
+    MessageBanner(
+        title = stringResource(alert.title),
+        message = alert.detail,
+        kind = when (alert.kind) {
+            HomeAlertKind.WARNING -> BannerKind.WARNING
+            HomeAlertKind.ERROR -> BannerKind.ERROR
         }
-    }
+    )
 }
 
 @Composable

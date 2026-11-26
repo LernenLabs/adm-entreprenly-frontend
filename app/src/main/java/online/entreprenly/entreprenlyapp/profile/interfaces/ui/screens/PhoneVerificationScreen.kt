@@ -2,6 +2,17 @@ package online.entreprenly.entreprenlyapp.profile.interfaces.ui.screens
 
 import android.os.SystemClock
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -48,7 +59,11 @@ import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.components.ProfileStateGate
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.PhoneVerificationState
 import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileViewModel
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.BannerKind
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.MessageBanner
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PlainTopBar
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.SecondaryPillButton
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.theme.extraColors
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PrimaryPillButton
 
 private const val CodeLength = 6
@@ -57,29 +72,45 @@ private const val CodeLength = 6
 fun PhoneVerificationScreen(viewModel: ProfileViewModel, onBack: () -> Unit, onSignIn: () -> Unit) {
     val profileState by viewModel.uiState.collectAsState()
     val state by viewModel.phoneVerification.collectAsState()
+    var changingNumber by rememberSaveable { mutableStateOf(false) }
     val goBack = {
         if (!state.form.loading) {
-            if (state.sentTo == null) onBack() else viewModel.resetPhoneVerification()
+            when {
+                state.sentTo != null -> viewModel.resetPhoneVerification()
+                changingNumber && !state.verified -> changingNumber = false
+                else -> onBack()
+            }
         }
     }
-    BackHandler(enabled = state.sentTo != null || state.form.loading, onBack = goBack)
+    BackHandler(enabled = changingNumber || state.sentTo != null || state.form.loading, onBack = goBack)
 
     Column(Modifier.fillMaxSize().imePadding().navigationBarsPadding()) {
-        val title = if (state.sentTo == null && !state.verified) {
-            R.string.profile_phone_title
-        } else {
+        val title = if (state.sentTo != null) {
             R.string.profile_phone_verify
+        } else {
+            R.string.profile_phone_title
         }
         PlainTopBar(stringResource(title), goBack)
         ProfileStateGate(profileState, onRetry = viewModel::load, onSignIn = onSignIn) { profile ->
-            PhoneVerificationForm(
-                state = state,
-                currentPhone = profile.phone.orEmpty(),
-                onSend = viewModel::requestPhoneVerification,
-                onConfirm = viewModel::confirmPhoneVerification,
-                onChangeNumber = viewModel::resetPhoneVerification,
-                onDone = onBack
-            )
+            if (state.verified || (profile.phoneVerified && !changingNumber)) {
+                PhoneVerifiedContent(
+                    phone = profile.phone.orEmpty(),
+                    animate = state.verified,
+                    onDone = onBack,
+                    onChangeNumber = {
+                        viewModel.resetPhoneVerification()
+                        changingNumber = true
+                    }
+                )
+            } else {
+                PhoneVerificationForm(
+                    state = state,
+                    currentPhone = if (profile.phoneVerified) "" else profile.phone.orEmpty(),
+                    onSend = viewModel::requestPhoneVerification,
+                    onConfirm = viewModel::confirmPhoneVerification,
+                    onChangeNumber = viewModel::resetPhoneVerification
+                )
+            }
         }
     }
 }
@@ -90,8 +121,7 @@ private fun PhoneVerificationForm(
     currentPhone: String,
     onSend: (String) -> Unit,
     onConfirm: (String) -> Unit,
-    onChangeNumber: () -> Unit,
-    onDone: () -> Unit
+    onChangeNumber: () -> Unit
 ) {
     var phone by rememberSaveable { mutableStateOf(currentPhone) }
     var code by remember(state.sentTo, state.resendAtMillis) { mutableStateOf("") }
@@ -106,7 +136,6 @@ private fun PhoneVerificationForm(
     val loading = state.form.loading
     val destination = state.sentTo
     val title = when {
-        state.verified -> R.string.profile_phone_verified
         destination == null -> R.string.profile_phone_number_heading
         else -> R.string.profile_phone_code_heading
     }
@@ -121,7 +150,6 @@ private fun PhoneVerificationForm(
                 fontWeight = FontWeight.Bold
             )
             when {
-                state.verified -> Unit
                 destination == null -> {
                     Text(stringResource(R.string.profile_phone_number_intro), style = MaterialTheme.typography.bodyMedium)
                     OutlinedTextField(
@@ -162,13 +190,14 @@ private fun PhoneVerificationForm(
                     }
                 }
             }
-            state.form.error?.let { Text(it.asString(), color = MaterialTheme.colorScheme.error) }
+            state.form.error?.let {
+                MessageBanner(stringResource(R.string.profile_phone_error_title), it.asString(), BannerKind.ERROR)
+            }
         }
 
         Box(Modifier.fillMaxWidth().padding(vertical = 12.dp), contentAlignment = Alignment.Center) {
             when {
                 loading -> CircularProgressIndicator(Modifier.height(40.dp))
-                state.verified -> PrimaryPillButton(stringResource(R.string.profile_phone_done), onDone)
                 destination == null -> PrimaryPillButton(
                     stringResource(R.string.profile_phone_send),
                     onClick = { onSend(phone) },
@@ -180,6 +209,51 @@ private fun PhoneVerificationForm(
                     enabled = code.length == CodeLength
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun PhoneVerifiedContent(
+    phone: String,
+    animate: Boolean,
+    onDone: () -> Unit,
+    onChangeNumber: () -> Unit
+) {
+    var visible by remember { mutableStateOf(!animate) }
+    LaunchedEffect(Unit) { visible = true }
+    val colors = MaterialTheme.extraColors
+    Column(Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+        Column(
+            modifier = Modifier.weight(1f).fillMaxWidth().verticalScroll(rememberScrollState()).padding(vertical = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn() + scaleIn(
+                    initialScale = 0.55f,
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                )
+            ) {
+                Box(
+                    Modifier.size(108.dp).background(colors.successBackground, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(Icons.Filled.Check, null, Modifier.size(58.dp), tint = colors.success)
+                }
+            }
+            Text(
+                stringResource(R.string.profile_phone_verified),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
+            Text(phone, color = colors.muted)
+        }
+        Column(Modifier.padding(bottom = 12.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            PrimaryPillButton(stringResource(R.string.profile_phone_done), onDone)
+            SecondaryPillButton(stringResource(R.string.profile_phone_change_number), onChangeNumber)
         }
     }
 }

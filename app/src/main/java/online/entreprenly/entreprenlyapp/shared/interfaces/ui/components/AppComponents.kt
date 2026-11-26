@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -15,6 +16,9 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.ErrorOutline
+import androidx.compose.material.icons.outlined.WarningAmber
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Button
@@ -28,6 +32,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,6 +131,7 @@ fun NavigationCard(
     title: String,
     subtitle: String?,
     modifier: Modifier = Modifier,
+    status: (@Composable () -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
     AppCard(modifier = modifier, onClick = onClick) {
@@ -142,6 +149,7 @@ fun NavigationCard(
                         color = MaterialTheme.extraColors.muted
                     )
                 }
+                status?.invoke()
             }
             if (onClick != null) {
                 Icon(
@@ -154,7 +162,7 @@ fun NavigationCard(
     }
 }
 
-enum class BannerKind { SUCCESS, WARNING }
+enum class BannerKind { SUCCESS, WARNING, ERROR }
 
 /** Highlighted message: green for success, amber for warnings. */
 @Composable
@@ -165,19 +173,24 @@ fun MessageBanner(
     modifier: Modifier = Modifier
 ) {
     val extra = MaterialTheme.extraColors
-    val (fg, bg) = when (kind) {
-        BannerKind.SUCCESS -> extra.success to extra.successBackground
-        BannerKind.WARNING -> extra.warning to extra.warningBackground
+    val (fg, bg, icon) = when (kind) {
+        BannerKind.SUCCESS -> Triple(extra.success, extra.successBackground, Icons.Outlined.CheckCircle)
+        BannerKind.WARNING -> Triple(extra.warning, extra.warningBackground, Icons.Outlined.WarningAmber)
+        BannerKind.ERROR -> Triple(MaterialTheme.colorScheme.error, extra.errorBackground, Icons.Outlined.ErrorOutline)
     }
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = CardShape,
-        color = bg,
-        border = BorderStroke(1.dp, fg)
-    ) {
-        Column(Modifier.padding(14.dp)) {
-            Text(title, color = fg, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyLarge)
-            Text(message, color = MaterialTheme.colorScheme.onBackground, style = MaterialTheme.typography.bodyMedium)
+    val accent = if (kind == BannerKind.WARNING) MaterialTheme.colorScheme.primary else fg
+    Surface(modifier = modifier.fillMaxWidth(), shape = CardShape, color = bg) {
+        Row(
+            Modifier.drawBehind { drawRect(accent, size = Size(4.dp.toPx(), size.height)) }
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Icon(icon, null, Modifier.size(20.dp), tint = fg)
+            Column {
+                Text(title, color = fg, fontWeight = FontWeight.Bold, style = MaterialTheme.typography.bodyMedium)
+                if (message.isNotBlank()) Text(message, color = fg, style = MaterialTheme.typography.bodySmall)
+            }
         }
     }
 }

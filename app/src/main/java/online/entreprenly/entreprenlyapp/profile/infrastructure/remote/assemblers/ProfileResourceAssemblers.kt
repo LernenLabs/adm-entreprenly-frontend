@@ -28,7 +28,9 @@ fun ProfileResource.toEntity() = Profile(
         theme = AppTheme.fromCode(preferences?.theme),
         currency = AppCurrency.fromCode(preferences?.currency)
     ),
-    notificationSettings = NotificationSettings(stockAlerts = notificationSettings?.stockAlerts ?: true)
+    notificationSettings = NotificationSettings(stockAlerts = notificationSettings?.stockAlerts ?: true),
+    phoneVerified = phoneVerified == true && !phone.isNullOrBlank(),
+    emailVerified = emailVerified == true
 )
 
 fun UpdateProfileCommand.toResource() = UpdateProfileResource(

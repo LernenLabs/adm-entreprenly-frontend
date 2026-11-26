@@ -12,6 +12,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.components.ContactVerificationLabel
 import online.entreprenly.entreprenlyapp.R
 import online.entreprenly.entreprenlyapp.profile.domain.model.aggregates.Profile
 import online.entreprenly.entreprenlyapp.profile.domain.model.valueobjects.AppTheme
@@ -39,6 +42,7 @@ fun ProfileScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val updated by viewModel.profileUpdated.collectAsState()
+    LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { viewModel.refreshVerification() }
 
     Column(modifier.fillMaxSize()) {
         AppTopBar(stringResource(R.string.profile_title), onBack)
@@ -55,10 +59,16 @@ fun ProfileScreen(
                         BannerKind.SUCCESS
                     )
                 }
-                NavigationCard(stringResource(R.string.profile_email_title), email, onClick = onChangeEmail)
+                NavigationCard(
+                    stringResource(R.string.profile_email_title),
+                    email,
+                    status = { ContactVerificationLabel(profile.emailVerified) },
+                    onClick = onChangeEmail
+                )
                 NavigationCard(
                     stringResource(R.string.profile_phone_title),
                     profile.phone?.takeIf { it.isNotBlank() } ?: stringResource(R.string.profile_phone_empty),
+                    status = { ContactVerificationLabel(profile.phoneVerified) },
                     onClick = onVerifyPhone
                 )
                 NavigationCard(
