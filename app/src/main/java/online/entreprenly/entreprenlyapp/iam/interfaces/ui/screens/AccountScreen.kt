@@ -25,6 +25,7 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.AppTopB
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.EmailField
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.FormSubmit
 import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.PasswordField
+import online.entreprenly.entreprenlyapp.shared.interfaces.ui.components.SecondaryPillButton
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountViewModel
 
 /** US-66 change password and US-65 change email. Sign out lives in the More tab (US-61). */
@@ -33,7 +34,8 @@ fun AccountScreen(
     viewModel: AccountViewModel,
     email: String,
     onBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    verifyCurrentEmail: Boolean = false
 ) {
     val passwordForm by viewModel.passwordForm.collectAsState()
     val emailForm by viewModel.emailForm.collectAsState()
@@ -57,6 +59,23 @@ fun AccountScreen(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Text(email, style = MaterialTheme.typography.bodyLarge)
+        if (verifyCurrentEmail) {
+            SecondaryPillButton(
+                text = stringResource(
+                    if (submittedEmail == email && emailForm.success != null) R.string.account_resend_email_action
+                    else R.string.account_verify_current_email
+                ),
+                onClick = {
+                    submittedEmail = email
+                    viewModel.changeEmail(email)
+                },
+                enabled = !emailForm.loading
+            )
+            if (submittedEmail == email) {
+                emailForm.error?.let { Text(it.asString(), color = MaterialTheme.colorScheme.error) }
+                emailForm.success?.let { Text(it.asString(), color = MaterialTheme.colorScheme.primary) }
+            }
+        }
 
         HorizontalDivider()
         Text(stringResource(R.string.account_change_password_title), style = MaterialTheme.typography.titleMedium)
@@ -74,7 +93,7 @@ fun AccountScreen(
         Text(stringResource(R.string.account_change_email_hint), style = MaterialTheme.typography.bodySmall)
         EmailField(newEmail, { newEmail = it }, label = stringResource(R.string.account_new_email))
         FormSubmit(
-            emailForm,
+            if (submittedEmail == email) emailForm.copy(error = null, success = null) else emailForm,
             stringResource(
                 if (emailForm.success != null && newEmail == submittedEmail) R.string.account_resend_email_action
                 else R.string.account_change_email_action

@@ -22,7 +22,9 @@ data class ProfileResource(
     val role: String?,
     val plan: String?,
     val preferences: PreferencesResource?,
-    val notificationSettings: NotificationSettingsResource?
+    val notificationSettings: NotificationSettingsResource?,
+    val phoneVerified: Boolean? = null,
+    val emailVerified: Boolean? = null
 )
 
 data class UpdateProfileResource(

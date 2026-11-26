@@ -124,6 +124,23 @@ class ProfileViewModel(
         }
     }
 
+    fun refreshVerification() {
+        val current = _uiState.value as? ProfileUiState.Loaded ?: return
+        viewModelScope.launch {
+            val result = profileQueryService.handle(GetProfileByUserIdQuery(current.profile.userId))
+            if (userId != current.profile.userId) return@launch
+            when (result) {
+                is Result.Success -> _uiState.compareAndSet(current, loaded(result.value))
+                is Result.Failure -> {
+                    if (result.error is ApplicationError.Unauthorized) {
+                        _uiState.compareAndSet(current, ProfileUiState.SessionExpired)
+                    }
+                }
+            }
+            Unit
+        }
+    }
+
     /** Re-reads the plan without reloading the profile, so a new subscription shows up right away. */
     fun refreshPlan() {
         val id = userId ?: return

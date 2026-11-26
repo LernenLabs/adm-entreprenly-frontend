@@ -16,11 +16,22 @@ import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountVie
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.PasswordResetViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignInViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.SignUpViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileUiState
+import online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels.ProfileViewModel
 import online.entreprenly.entreprenlyapp.shared.infrastructure.di.AppContainer
 import online.entreprenly.entreprenlyapp.shared.interfaces.navigation.Routes
 
 /** IAM destinations: sign in, sign up and account security (change password / email). */
-fun NavGraphBuilder.iamGraph(navController: NavController, container: AppContainer, email: String) {
+fun NavGraphBuilder.iamGraph(
+    navController: NavController,
+    container: AppContainer,
+    email: String,
+    profileViewModel: ProfileViewModel
+) {
     composable(Routes.WELCOME) {
         WelcomeScreen(
             onCreateAccount = { navController.navigate(Routes.SIGN_UP) { launchSingleTop = true } },
@@ -52,12 +63,15 @@ fun NavGraphBuilder.iamGraph(navController: NavController, container: AppContain
         )
     }
     composable(Routes.ACCOUNT) {
+        val profileState by profileViewModel.uiState.collectAsState()
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { profileViewModel.refreshVerification() }
         val vm: AccountViewModel = viewModel(factory = viewModelFactory {
             initializer { AccountViewModel(container.userCommandService) }
         })
         AccountScreen(
             viewModel = vm,
             email = email,
+            verifyCurrentEmail = (profileState as? ProfileUiState.Loaded)?.profile?.emailVerified == false,
             onBack = { navController.popBackStack() },
             modifier = Modifier.statusBarsPadding()
         )
