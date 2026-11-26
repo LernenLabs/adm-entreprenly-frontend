@@ -1,6 +1,10 @@
 package online.entreprenly.entreprenlyapp.profile.interfaces.ui.components
 
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.provider.Settings
 import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,6 +31,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import java.io.File
 import java.net.HttpURLConnection
@@ -130,9 +135,32 @@ fun AvatarPhotoForm(
         }
     }
 
+    fun openCamera() {
+        runCatching {
+            val directory = File(context.cacheDir, "profile-camera").apply { mkdirs() }
+            val file = File.createTempFile("profile-", ".jpg", directory)
+            cameraFile = file.absolutePath
+            val uri = FileProvider.getUriForFile(context, context.packageName + ".profile-files", file)
+            takePhoto.launch(uri)
+        }.onFailure {
+            cameraFile?.let { File(it).delete() }
+            cameraFile = null
+            error = R.string.profile_avatar_access
+        }
+    }
+
+    val cameraPermission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) openCamera() else error = R.string.profile_avatar_access
+    }
+
     Text(stringResource(R.string.profile_avatar_title), style = MaterialTheme.typography.titleMedium)
     photo?.let { AvatarBitmap(it.second) }
     error?.let { Text(stringResource(it), color = MaterialTheme.colorScheme.error) }
+    if (error == R.string.profile_avatar_access) {
+        SecondaryPillButton(stringResource(R.string.profile_avatar_settings), onClick = {
+            context.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", context.packageName, null)))
+        })
+    }
     if (reading) Text(stringResource(R.string.profile_avatar_reading))
     val canSelect = enabled && !reading && !form.loading
     SecondaryPillButton(
@@ -146,16 +174,11 @@ fun AvatarPhotoForm(
     SecondaryPillButton(
         stringResource(R.string.profile_avatar_camera),
         onClick = {
-            runCatching {
-                val directory = File(context.cacheDir, "profile-camera").apply { mkdirs() }
-                val file = File.createTempFile("profile-", ".jpg", directory)
-                cameraFile = file.absolutePath
-                val uri = FileProvider.getUriForFile(context, context.packageName + ".profile-files", file)
-                takePhoto.launch(uri)
-            }.onFailure {
-                cameraFile?.let { File(it).delete() }
-                cameraFile = null
-                error = R.string.profile_avatar_access
+            error = null
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                openCamera()
+            } else {
+                cameraPermission.launch(Manifest.permission.CAMERA)
             }
         },
         enabled = canSelect

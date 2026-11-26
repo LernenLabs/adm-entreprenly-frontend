@@ -28,6 +28,8 @@
     <string name="account_change_email_action">Enviar enlace de confirmación</string>
     <string name="account_email_link_sent">Enlace enviado. Confírmalo desde tu nuevo correo.</string>
     <string name="account_confirm_password">Confirmar nueva contraseña</string>
+    <string name="account_resend_email_action">Reenviar enlace de confirmación</string>
+    <string name="account_new_password_requirements">Usa al menos 8 caracteres y un máximo de 72 bytes para la nueva contraseña.</string>
     <string name="account_password_mismatch">Las contraseñas nuevas no coinciden.</string>
     <string name="account_sign_out">Cerrar sesión</string>
 

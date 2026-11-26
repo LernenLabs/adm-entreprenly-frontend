@@ -1,5 +1,6 @@
 package online.entreprenly.entreprenlyapp.profile.interfaces.ui.viewmodels
 
+import android.os.SystemClock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.async
@@ -32,6 +33,7 @@ import online.entreprenly.entreprenlyapp.shared.interfaces.ui.UiText
 
 data class PhoneVerificationState(
     val sentTo: PhoneNumber? = null,
+    val resendAtMillis: Long = 0L,
     val verified: Boolean = false,
     val form: FormState = FormState()
 )
@@ -221,7 +223,7 @@ class ProfileViewModel(
             _phoneVerification.value = when (result) {
                 is Result.Success -> PhoneVerificationState(
                     sentTo = phone,
-                    form = FormState(success = UiText.Res(R.string.profile_phone_code_sent))
+                    resendAtMillis = SystemClock.elapsedRealtime() + 30_000L
                 )
                 is Result.Failure -> state.copy(form = FormState(error = profileOperationError(result.error)))
             }

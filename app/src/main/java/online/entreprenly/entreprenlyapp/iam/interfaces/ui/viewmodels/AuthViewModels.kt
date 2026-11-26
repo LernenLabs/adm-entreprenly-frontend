@@ -122,7 +122,11 @@ class AccountViewModel(private val userCommandService: UserCommandService) : Vie
             return
         }
         val c = Password.of(current) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
-        val n = Password.of(new) ?: return _passwordForm.update { FormState(error = UiText.Res(R.string.error_invalid_password)) }
+        val n = Password.of(new)
+        if (n == null || new.isBlank() || new.toByteArray(Charsets.UTF_8).size > 72) {
+            _passwordForm.value = FormState(error = UiText.Res(R.string.account_new_password_requirements))
+            return
+        }
         _passwordForm.value = FormState(loading = true)
         viewModelScope.launch {
             _passwordForm.value = when (val r = userCommandService.handle(ChangePasswordCommand(c, n))) {
