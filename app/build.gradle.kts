@@ -10,11 +10,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "online.entreprenly.entreprenlyapp"
+        applicationId = "online.entreprenly.app"
         minSdk = 30
         targetSdk = 37
         versionCode = 1
-        versionName = "1.0"
+        versionName = "v1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -27,8 +27,6 @@ android {
         }
         create("av2") {
             initWith(getByName("debug"))
-            applicationIdSuffix = ".av2"
-            versionNameSuffix = "-av2"
             matchingFallbacks += "debug"
             val av2ApiUrl = providers.gradleProperty("av2ApiUrl").orElse("http://127.0.0.1:8092/").get()
             require(av2ApiUrl in setOf(
