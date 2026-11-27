@@ -1,0 +1,14 @@
+<resources>
+    <string name="terms_title">Terms and conditions</string>
+    <string name="terms_read">Read terms and conditions</string>
+    <string name="sign_up_accept_terms">I accept the terms and conditions.</string>
+    <string name="terms_intro">These conditions apply to registering and using your merchant account in Entreprenly.</string>
+    <string name="terms_account_title">1. Merchant account</string>
+    <string name="terms_account_body">Provide accurate account and contact information and keep it up to date. Keep your credentials confidential and protect access to your account.</string>
+    <string name="terms_use_title">2. Use of the service</string>
+    <string name="terms_use_body">Use Entreprenly to manage your business inventory, sales and orders. Do not use the service for unlawful activities, access other accounts without authorization or interfere with its operation.</string>
+    <string name="terms_operations_title">3. Business information and operations</string>
+    <string name="terms_operations_body">You are responsible for the information you enter about your business and customers. Review stock, prices, orders and payment evidence before confirming an operation. Alerts and automated responses support your work and require your supervision.</string>
+    <string name="terms_subscription_title">4. Plans and subscriptions</string>
+    <string name="terms_subscription_body">Registration starts with the Free plan. Before purchasing a paid plan, review the price, billing period and conditions shown in the subscription flow.</string>
+</resources>

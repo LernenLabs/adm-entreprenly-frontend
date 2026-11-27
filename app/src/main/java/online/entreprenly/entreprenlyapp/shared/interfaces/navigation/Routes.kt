@@ -6,6 +6,7 @@ object Routes {
     const val WELCOME = "welcome"
     const val SIGN_IN = "sign_in"
     const val SIGN_UP = "sign_up"
+    const val TERMS = "terms"
     const val ACCOUNT = "account"
 
     // Bottom navigation tabs

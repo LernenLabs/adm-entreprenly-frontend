@@ -30,6 +30,7 @@ fun NavGraphBuilder.profileGraph(
             onNotifications = { navController.navigate(Routes.NOTIFICATIONS) },
             onSubscription = { navController.navigate(Routes.SUBSCRIPTION) },
             onAccountSecurity = { navController.navigate(Routes.ACCOUNT) },
+            onTerms = { navController.navigate(Routes.TERMS) { launchSingleTop = true } },
             onSignOut = onSignOut
         )
     }

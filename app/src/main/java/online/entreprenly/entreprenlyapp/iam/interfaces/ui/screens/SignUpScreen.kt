@@ -4,14 +4,18 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.MailOutline
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import online.entreprenly.entreprenlyapp.R
@@ -41,6 +46,7 @@ fun SignUpScreen(
     viewModel: SignUpViewModel,
     onBack: () -> Unit,
     onGoToSignIn: () -> Unit,
+    onTerms: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val form by viewModel.form.collectAsState()
@@ -49,7 +55,8 @@ fun SignUpScreen(
     var firstName by rememberSaveable { mutableStateOf("") }
     var lastName by rememberSaveable { mutableStateOf("") }
     var phone by rememberSaveable { mutableStateOf("") }
-    val canSubmit = email.isNotBlank() && PasswordRules.of(password).allMet && !form.loading
+    var termsAccepted by rememberSaveable { mutableStateOf(false) }
+    val canSubmit = email.isNotBlank() && PasswordRules.of(password).allMet && termsAccepted && !form.loading
 
     Column(modifier.fillMaxSize().imePadding()) {
         PlainTopBar(stringResource(R.string.sign_up_title), onBack)
@@ -85,6 +92,22 @@ fun SignUpScreen(
             LabeledTextField(
                 stringResource(R.string.sign_up_phone), phone, { phone = it }, keyboardType = KeyboardType.Phone
             )
+            Column {
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                        value = termsAccepted,
+                        role = Role.Checkbox,
+                        enabled = !form.loading,
+                        onValueChange = { termsAccepted = it }
+                    ),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Checkbox(checked = termsAccepted, onCheckedChange = null, enabled = !form.loading)
+                    Text(stringResource(R.string.sign_up_accept_terms), style = MaterialTheme.typography.bodyMedium)
+                }
+                LinkText(stringResource(R.string.terms_read), onTerms)
+            }
         }
         Column(
             Modifier.padding(horizontal = 20.dp, vertical = 12.dp).navigationBarsPadding(),
@@ -93,7 +116,7 @@ fun SignUpScreen(
         ) {
             PrimaryPillButton(
                 stringResource(R.string.sign_up_action),
-                onClick = { viewModel.signUp(email, password, firstName, lastName, phone) },
+                onClick = { viewModel.signUp(email, password, firstName, lastName, phone, termsAccepted) },
                 enabled = canSubmit
             )
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {

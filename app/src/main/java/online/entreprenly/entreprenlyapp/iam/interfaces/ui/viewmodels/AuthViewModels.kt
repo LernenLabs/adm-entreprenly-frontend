@@ -85,8 +85,10 @@ class SignUpViewModel(private val userCommandService: UserCommandService) : View
         password: String,
         firstName: String,
         lastName: String,
-        phone: String
+        phone: String,
+        termsAccepted: Boolean
     ) {
+        if (!termsAccepted || _form.value.loading) return
         val e = Email.of(email) ?: return fail(UiText.Res(R.string.error_invalid_email))
         val p = Password.of(password) ?: return fail(UiText.Res(R.string.error_invalid_password))
         _form.value = FormState(loading = true)
