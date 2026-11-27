@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Entreprenly App</string>
+    <string name="app_name">Entreprenly</string>
 
     <string name="field_email">Correo electrónico</string>
     <string name="field_password">Contraseña</string>

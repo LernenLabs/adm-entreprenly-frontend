@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Entreprenly App</string>
+    <string name="app_name">Entreprenly</string>
 
     <!-- Shared -->
     <string name="field_email">Email</string>
