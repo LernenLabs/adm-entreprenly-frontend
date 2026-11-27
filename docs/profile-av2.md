@@ -1,8 +1,6 @@
 # Profile en Android · AV2
 
-La variante **Entreprenly AV2** usa el identificador independiente
-`online.entreprenly.entreprenlyapp.av2` y se conecta al backend local de prueba.
-Puede convivir con la app habitual en el mismo dispositivo.
+La variante de prueba se muestra como **Entreprenly** y usa el identificador `online.entreprenly.app`. Por defecto se conecta al backend local de prueba.
 
 ## Probar en un teléfono por USB
 
@@ -22,7 +20,7 @@ Puede convivir con la app habitual en el mismo dispositivo.
    & $adb install -r app/build/outputs/apk/av2/app-av2.apk
    ```
 
-3. Abre **Entreprenly AV2** y registra una cuenta de prueba. El perfil local usa una base H2 separada.
+3. Abre **Entreprenly** y registra una cuenta de prueba. El perfil local usa una base H2 separada.
 
 Para un emulador sin redirección USB, compila con
 `.gradlew.bat :app:assembleAv2 "-Pav2ApiUrl=http://10.0.2.2:8092/"`.

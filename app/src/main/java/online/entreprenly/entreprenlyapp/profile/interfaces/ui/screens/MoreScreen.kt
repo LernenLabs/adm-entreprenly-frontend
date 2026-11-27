@@ -31,6 +31,7 @@ fun MoreScreen(
     onNotifications: () -> Unit,
     onSubscription: () -> Unit,
     onAccountSecurity: () -> Unit,
+    onTerms: () -> Unit,
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -51,6 +52,7 @@ fun MoreScreen(
             NavigationCard(stringResource(R.string.more_preferences), stringResource(R.string.more_preferences_sub), onClick = onPreferences)
             NavigationCard(stringResource(R.string.more_notifications), stringResource(R.string.more_notifications_sub), onClick = onNotifications)
             NavigationCard(stringResource(R.string.more_account_security), stringResource(R.string.more_account_security_sub), onClick = onAccountSecurity)
+            NavigationCard(stringResource(R.string.terms_title), null, onClick = onTerms)
             SecondaryPillButton(stringResource(R.string.more_sign_out), onSignOut)
         }
     }

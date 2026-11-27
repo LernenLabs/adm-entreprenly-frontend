@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.AccountScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignInScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.SignUpScreen
+import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.TermsScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.screens.WelcomeScreen
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.AccountViewModel
 import online.entreprenly.entreprenlyapp.iam.interfaces.ui.viewmodels.PasswordResetViewModel
@@ -59,8 +60,12 @@ fun NavGraphBuilder.iamGraph(
         SignUpScreen(
             vm,
             onBack = { navController.popBackStack() },
-            onGoToSignIn = { navController.navigate(Routes.SIGN_IN) { popUpTo(Routes.WELCOME) } }
+            onGoToSignIn = { navController.navigate(Routes.SIGN_IN) { popUpTo(Routes.WELCOME) } },
+            onTerms = { navController.navigate(Routes.TERMS) { launchSingleTop = true } }
         )
+    }
+    composable(Routes.TERMS) {
+        TermsScreen(onBack = { navController.popBackStack() })
     }
     composable(Routes.ACCOUNT) {
         val profileState by profileViewModel.uiState.collectAsState()
